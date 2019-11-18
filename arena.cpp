@@ -16,6 +16,16 @@ Arena::Arena(float x, float y, float r){
 }
 
 void Arena::desenhar(){
+	glPushMatrix();
+		glColor3f(1, 1, 0);
+		glBegin(GL_POLYGON);
+			glTranslatef(0, 0, 0);
+			glVertex3f(-r, -r, 0);
+			glVertex3f(-r,  r, 0);
+			glVertex3f(r,  r, 0);
+			glVertex3f(r, -r, 0);
+		glEnd();
+	glPopMatrix();
 }
 
 Arena::~Arena(){

@@ -24,6 +24,13 @@ int teclas[256];
  * VARIÁVEIS DO JOGO
  */
 Configuracao configuracao;
+vector<Inimigo> inimigos;
+vector<Inimigo> inimigos_copia;
+vector<Base> bases;
+vector<Base> bases_copia;
+Jogador jogador;
+Jogador jogador_copia;
+Pista pista;
 Arena arena;
 int estado = 0;
 
@@ -37,7 +44,7 @@ GLdouble timeDiference;
 // VARIÁVEIS DA CÂMERA
 int camera = 1;
 GLfloat angle=45, fAspect;
-GLdouble obsX=0, obsY=0, obsZ=200;
+GLdouble obsX=200, obsY=200, obsZ=200;
 GLdouble eyeX=0, eyeY=0, eyeZ=0;
 GLdouble upX=0, upY=1, upZ=0;
 
@@ -69,8 +76,23 @@ void criarTirosInimigos() {
 }
 
 /*
- * INICIALIZAÇÃO
+ * CONFIGURAÇÕES
  */
+
+void inicializarOpengl() {
+	// Especifica que a cor de fundo da janela será preta
+	glClearColor(0, 0, 0, 1);
+	// Habilita a definicao da cor do material a partir da cor corrente
+	glEnable(GL_COLOR_MATERIAL);
+	//Habilita o uso de iluminacao
+	glEnable(GL_LIGHTING);
+	// Habilita a luz de numero 0
+	glEnable(GL_LIGHT0);
+	// Habilita o depth-buffering
+	glEnable(GL_DEPTH_TEST);
+	// Habilita o modelo de colorizacao de Gouraud
+	glShadeModel(GL_SMOOTH);
+}
 
 bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 
@@ -108,19 +130,21 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		cout << "Erro ao carregar arena" << endl;
 		return false;
 	}
+		float x1, y1, x2, y2;
 		XMLElement* xml_pista = doc_arena.FirstChildElement( "svg" )->FirstChildElement( "line" );
-		Pista pista = Pista();
-		xml_pista->QueryFloatAttribute("x1", &pista.x1);
-		xml_pista->QueryFloatAttribute("y1", &pista.y1);
-		xml_pista->QueryFloatAttribute("x2", &pista.x2);
-		xml_pista->QueryFloatAttribute("y2", &pista.y2);
+		xml_pista->QueryFloatAttribute("x1", &x1);
+		xml_pista->QueryFloatAttribute("y1", &y1);
+		xml_pista->QueryFloatAttribute("x2", &x2);
+		xml_pista->QueryFloatAttribute("y2", &y2);
+
+		Pista p = Pista(x1, y1, x2, y2);
+		pista = p;
 
 		XMLElement* xml_circulo = doc_arena.FirstChildElement( "svg" )->FirstChildElement( "circle" );
 		for(XMLElement* e = xml_circulo; e != NULL; e = e->NextSiblingElement("circle")) {
 			
 			float x, y, r;
 			const char* fill;
-			
 			e->QueryFloatAttribute("cx", &x);
 			e->QueryFloatAttribute("cy", &y);
 			e->QueryFloatAttribute("r", &r);
@@ -133,13 +157,19 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 			if(!strcmp(fill,"red")){
 				float distancia_pista = sqrt(pow(pista.y2-pista.y1,2) + pow(pista.x2-pista.x1,2));
 				float velocidade = (distancia_pista / 8) * 4;
-				Inimigo inimigo = Inimigo(x, y, 0, r, velocidade);
+				Inimigo i = Inimigo(x, y, 0, r, velocidade);
+				inimigos.push_back(i);
+				inimigos_copia.push_back(i);
 			}
 			if(!strcmp(fill,"orange")){
-				Base base = Base(x, y, r);
+				Base b = Base(x, y, r);
+				bases.push_back(b);
+				bases_copia.push_back(b);
 			}
 			if(!strcmp(fill,"green")){
 				Jogador j = Jogador(x, y, 0, r, 0);
+				jogador = j;
+				jogador_copia = j;
 			}
 		}
 
@@ -201,19 +231,23 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 	return true;
 }
 
-void inicializarOpengl() {
-	// Especifica que a cor de fundo da janela será preta
-	glClearColor(0, 0, 0, 1);
-	// Habilita a definicao da cor do material a partir da cor corrente
-	glEnable(GL_COLOR_MATERIAL);
-	//Habilita o uso de iluminacao
-	glEnable(GL_LIGHTING);
-	// Habilita a luz de numero 0
-	glEnable(GL_LIGHT0);
-	// Habilita o depth-buffering
-	glEnable(GL_DEPTH_TEST);
-	// Habilita o modelo de colorizacao de Gouraud
-	glShadeModel(GL_SMOOTH);
+void PosicionaObservador(GLdouble obsX, GLdouble obsY, GLdouble obsZ, GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, GLdouble upX, GLdouble upY, GLdouble upZ)
+{
+	// Especifica sistema de coordenadas do modelo
+	glMatrixMode(GL_MODELVIEW);
+	// Inicializa sistema de coordenadas do modelo
+	glLoadIdentity();
+	// Especifica posição do observador e do alvo
+    gluLookAt(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
+}
+
+void EspecificaParametrosVisualizacao(GLfloat angle, GLfloat fAspect, GLfloat zMin, GLfloat zMax) {
+	// Especifica sistema de coordenadas de projeção
+	glMatrixMode(GL_PROJECTION);
+	// Inicializa sistema de coordenadas de projeção
+	glLoadIdentity();
+	// Especifica a projeção perspectiva(angulo,aspecto,zMin,zMax)
+	gluPerspective(angle,fAspect,zMin,zMax);
 }
 
 /*
@@ -223,6 +257,8 @@ void inicializarOpengl() {
 void display(void) {
 
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	arena.desenhar();
 	
 	glutSwapBuffers();
 }
@@ -236,8 +272,8 @@ void idle(void) {
 
 	// Ajusta a camera
 	if(camera == 1){
-		// EspecificaParametrosVisualizacao(angle, fAspect, 0.5, 5000);
-		// PosicionaObservador(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
+		EspecificaParametrosVisualizacao(angle, fAspect, 0.5, 5000);
+		PosicionaObservador(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
 	}
 	if(camera == 2){
 		// EspecificaParametrosVisualizacao(angle, fAspect, 0.5, 5000);
