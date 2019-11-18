@@ -16,6 +16,12 @@ using namespace tinyxml2;
 using namespace std;
 
 /*
+ * DIMENSÕES DO JOGO
+ */
+int larguraJanela = 500;
+int alturaJanela = 500;
+
+/*
  * MAPEAMENTO DAS TECLAS
  */
 int teclas[256];
@@ -47,6 +53,11 @@ GLfloat angle=45, fAspect;
 GLdouble obsX=200, obsY=200, obsZ=200;
 GLdouble eyeX=0, eyeY=0, eyeZ=0;
 GLdouble upX=0, upY=1, upZ=0;
+
+
+
+int anguloCamera = 60;
+
 
 /*
  * REGRAS DO JOGO
@@ -81,7 +92,7 @@ void criarTirosInimigos() {
 
 void inicializarOpengl() {
 	// Especifica que a cor de fundo da janela será preta
-	glClearColor(0, 0, 0, 1);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
 	// Habilita a definicao da cor do material a partir da cor corrente
 	glEnable(GL_COLOR_MATERIAL);
 	//Habilita o uso de iluminacao
@@ -92,6 +103,15 @@ void inicializarOpengl() {
 	glEnable(GL_DEPTH_TEST);
 	// Habilita o modelo de colorizacao de Gouraud
 	glShadeModel(GL_SMOOTH);
+
+	
+	glShadeModel(GL_FLAT);
+	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(90, (GLfloat)larguraJanela / (GLfloat)alturaJanela, 1, 15);
+
+
 }
 
 bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
@@ -241,14 +261,31 @@ void PosicionaObservador(GLdouble obsX, GLdouble obsY, GLdouble obsZ, GLdouble e
     gluLookAt(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
 }
 
-void EspecificaParametrosVisualizacao(GLfloat angle, GLfloat fAspect, GLfloat zMin, GLfloat zMax) {
+void EspecificaParametrosVisualizacao(GLfloat angle, GLfloat fAspectW, GLfloat fAspectH, GLfloat zMin, GLfloat zMax) {
 	// Especifica sistema de coordenadas de projeção
 	glMatrixMode(GL_PROJECTION);
 	// Inicializa sistema de coordenadas de projeção
 	glLoadIdentity();
 	// Especifica a projeção perspectiva(angulo,aspecto,zMin,zMax)
-	gluPerspective(angle,fAspect,zMin,zMax);
+	gluPerspective(angle, (GLfloat)fAspectW / (GLfloat)fAspectH, zMin, zMax);
+	
+	
+	glMatrixMode(GL_MODELVIEW);
 }
+
+/*
+void mudarCamera(int angle, int w, int h)
+{
+    glMatrixMode(GL_PROJECTION);
+
+    glLoadIdentity();
+
+    gluPerspective(angle, (GLfloat)w / (GLfloat)h, 0.1, 500.0);
+
+    glMatrixMode(GL_MODELVIEW);
+}
+*/
+
 
 /*
  * CALLBACK'S
@@ -256,9 +293,66 @@ void EspecificaParametrosVisualizacao(GLfloat angle, GLfloat fAspect, GLfloat zM
 
 void display(void) {
 
-	glClear(GL_COLOR_BUFFER_BIT);
+	/* Limpar todos os pixels */
+	glClearColor (0.0, 0.0, 0.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	arena.desenhar();
+//---------------------------------------------------------------------------------------	
+	//Câmera da bomba
+	glViewport(0, (GLsizei)alturaJanela, (GLsizei)larguraJanela ,200);	
+	glLoadIdentity();
+//	mudarCamera(anguloCamera, larguraJanela, 200);
+	EspecificaParametrosVisualizacao(anguloCamera, larguraJanela, 200, 0.1, 500.0);
+
+	//Colocar o código da câmera da bomba aqui
+
+	
+	PosicionaObservador(0.0, 80.0, 200.0,
+					0.0, 0.0, 0.0, 
+					0.0, 1.0, 0.0);
+	
+	glPushMatrix();
+		GLfloat mat_ambient_a[] = {0.0, 0.0, 1.0, 1.0};
+		glColor3fv(mat_ambient_a);
+		glutSolidTeapot(20);
+	glPopMatrix();
+
+
+
+	
+
+	
+//---------------------------------------------------------------------------------------	
+	
+	//Câmera normal
+	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
+	glLoadIdentity();
+//	mudarCamera(anguloCamera, larguraJanela, alturaJanela);
+	EspecificaParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 500.0);
+
+	//Colocar o código do jogo a partir daqui
+	
+	
+	
+	
+	
+	
+	PosicionaObservador(0.0, 80.0, 200.0,
+					0.0, 0.0, 0.0, 
+					0.0, 1.0, 0.0);
+
+	glPushMatrix();		
+		GLfloat mat_ambient_y[] = {1.0, 1.0, 0.0, 1.0};
+		glColor3fv(mat_ambient_y);
+		glutWireTeapot(20);
+	glPopMatrix();
+	
+	
+	
+	
+	
+	
+	
 	
 	glutSwapBuffers();
 }
@@ -272,7 +366,7 @@ void idle(void) {
 
 	// Ajusta a camera
 	if(camera == 1){
-		EspecificaParametrosVisualizacao(angle, fAspect, 0.5, 5000);
+		EspecificaParametrosVisualizacao(angle, larguraJanela, alturaJanela, 0.5, 5000);
 		PosicionaObservador(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
 	}
 	if(camera == 2){
@@ -323,6 +417,16 @@ void idle(void) {
 	if(teclas['r'] == 1) {
 		reiniciarJogo();
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	// Marca a janela atual como precisando ser reexibida
 	glutPostRedisplay();
@@ -341,6 +445,27 @@ void keyPress(unsigned char key, int x, int y) {
 		case '-':
 			// jogador.velocidade -= (estado == 2) ? ((jogador.velocidade > 50) ? 1 : 0) : 0;
 			break;
+		case 'I':
+		case 'i':
+		{	
+			int inc = anguloCamera <= 5 ? 0 : 1;
+		     anguloCamera -= inc;
+		   //  mudarCamera(anguloCamera, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+		     EspecificaParametrosVisualizacao(anguloCamera, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT), 0.1, 500.0);
+		     			
+			break;
+		}
+		case 'O':
+		case 'o':
+		{	
+			int inc = anguloCamera >= 180 ? 0 : 1;
+		     anguloCamera += inc;
+		    // mudarCamera(anguloCamera, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+		     EspecificaParametrosVisualizacao(anguloCamera, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT), 0.1, 500.0);
+			break;
+		}
+		default:
+			break;  	
 	}
 }
 
@@ -382,11 +507,19 @@ void reshape(GLsizei w, GLsizei h) {
 	// Para previnir uma divis�o por zero
 	if ( h == 0 ) h = 1;
 
-	// Especifica o tamanho da viewport
-    glViewport(0, 0, w, h);
- 
 	// Calcula a correcao de aspecto
-	fAspect = (GLfloat)w/(GLfloat)h;
+//	fAspect = (GLfloat)w/(GLfloat)h;
+
+	// Especifica o tamanho da viewport
+	glViewport (0, 0, (GLsizei)w, (GLsizei)h);
+
+//	mudarCamera(anguloCamera, w, h);
+	EspecificaParametrosVisualizacao(anguloCamera, w, h, 0.1, 500.0);
+
+	larguraJanela = w;
+	alturaJanela = h - 200;
+ 
+	
 }
 
 /*
@@ -400,10 +533,10 @@ int main(int argc, char** argv) {
 
 	glutInit (&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(500,500);
-	glutInitWindowPosition (0, 0);
-	glutCreateWindow("Trabalho Final");
-    glutReshapeFunc(reshape);
+	glutInitWindowSize(larguraJanela, alturaJanela + 200);
+	glutInitWindowPosition((glutGet(GLUT_SCREEN_WIDTH)-larguraJanela)/2,(glutGet(GLUT_SCREEN_HEIGHT)-alturaJanela)/2);
+	glutCreateWindow("TRABALHO FINAL");
+	glutReshapeFunc(reshape);
 	glutSpecialFunc(specialKeys);
 	glutDisplayFunc(display);
 	glutIdleFunc(idle);
