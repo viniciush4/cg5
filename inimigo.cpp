@@ -28,6 +28,7 @@ Inimigo::Inimigo(){
 Inimigo::Inimigo(float x, float y, float z, float r, float velocidade){
 	this->x = x;
 	this->y = y;
+    this->z = z;
 	this->r = r;
     this->angulo_xy = rand() % 360;
     this->angulo_xz = rand() % 360;

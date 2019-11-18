@@ -1,12 +1,14 @@
-#include <iostream>
-#include <math.h>
+#include "tinyxml2.h"
 #include "configuracao.h"
 #include "pista.h"
 #include "arena.h"
 #include "inimigo.h"
-#include "tinyxml2.h"
+#include "base.h"
+#include "jogador.h"
 #include <GL/glut.h>
 #include <vector>
+#include <iostream>
+#include <math.h>
 
 #define grausParaRadianos(g) g*(M_PI/180)
 
@@ -22,6 +24,7 @@ int teclas[256];
  * VARIÁVEIS DO JOGO
  */
 Configuracao configuracao;
+Arena arena;
 int estado = 0;
 
 /*
@@ -124,7 +127,8 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 			e->QueryStringAttribute("fill", &fill);
 
 			if(!strcmp(fill,"blue")){
-				Arena arena = Arena(x, y, r);
+				Arena a = Arena(x, y, r);
+				arena = a;
 			}
 			if(!strcmp(fill,"red")){
 				float distancia_pista = sqrt(pow(pista.y2-pista.y1,2) + pow(pista.x2-pista.x1,2));
@@ -132,33 +136,10 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 				Inimigo inimigo = Inimigo(x, y, 0, r, velocidade);
 			}
 			if(!strcmp(fill,"orange")){
-				// Base b = Base();
-				// b.cor_r = 1;
-				// b.cor_g = 0.5;
-				// b.cor_b = 0;
-				// b.x = circulo.x;
-				// b.y = circulo.y;
-				// b.r = circulo.r;
-				// b.r_inicial = circulo.r;
-				// b.fill = circulo.fill;
-				// b.id = circulo.id;
-				// b.escala = circulo.r;
-				// inimigos_terrestres.push_back(b);
-				// inimigos_terrestres_base.push_back(b);
+				Base base = Base(x, y, r);
 			}
 			if(!strcmp(fill,"green")){
-				// Jogador j = Jogador();
-				// j.cor_r = 0;
-				// j.cor_g = 1;
-				// j.cor_b = 0;
-				// j.x = circulo.x;
-				// j.y = circulo.y;
-				// j.r = circulo.r;
-				// j.r_inicial = circulo.r;
-				// j.fill = circulo.fill;
-				// j.id = circulo.id;
-				// j.escala = circulo.r;
-				// jogador = j;
+				Jogador j = Jogador(x, y, 0, r, 0);
 			}
 		}
 
