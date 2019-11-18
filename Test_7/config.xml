@@ -1,0 +1,9 @@
+<aplicacao>
+	<arquivoDaArena>
+		<nome>arena</nome>
+		<tipo>svg</tipo>
+		<caminho>Test_7/</caminho>
+	</arquivoDaArena>
+	<jogador velTiro="2.0" vel="2.5"></jogador>
+	<inimigo freqTiro="0.2" vel="2.0" velTiro="1.0"></inimigo>
+</aplicacao>
