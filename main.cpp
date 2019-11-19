@@ -184,36 +184,39 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		// Seta a altura da arena (8x diametro do jogador)
 		arena.altura = 8 * 2 * jogador.r;
 
-		// int fator_correcao_x = (arena.r - arena.x) - arena.r;
-		// int fator_correcao_y = (arena.r - arena.y) - arena.r;
+		// Seta a largura da pista (mesma largura do jogador)
+		pista.largura = 2 * jogador.r;
+
+		int fator_correcao_x = (arena.r - arena.x) - arena.r;
+		int fator_correcao_y = (arena.r - arena.y) - arena.r;
 
 		// // Normaliza todos os elementos
-		// arena.x += fator_correcao_x;
-		// arena.y += fator_correcao_y;
-		// arena.y *= -1;
+		arena.x += fator_correcao_x;
+		arena.y += fator_correcao_y;
+		arena.y *= -1;
 
-		// jogador.x += fator_correcao_x;
-		// jogador.y += fator_correcao_y;
-		// jogador.y *= -1;
+		jogador.x += fator_correcao_x;
+		jogador.y += fator_correcao_y;
+		jogador.y *= -1;
 
-		// pista.x1 += fator_correcao_x;
-		// pista.y1 += fator_correcao_y;
-		// pista.y1 *= -1;
-		// pista.x2 += fator_correcao_x;
-		// pista.y2 += fator_correcao_y;
-		// pista.y2 *= -1;
+		pista.x1 += fator_correcao_x;
+		pista.y1 += fator_correcao_y;
+		pista.y1 *= -1;
+		pista.x2 += fator_correcao_x;
+		pista.y2 += fator_correcao_y;
+		pista.y2 *= -1;
 
-		// for(int i=0; i < inimigos_aereos.size(); i++){
-		// 	inimigos_aereos.at(i).x += fator_correcao_x;
-		// 	inimigos_aereos.at(i).y += fator_correcao_y;
-		// 	inimigos_aereos.at(i).y *= -1;
-		// }
+		for(int i=0; i < inimigos.size(); i++){
+			inimigos.at(i).x += fator_correcao_x;
+			inimigos.at(i).y += fator_correcao_y;
+			inimigos.at(i).y *= -1;
+		}
 
-		// for(int i=0; i < inimigos_terrestres.size(); i++){
-		// 	inimigos_terrestres.at(i).x += fator_correcao_x;
-		// 	inimigos_terrestres.at(i).y += fator_correcao_y;
-		// 	inimigos_terrestres.at(i).y *= -1;
-		// }
+		for(int i=0; i < bases.size(); i++){
+			bases.at(i).x += fator_correcao_x;
+			bases.at(i).y += fator_correcao_y;
+			bases.at(i).y *= -1;
+		}
 
 		// // Seta valores iniciais para os ângulos
 		// float angulo = atan2((pista.y2-pista.y1), (pista.x2-pista.x1));
@@ -378,7 +381,7 @@ void desenharViewport2() {
 	}
 	if(camera == 2){
 		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
-		posicionarObservador(80, 80, 80, 0, 0, 0, 0, 1, 0);
+		posicionarObservador(jogador.x-100, jogador.y, jogador.z+70, jogador.x, jogador.y, jogador.z, 0, 0, 1);
 	}
 	if(camera == 3){
 		
@@ -572,6 +575,7 @@ int main(int argc, char** argv) {
 		return EXIT_FAILURE;
 
 	cout << jogador.x << " " << jogador.y << " " << jogador.z << endl;
+	cout << pista.angulo_xy << endl;
 
 	glutInit (&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
