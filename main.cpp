@@ -206,13 +206,13 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		pista.y2 += fator_correcao_y;
 		pista.y2 *= -1;
 
-		for(int i=0; i < inimigos.size(); i++){
+		for(size_t i=0; i < inimigos.size(); i++){
 			inimigos.at(i).x += fator_correcao_x;
 			inimigos.at(i).y += fator_correcao_y;
 			inimigos.at(i).y *= -1;
 		}
 
-		for(int i=0; i < bases.size(); i++){
+		for(size_t i=0; i < bases.size(); i++){
 			bases.at(i).x += fator_correcao_x;
 			bases.at(i).y += fator_correcao_y;
 			bases.at(i).y *= -1;
@@ -558,7 +558,6 @@ void reshape(GLsizei w, GLsizei h) {
 	// Especifica o tamanho da viewport
 	glViewport (0, 0, (GLsizei)w, (GLsizei)h);
 
-	//	mudarCamera(anguloCamera, w, h);
 	especificarParametrosVisualizacao(anguloCamera, w, h, 0.1, 500.0);
 
 	larguraJanela = w;
