@@ -38,6 +38,11 @@ Jogador::Jogador(float x, float y, float z, float r, float velocidade){
 }
 
 void Jogador::desenhar(){
+    glPushMatrix();
+        glColor3f(0.0f, 0.0f, 1.0f);
+		glTranslatef(0, 0, 0);
+		glutSolidTeapot(20);
+	glPopMatrix();
 }
 
 // void Jogador::alterarAngulo(float coeficiente_ajuste){

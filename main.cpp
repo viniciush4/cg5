@@ -47,17 +47,14 @@ static GLdouble previousTime = 0;
 GLdouble currentTime;
 GLdouble timeDiference;
 
-// VARIÁVEIS DA CÂMERA
+/*
+ * VARIÁVEIS DA CÂMERA
+ */
 int camera = 1;
-GLfloat angle=45, fAspect;
+GLfloat anguloCamera=45, fAspect;
 GLdouble obsX=200, obsY=200, obsZ=200;
 GLdouble eyeX=0, eyeY=0, eyeZ=0;
 GLdouble upX=0, upY=1, upZ=0;
-
-
-
-int anguloCamera = 60;
-
 
 /*
  * REGRAS DO JOGO
@@ -103,15 +100,6 @@ void inicializarOpengl() {
 	glEnable(GL_DEPTH_TEST);
 	// Habilita o modelo de colorizacao de Gouraud
 	glShadeModel(GL_SMOOTH);
-
-	
-	glShadeModel(GL_FLAT);
-	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(90, (GLfloat)larguraJanela / (GLfloat)alturaJanela, 1, 15);
-
-
 }
 
 bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
@@ -171,7 +159,7 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 			e->QueryStringAttribute("fill", &fill);
 
 			if(!strcmp(fill,"blue")){
-				Arena a = Arena(x, y, r);
+				Arena a = Arena(x, y, r, 0);
 				arena = a;
 			}
 			if(!strcmp(fill,"red")){
@@ -192,6 +180,9 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 				jogador_copia = j;
 			}
 		}
+
+		// Seta a altura da arena (8x diametro do jogador)
+		arena.altura = 8 * 2 * jogador.r;
 
 		// int fator_correcao_x = (arena.r - arena.x) - arena.r;
 		// int fator_correcao_y = (arena.r - arena.y) - arena.r;
@@ -251,8 +242,11 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 	return true;
 }
 
-void PosicionaObservador(GLdouble obsX, GLdouble obsY, GLdouble obsZ, GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, GLdouble upX, GLdouble upY, GLdouble upZ)
-{
+/*
+ * CÂMERAS, LUZES E DESENHO
+ */
+
+void posicionarObservador(GLdouble obsX, GLdouble obsY, GLdouble obsZ, GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, GLdouble upX, GLdouble upY, GLdouble upZ) {
 	// Especifica sistema de coordenadas do modelo
 	glMatrixMode(GL_MODELVIEW);
 	// Inicializa sistema de coordenadas do modelo
@@ -261,31 +255,95 @@ void PosicionaObservador(GLdouble obsX, GLdouble obsY, GLdouble obsZ, GLdouble e
     gluLookAt(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
 }
 
-void EspecificaParametrosVisualizacao(GLfloat angle, GLfloat fAspectW, GLfloat fAspectH, GLfloat zMin, GLfloat zMax) {
+void especificarParametrosVisualizacao(GLfloat angle, GLfloat fAspectW, GLfloat fAspectH, GLfloat zMin, GLfloat zMax) {
 	// Especifica sistema de coordenadas de projeção
 	glMatrixMode(GL_PROJECTION);
 	// Inicializa sistema de coordenadas de projeção
 	glLoadIdentity();
 	// Especifica a projeção perspectiva(angulo,aspecto,zMin,zMax)
 	gluPerspective(angle, (GLfloat)fAspectW / (GLfloat)fAspectH, zMin, zMax);
-	
-	
-	glMatrixMode(GL_MODELVIEW);
 }
 
-/*
-void mudarCamera(int angle, int w, int h)
-{
-    glMatrixMode(GL_PROJECTION);
+void especificarIluminacao(void) {
 
-    glLoadIdentity();
+	GLfloat luzAmbiente[4]={0.2,0.2,0.2,1.0}; 
+	GLfloat luzDifusa[4]={0.7,0.7,0.7,1.0};	   // "cor" 
+	GLfloat luzEspecular[4]={1.0, 1.0, 1.0, 1.0};// "brilho" 
+	GLfloat posicaoLuz[4]={0.0, 50.0, 0.0, 1.0};
 
-    gluPerspective(angle, (GLfloat)w / (GLfloat)h, 0.1, 500.0);
+	GLfloat posicaoLuzSpot[4]={jogador.x+20, jogador.y, jogador.z, 1.0};
+	GLfloat direcaoLuzSpot[4]={jogador.x+50, jogador.y, jogador.z, 1.0};
 
-    glMatrixMode(GL_MODELVIEW);
+	// Capacidade de brilho do material
+	GLfloat especularidade[4]={1.0,1.0,1.0,1.0}; 
+	GLint especMaterial = 60;
+
+	// Define a reflet�ncia do material 
+	glMaterialfv(GL_FRONT,GL_SPECULAR, especularidade);
+	// Define a concentra��o do brilho
+	glMateriali(GL_FRONT,GL_SHININESS,especMaterial);
+
+	// Ativa o uso da luz ambiente 
+	// glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
+
+	// Define os par�metros da luz de n�mero 0
+	glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente); 
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa );
+	glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular );
+	glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz ); 
+
+	// Luz spot (farol)
+	glLightfv(GL_LIGHT1, GL_AMBIENT, luzAmbiente); 
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, luzDifusa );
+	glLightfv(GL_LIGHT1, GL_SPECULAR, luzEspecular );
+	glLightfv(GL_LIGHT1, GL_POSITION, posicaoLuzSpot );   
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, direcaoLuzSpot ); 
 }
-*/
 
+void desenharMundo() {
+	
+	// Desenha uma esfera na posição da luz
+	glPushMatrix();
+		glTranslatef(0, 50, 0);
+		glColor3f(1.0f, 1.0f, 0.0f);
+		glutSolidSphere (10.0, 50, 50);
+		glColor3f(0.0f, 0.0f, 1.0f);
+	glPopMatrix();
+
+	arena.desenhar();
+
+	jogador.desenhar();
+}
+
+void desenharViewport1() {
+	
+	glViewport(0, (GLsizei)alturaJanela, (GLsizei)larguraJanela ,200);	
+	
+	especificarParametrosVisualizacao(anguloCamera, larguraJanela, 200, 0.1, 5000.0);
+	
+	posicionarObservador(0.0, 80.0, 200.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+
+	desenharMundo();
+}
+
+void desenharViewport2() {
+
+	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
+
+	if(camera == 1){
+		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
+		posicionarObservador(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
+	}
+	if(camera == 2){
+		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
+		posicionarObservador(-80, 80, 80, 0, 0, 0, 0, 1, 0);
+	}
+	if(camera == 3){
+		
+	} 
+
+	desenharMundo();
+}
 
 /*
  * CALLBACK'S
@@ -293,66 +351,15 @@ void mudarCamera(int angle, int w, int h)
 
 void display(void) {
 
-	/* Limpar todos os pixels */
 	glClearColor (0.0, 0.0, 0.0, 1.0);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-//---------------------------------------------------------------------------------------	
-	//Câmera da bomba
-	glViewport(0, (GLsizei)alturaJanela, (GLsizei)larguraJanela ,200);	
-	glLoadIdentity();
-//	mudarCamera(anguloCamera, larguraJanela, 200);
-	EspecificaParametrosVisualizacao(anguloCamera, larguraJanela, 200, 0.1, 500.0);
+	especificarIluminacao();
+	
+	desenharViewport1();
 
-	//Colocar o código da câmera da bomba aqui
-
-	
-	PosicionaObservador(0.0, 80.0, 200.0,
-					0.0, 0.0, 0.0, 
-					0.0, 1.0, 0.0);
-	
-	glPushMatrix();
-		GLfloat mat_ambient_a[] = {0.0, 0.0, 1.0, 1.0};
-		glColor3fv(mat_ambient_a);
-		glutSolidTeapot(20);
-	glPopMatrix();
-
-
-
-	
-
-	
-//---------------------------------------------------------------------------------------	
-	
-	//Câmera normal
-	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
-	glLoadIdentity();
-//	mudarCamera(anguloCamera, larguraJanela, alturaJanela);
-	EspecificaParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 500.0);
-
-	//Colocar o código do jogo a partir daqui
-	
-	
-	
-	
-	
-	
-	PosicionaObservador(0.0, 80.0, 200.0,
-					0.0, 0.0, 0.0, 
-					0.0, 1.0, 0.0);
-
-	glPushMatrix();		
-		GLfloat mat_ambient_y[] = {1.0, 1.0, 0.0, 1.0};
-		glColor3fv(mat_ambient_y);
-		glutWireTeapot(20);
-	glPopMatrix();
-	
-	
-	
-	
-	
-	
-	
+	desenharViewport2();
 	
 	glutSwapBuffers();
 }
@@ -363,19 +370,6 @@ void idle(void) {
 	currentTime = glutGet(GLUT_ELAPSED_TIME);
 	timeDiference = currentTime - previousTime;
 	previousTime = currentTime;
-
-	// Ajusta a camera
-	if(camera == 1){
-		EspecificaParametrosVisualizacao(angle, larguraJanela, alturaJanela, 0.5, 5000);
-		PosicionaObservador(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
-	}
-	if(camera == 2){
-		// EspecificaParametrosVisualizacao(angle, fAspect, 0.5, 5000);
-		// PosicionaObservador(jx-120, jy+50, jz, jx, jy, jz, 0, 1, 0);
-	}
-	if(camera == 3){
-		
-	} 
 
 	// Decolando
 	if(estado == 1){
@@ -418,16 +412,6 @@ void idle(void) {
 		reiniciarJogo();
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 	// Marca a janela atual como precisando ser reexibida
 	glutPostRedisplay();
 }
@@ -447,23 +431,33 @@ void keyPress(unsigned char key, int x, int y) {
 			break;
 		case 'I':
 		case 'i':
-		{	
+		{
 			int inc = anguloCamera <= 5 ? 0 : 1;
-		     anguloCamera -= inc;
-		   //  mudarCamera(anguloCamera, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
-		     EspecificaParametrosVisualizacao(anguloCamera, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT), 0.1, 500.0);
-		     			
+			anguloCamera -= inc;
 			break;
 		}
 		case 'O':
 		case 'o':
-		{	
+		{
 			int inc = anguloCamera >= 180 ? 0 : 1;
-		     anguloCamera += inc;
-		    // mudarCamera(anguloCamera, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
-		     EspecificaParametrosVisualizacao(anguloCamera, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT), 0.1, 500.0);
+			anguloCamera += inc;
 			break;
 		}
+		case '1':
+			camera = 1;
+			break;
+		case '2':
+			camera = 2;
+			break;
+		case '3':
+			camera = 3;
+			break;
+		case 'n':
+			if(glIsEnabled(GL_LIGHT0)){ glDisable(GL_LIGHT0); }else{ glEnable(GL_LIGHT0); }
+			break;
+		case 'm':
+			if(glIsEnabled(GL_LIGHT1)){ glDisable(GL_LIGHT1); }else{ glEnable(GL_LIGHT1); }
+			break;
 		default:
 			break;  	
 	}
@@ -475,17 +469,23 @@ void keyUp(unsigned char key, int x, int y) {
 
 void specialKeys(int key, int x, int y) {
 	switch (key) {
-		case GLUT_KEY_LEFT :
+		case GLUT_KEY_LEFT:
+			obsX -=10;
 			break;
-		case GLUT_KEY_RIGHT :
+		case GLUT_KEY_RIGHT: 
+			obsX +=10;
 			break;
-		case GLUT_KEY_UP : 
+		case GLUT_KEY_UP: 
+			obsY +=10;
 			break;
-		case GLUT_KEY_DOWN : 
+		case GLUT_KEY_DOWN: 
+			obsY -=10;
 			break;
 		case GLUT_KEY_HOME : 
+			obsZ +=10;
 			break;
 		case GLUT_KEY_END : 
+			obsZ -=10;
 			break;
 	}
 }
@@ -508,18 +508,16 @@ void reshape(GLsizei w, GLsizei h) {
 	if ( h == 0 ) h = 1;
 
 	// Calcula a correcao de aspecto
-//	fAspect = (GLfloat)w/(GLfloat)h;
+	//	fAspect = (GLfloat)w/(GLfloat)h;
 
 	// Especifica o tamanho da viewport
 	glViewport (0, 0, (GLsizei)w, (GLsizei)h);
 
-//	mudarCamera(anguloCamera, w, h);
-	EspecificaParametrosVisualizacao(anguloCamera, w, h, 0.1, 500.0);
+	//	mudarCamera(anguloCamera, w, h);
+	especificarParametrosVisualizacao(anguloCamera, w, h, 0.1, 500.0);
 
 	larguraJanela = w;
-	alturaJanela = h - 200;
- 
-	
+	alturaJanela = h - 200;	
 }
 
 /*
