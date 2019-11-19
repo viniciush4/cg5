@@ -21,7 +21,7 @@ void Arena::desenhar(){
 	
 	// Desenha um cilindro
 	glPushMatrix();
-		glRotatef(-90,1,0,0);
+		// glRotatef(-90,1,0,0);
 		GLUquadric* q = gluNewQuadric();
 		gluQuadricOrientation(q, GLU_INSIDE);
 		gluCylinder(q, r, r, altura, 30, 30);
@@ -32,10 +32,10 @@ void Arena::desenhar(){
 		glBegin(GL_QUADS);
 			glColor3f(1.0f, 0.0f, 0.5f);
 			glNormal3f(0.0, 1.0, 0.0);
-			glVertex3f(-r, 0.0, -r);
-			glVertex3f(r, 0.0, -r);
-			glVertex3f(r, 0.0, r);
-			glVertex3f(-r, 0.0, r);
+			glVertex3f(-r, -r, 0.0);
+			glVertex3f(r, -r, 0.0);
+			glVertex3f(r, r, 0.0);
+			glVertex3f(-r, r, 0.0);
 		glEnd();
 	glPopMatrix();
 }

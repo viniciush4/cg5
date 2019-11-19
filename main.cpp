@@ -52,9 +52,9 @@ GLdouble timeDiference;
  */
 int camera = 1;
 GLfloat anguloCamera=45, fAspect;
-GLdouble obsX=200, obsY=200, obsZ=200;
+GLdouble obsX=0, obsY=-10, obsZ=1000;
 GLdouble eyeX=0, eyeY=0, eyeZ=0;
-GLdouble upX=0, upY=1, upZ=0;
+GLdouble upX=0, upY=0, upZ=1;
 
 /*
  * REGRAS DO JOGO
@@ -269,7 +269,7 @@ void especificarIluminacao(void) {
 	GLfloat luzAmbiente[4]={0.2,0.2,0.2,1.0}; 
 	GLfloat luzDifusa[4]={0.7,0.7,0.7,1.0};	   // "cor" 
 	GLfloat luzEspecular[4]={1.0, 1.0, 1.0, 1.0};// "brilho" 
-	GLfloat posicaoLuz[4]={0.0, 50.0, 0.0, 1.0};
+	GLfloat posicaoLuz[4]={0.0, 0.0, 50.0, 1.0};
 
 	GLfloat posicaoLuzSpot[4]={jogador.x+20, jogador.y, jogador.z, 1.0};
 	GLfloat direcaoLuzSpot[4]={jogador.x+50, jogador.y, jogador.z, 1.0};
@@ -300,17 +300,59 @@ void especificarIluminacao(void) {
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, direcaoLuzSpot ); 
 }
 
+// Vamos retirar depois
+void DrawAxes() {
+    GLfloat mat_ambient_r[] = { 1.0, 0.0, 0.0, 1.0 };
+    GLfloat mat_ambient_g[] = { 0.0, 1.0, 0.0, 1.0 };
+    GLfloat mat_ambient_b[] = { 0.0, 0.0, 1.0, 1.0 };
+
+    glPushAttrib(GL_ENABLE_BIT);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_TEXTURE_2D);
+ 
+        //x axis
+        glPushMatrix();
+            glColor3fv(mat_ambient_r);
+            glScalef(5, 0.3, 0.3);
+            glTranslatef(0, 0, 0); // put in one end
+            glutSolidCube(20.0);
+        glPopMatrix();
+
+        //y axis
+        glPushMatrix();
+            glColor3fv(mat_ambient_g);
+            glScalef(0.3, 5, 0.3);
+            glTranslatef(0, 0, 0); // put in one end
+            glutSolidCube(20.0);
+        glPopMatrix();
+
+        //z axis
+        glPushMatrix();
+            glColor3fv(mat_ambient_b);
+            glScalef(0.3, 0.3, 5);
+            glTranslatef(0, 0, 0); // put in one end
+            glutSolidCube(20.0);
+        glPopMatrix();
+    glPopAttrib();
+    
+}
+
 void desenharMundo() {
 	
 	// Desenha uma esfera na posição da luz
+	// Vamos retirar isso depois
 	glPushMatrix();
-		glTranslatef(0, 50, 0);
+		glTranslatef(0, 0, 50);
 		glColor3f(1.0f, 1.0f, 0.0f);
 		glutSolidSphere (10.0, 50, 50);
 		glColor3f(0.0f, 0.0f, 1.0f);
 	glPopMatrix();
 
+	DrawAxes();
+
 	arena.desenhar();
+
+	pista.desenhar();
 
 	jogador.desenhar();
 }
@@ -321,7 +363,7 @@ void desenharViewport1() {
 	
 	especificarParametrosVisualizacao(anguloCamera, larguraJanela, 200, 0.1, 5000.0);
 	
-	posicionarObservador(0.0, 80.0, 200.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	posicionarObservador(200.0, -200.0, 200.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 
 	desenharMundo();
 }
@@ -336,7 +378,7 @@ void desenharViewport2() {
 	}
 	if(camera == 2){
 		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
-		posicionarObservador(-80, 80, 80, 0, 0, 0, 0, 1, 0);
+		posicionarObservador(80, 80, 80, 0, 0, 0, 0, 1, 0);
 	}
 	if(camera == 3){
 		
@@ -528,6 +570,8 @@ int main(int argc, char** argv) {
 
 	if (!inicializarObjetosJogo(argv[1]))
 		return EXIT_FAILURE;
+
+	cout << jogador.x << " " << jogador.y << " " << jogador.z << endl;
 
 	glutInit (&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
