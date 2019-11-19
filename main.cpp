@@ -316,7 +316,7 @@ void DrawAxes() {
         //x axis
         glPushMatrix();
             glColor3fv(mat_ambient_r);
-            glScalef(5, 0.3, 0.3);
+            glScalef(5, 0.1, 0.1);
             glTranslatef(0, 0, 0); // put in one end
             glutSolidCube(20.0);
         glPopMatrix();
@@ -324,7 +324,7 @@ void DrawAxes() {
         //y axis
         glPushMatrix();
             glColor3fv(mat_ambient_g);
-            glScalef(0.3, 5, 0.3);
+            glScalef(0.1, 5, 0.1);
             glTranslatef(0, 0, 0); // put in one end
             glutSolidCube(20.0);
         glPopMatrix();
@@ -332,7 +332,7 @@ void DrawAxes() {
         //z axis
         glPushMatrix();
             glColor3fv(mat_ambient_b);
-            glScalef(0.3, 0.3, 5);
+            glScalef(0.1, 0.1, 5);
             glTranslatef(0, 0, 0); // put in one end
             glutSolidCube(20.0);
         glPopMatrix();
