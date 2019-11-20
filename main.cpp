@@ -1,3 +1,8 @@
+#include <GL/glut.h>
+#include <vector>
+#include <iostream>
+#include <math.h>
+
 #include "tinyxml2.h"
 #include "configuracao.h"
 #include "pista.h"
@@ -5,21 +10,35 @@
 #include "inimigo.h"
 #include "base.h"
 #include "jogador.h"
-#include <GL/glut.h>
-#include <vector>
-#include <iostream>
-#include <math.h>
+#include "OBJ_Loader.h"
+#include "imageloader.h"
+
+
 
 #define grausParaRadianos(g) g*(M_PI/180)
 
+
 using namespace tinyxml2;
 using namespace std;
+using namespace objl;
+
 
 /*
  * DIMENSÕES DO JOGO
  */
 int larguraJanela = 500;
 int alturaJanela = 500;
+
+/*
+ * TEXTURAS DO JOGO
+ */
+GLuint texturaCeu;
+
+/*
+ * MODELOS IMPORTADOS NO JOGO
+ */
+Loader aviaoJogador;
+bool carregouAviaoJogador = false;
 
 /*
  * MAPEAMENTO DAS TECLAS
@@ -83,6 +102,33 @@ void atualizarEstadoBombas() {
 void criarTirosInimigos() {
 }
 
+
+//Carregar texturas
+GLuint LoadTextureRAW( const char * filename )
+{
+	GLuint texture;
+
+	Image* image = loadBMP(filename);
+
+	glGenTextures( 1, &texture );
+	glBindTexture( GL_TEXTURE_2D, texture );
+	glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,GL_MODULATE );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+	glTexImage2D(GL_TEXTURE_2D,                //Always GL_TEXTURE_2D
+		                   0,                            //0 for now
+		                   GL_RGB,                       //Format OpenGL uses for image
+		                   image->width, image->height,  //Width and height
+		                   0,                            //The border of the image
+		                   GL_RGB, //GL_RGB, because pixels are stored in RGB format
+		                   GL_UNSIGNED_BYTE, //GL_UNSIGNED_BYTE, because pixels are stored
+		                                     //as unsigned numbers
+		                   image->pixels);               //The actual pixel data
+	delete image;
+
+	return texture;
+}	
+
 /*
  * CONFIGURAÇÕES
  */
@@ -98,8 +144,17 @@ void inicializarOpengl() {
 	glEnable(GL_LIGHT0);
 	// Habilita o depth-buffering
 	glEnable(GL_DEPTH_TEST);
+	
+	//Habilitar texturas
+	glEnable(GL_TEXTURE_2D);
+	
 	// Habilita o modelo de colorizacao de Gouraud
 	glShadeModel(GL_SMOOTH);
+	
+	
+	//Carregar
+	texturaCeu = LoadTextureRAW("Texturas/ceu.bmp");
+	carregouAviaoJogador = aviaoJogador.LoadFile("Modelos/convertoplan_OBJ.obj");
 }
 
 bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
@@ -245,6 +300,7 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 	return true;
 }
 
+
 /*
  * CÂMERAS, LUZES E DESENHO
  */
@@ -340,6 +396,56 @@ void DrawAxes() {
     
 }
 
+
+void desenharAeromodelo()
+{
+	if(carregouAviaoJogador)
+	{
+		glPushMatrix();
+			//glTranslatef(0,-0.5,0);
+			//glRotatef(rodar, 0, 1, 0);
+			
+
+			for(size_t i = 0; i < aviaoJogador.LoadedMeshes.size(); i++)
+			{
+				Mesh curMesh = aviaoJogador.LoadedMeshes[i];
+			
+				GLfloat materialEmission[] = { 0.1, 0.1, 0.1, 1};
+				GLfloat materialColorA[] = { curMesh.MeshMaterial.Ka.X, curMesh.MeshMaterial.Ka.Y, curMesh.MeshMaterial.Ka.Z, 1};
+				GLfloat materialColorD[] = { curMesh.MeshMaterial.Kd.X, curMesh.MeshMaterial.Kd.Y, curMesh.MeshMaterial.Kd.Z, 1};
+				GLfloat mat_specular[] = { curMesh.MeshMaterial.Ks.X, curMesh.MeshMaterial.Ks.Y, curMesh.MeshMaterial.Ks.Z, 1};
+				GLfloat mat_shininess[] = { curMesh.MeshMaterial.Ns };
+				glColor3f(1,1,1);
+
+				glMaterialfv(GL_FRONT, GL_EMISSION, materialEmission);
+				glMaterialfv(GL_FRONT, GL_AMBIENT, materialColorA);
+				glMaterialfv(GL_FRONT, GL_DIFFUSE, materialColorD);
+				glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+				glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+			
+				
+				glBindTexture (GL_TEXTURE_2D, texturaCeu);
+				glBegin (GL_QUADS);
+				for(size_t j = 0; j < curMesh.Vertices.size(); j++)
+				{
+				   glNormal3f(curMesh.Vertices[j].Normal.X, curMesh.Vertices[j].Normal.Y, curMesh.Vertices[j].Normal.Z);
+				   glTexCoord2f (curMesh.Vertices[j].TextureCoordinate.X, curMesh.Vertices[j].TextureCoordinate.Y);
+				   glVertex3f (curMesh.Vertices[j].Position.X, curMesh.Vertices[j].Position.Y, curMesh.Vertices[j].Position.Z);
+				}
+				glEnd();
+		    
+		    }
+		glPopMatrix();
+	}
+	else
+	{
+		cout << "ERRO: Aeromodelo não encontrado na pasta específica!" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+}
+
+
 void desenharMundo() {
 	
 	// Desenha uma esfera na posição da luz
@@ -351,13 +457,23 @@ void desenharMundo() {
 		glColor3f(0.0f, 0.0f, 1.0f);
 	glPopMatrix();
 
+	
 	DrawAxes();
 
-	arena.desenhar();
+	arena.desenhar(texturaCeu);
 
 	pista.desenhar();
 
-	jogador.desenhar();
+	//jogador.desenhar();
+
+	glPushMatrix();
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glTranslatef(jogador.x, jogador.y, jogador.z);
+		glRotatef(90, 1, 0, 0);
+		desenharAeromodelo();
+	glPopMatrix();
+	
+	
 }
 
 void desenharViewport1() {

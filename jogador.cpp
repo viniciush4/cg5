@@ -1,11 +1,5 @@
-#include <iostream>
 #include "jogador.h"
-#include <math.h>
-#include <GL/glut.h>
 
-using namespace std;
-
-#define grausParaRadianos(g) g*(M_PI/180)
 
 Jogador::Jogador(){
 	this->x = 0;
@@ -37,7 +31,8 @@ Jogador::Jogador(float x, float y, float z, float r, float velocidade){
     this->velocidade = velocidade;
 }
 
-void Jogador::desenhar(){
+void Jogador::desenhar()
+{
     glPushMatrix();
         glColor3f(0.0f, 0.0f, 1.0f);
 		glTranslatef(x, y, z);

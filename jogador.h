@@ -1,3 +1,13 @@
+#include <iostream>
+#include <GL/glut.h>
+#include <math.h>
+
+
+#define grausParaRadianos(g) g*(M_PI/180)
+
+using namespace std;
+
+
 class Jogador {
 public:
 	float x;

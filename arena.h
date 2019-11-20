@@ -1,3 +1,8 @@
+#include <GL/glut.h>
+#include <math.h>
+
+using namespace std;
+
 class Arena {
 public:
 	float x;
@@ -7,7 +12,7 @@ public:
 
 	Arena();
 	Arena(float x, float y, float r, float altura);
-	void desenhar();
+	void desenhar(GLuint textura);
 	
 	virtual ~Arena();
 };

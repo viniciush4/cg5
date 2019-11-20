@@ -1,8 +1,4 @@
 #include "arena.h"
-#include <GL/glut.h>
-#include <math.h>
-
-using namespace std;
 
 Arena::Arena(){
 	this->x = 0;
@@ -18,14 +14,20 @@ Arena::Arena(float x, float y, float r, float altura){
 	this->altura = altura;
 }
 
-void Arena::desenhar(){
+void Arena::desenhar(GLuint textura){
 	
 	// Desenha um cilindro
 	glPushMatrix();
+		
 		GLUquadric* q = gluNewQuadric();
 		gluQuadricOrientation(q, GLU_INSIDE);
+		gluQuadricDrawStyle(q, GLU_FILL); //GLU_FILL, GLU_LINE, GLU_SILHOUETTE, GLU_POINT
+		gluQuadricNormals(q, GLU_FLAT); //GLU_NONE, GLU_FLAT, GLU_SMOOTH
+		gluQuadricTexture(q, GL_TRUE);// if you want to map a texture to it.	
+		glBindTexture(GL_TEXTURE_2D, textura);
 		gluCylinder(q, r, r, altura, 30, 30);
 	glPopMatrix();
+	
 
 /*
 	// Desenha o chão
@@ -49,7 +51,7 @@ void Arena::desenhar(){
 		glColor3f(1.0f, 0.0f, 0.5f);
 		glNormal3f(0.0, 0.0, 1.0);
 
-		//Desenha o círculo
+		//Desenha o círculo		
 		glBegin(GL_POLYGON);
 			for(int i=0; i < numVertices; i++)
 			{
