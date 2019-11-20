@@ -23,7 +23,7 @@ void Arena::desenhar(GLuint textura){
 		gluQuadricOrientation(q, GLU_INSIDE);
 		gluQuadricDrawStyle(q, GLU_FILL); //GLU_FILL, GLU_LINE, GLU_SILHOUETTE, GLU_POINT
 		gluQuadricNormals(q, GLU_FLAT); //GLU_NONE, GLU_FLAT, GLU_SMOOTH
-		gluQuadricTexture(q, GL_TRUE);// if you want to map a texture to it.	
+		// gluQuadricTexture(q, GL_TRUE);// if you want to map a texture to it.	
 		glBindTexture(GL_TEXTURE_2D, textura);
 		gluCylinder(q, r, r, altura, 30, 30);
 	glPopMatrix();

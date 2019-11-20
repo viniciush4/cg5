@@ -26,11 +26,12 @@ public:
 	Jogador();
 	Jogador(float x, float y, float z, float r, float velocidade);
 	void desenhar();
-	// void alterarAngulo(float coeficiente_ajuste);
-	// void alterarAnguloCanhao(float incremento);
-	// void alterarEscala(float incremento);
-	// void andar(float coeficiente_ajuste);
-	// void girarHelices(float coeficiente_ajuste);
+	void alterarAnguloXY(float coeficiente_ajuste);
+	void alterarAnguloXZ(float coeficiente_ajuste);
+	void alterarAnguloCanhaoXY(float incremento);
+	void alterarAnguloCanhaoXZ(float incremento);
+	void andar(float coeficiente_ajuste);
+	void girarHelices(float coeficiente_ajuste);
 	
 	virtual ~Jogador();
 };

@@ -16,6 +16,7 @@
 
 
 #define grausParaRadianos(g) g*(M_PI/180)
+#define radianosParaGraus(r) r*(180/M_PI)
 
 
 using namespace tinyxml2;
@@ -82,9 +83,19 @@ void teletransportarJogador() {
 }
 
 void reiniciarJogo() {
+	jogador = jogador_copia;
+	inimigos = inimigos_copia;
+	bases = bases_copia;
+	// tiros.clear();
+	// tiros_inimigos.clear();
+	// bombas.clear();
+	// placar.resetarPlacar();
+	estado = 0;
 }
 
 void atualizarEstadoJogador() {
+	jogador.girarHelices(timeDiference/1000);
+	jogador.andar(timeDiference/1000);
 }
 
 void atualizarEstadoInimigos() {
@@ -274,9 +285,9 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		}
 
 		// // Seta valores iniciais para os ângulos
-		// float angulo = atan2((pista.y2-pista.y1), (pista.x2-pista.x1));
-		// jogador.angulo = radianosParaGraus(angulo);
-		// jogador.angulo_canhao_arena = radianosParaGraus(angulo);
+		float angulo = atan2((pista.y2-pista.y1), (pista.x2-pista.x1));
+		jogador.angulo_xy = radianosParaGraus(angulo);
+		jogador.angulo_canhao_arena_xy = radianosParaGraus(angulo);
 
 		// // Calcula a velocidade dos inimigos
 		// float distancia 					= sqrt(pow(pista.y2-pista.y1,2) + pow(pista.x2-pista.x1,2));
@@ -464,14 +475,14 @@ void desenharMundo() {
 
 	pista.desenhar();
 
-	//jogador.desenhar();
+	jogador.desenhar();
 
-	glPushMatrix();
-		glColor3f(0.0f, 0.0f, 1.0f);
-		glTranslatef(jogador.x, jogador.y, jogador.z);
-		glRotatef(90, 1, 0, 0);
-		desenharAeromodelo();
-	glPopMatrix();
+	// glPushMatrix();
+	// 	glColor3f(0.0f, 0.0f, 1.0f);
+	// 	glTranslatef(jogador.x, jogador.y, jogador.z);
+	// 	glRotatef(90, 1, 0, 0);
+	// 	desenharAeromodelo();
+	// glPopMatrix();
 	
 	
 }
@@ -497,7 +508,11 @@ void desenharViewport2() {
 	}
 	if(camera == 2){
 		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
-		posicionarObservador(jogador.x-100, jogador.y, jogador.z+70, jogador.x, jogador.y, jogador.z, 0, 0, 1);
+		posicionarObservador(
+			jogador.x - 50*cos(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.y - 50*sin(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.z + jogador.r + 50*sin(grausParaRadianos(jogador.angulo_xz)),
+			jogador.x, jogador.y, jogador.z, 0, 0, 1);
 	}
 	if(camera == 3){
 		
@@ -535,6 +550,18 @@ void idle(void) {
 	// Decolando
 	if(estado == 1){
 
+		float distancia_jogador_fim_pista = sqrt(pow(jogador.y-pista.y1,2) + pow(jogador.x-pista.x1,2));
+		
+		jogador.velocidade += (pista.comprimento/8) * (timeDiference/1000);
+
+		jogador.girarHelices(timeDiference/1000);
+		jogador.andar(timeDiference/1000);
+
+		if(distancia_jogador_fim_pista >= pista.comprimento/2)
+			jogador.alterarAnguloXZ((timeDiference/1000) * 0.5);			
+
+		if(distancia_jogador_fim_pista >= pista.comprimento)
+			estado = 2;
 	}
 
 	// Jogando
@@ -551,16 +578,16 @@ void idle(void) {
 		criarTirosInimigos();		
 
 		if(teclas['a'] == 1) {
-			
+			jogador.alterarAnguloXY(+1 * timeDiference/1000);
 		}
 		if(teclas['d'] == 1) {
-			
+			jogador.alterarAnguloXY(-1 * timeDiference/1000);
 		}
 		if(teclas['w'] == 1) {
-			
+			jogador.alterarAnguloXZ(+1 * timeDiference/1000);
 		}
 		if(teclas['s'] == 1) {
-			
+			jogador.alterarAnguloXZ(-1 * timeDiference/1000);
 		}
 	}
 
@@ -578,7 +605,7 @@ void idle(void) {
 }
 
 void keyPress(unsigned char key, int x, int y) {
-	teclas[key] = 1;	
+	teclas[key] = 1;
 	switch (key)
 	{
 		case 'u':
@@ -689,13 +716,14 @@ int main(int argc, char** argv) {
 	if (!inicializarObjetosJogo(argv[1]))
 		return EXIT_FAILURE;
 
-	cout << jogador.x << " " << jogador.y << " " << jogador.z << endl;
-	cout << pista.angulo_xy << endl;
+	cout << "Angulo xy: " << jogador.angulo_xy << endl;
+	cout << "Angulo xz: " << jogador.angulo_xz << endl;
 
 	glutInit (&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(larguraJanela, alturaJanela + 200);
-	glutInitWindowPosition((glutGet(GLUT_SCREEN_WIDTH)-larguraJanela)/2,(glutGet(GLUT_SCREEN_HEIGHT)-alturaJanela)/2);
+	glutInitWindowPosition(0, 0); // Deixar assim por enquanto... para a janela não abrir em cma do código
+	// glutInitWindowPosition((glutGet(GLUT_SCREEN_WIDTH)-larguraJanela)/2,(glutGet(GLUT_SCREEN_HEIGHT)-alturaJanela)/2);
 	glutCreateWindow("TRABALHO FINAL");
 	glutReshapeFunc(reshape);
 	glutSpecialFunc(specialKeys);
