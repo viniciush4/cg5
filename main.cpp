@@ -162,10 +162,6 @@ void inicializarOpengl() {
 	// Habilita o modelo de colorizacao de Gouraud
 	glShadeModel(GL_SMOOTH);
 	
-	
-	//Carregar
-	texturaCeu = LoadTextureRAW("Texturas/ceu.bmp");
-	carregouAviaoJogador = aviaoJogador.LoadFile("Modelos/convertoplan_OBJ.obj");
 }
 
 bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
@@ -307,6 +303,10 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 
 		// // Cria o placar
 		// placar = Placar(arena.r, inimigos_terrestres.size());
+
+		//Carregar
+		texturaCeu = LoadTextureRAW("Texturas/ceu.bmp");
+		//carregouAviaoJogador = aviaoJogador.LoadFile("Modelos/convertoplan_OBJ.obj");
 
 	return true;
 }
@@ -608,6 +608,7 @@ void keyPress(unsigned char key, int x, int y) {
 	teclas[key] = 1;
 	switch (key)
 	{
+		case 'U':
 		case 'u':
 			estado = (estado == 0) ? 1 : estado;
 			break;
@@ -640,9 +641,11 @@ void keyPress(unsigned char key, int x, int y) {
 		case '3':
 			camera = 3;
 			break;
+		case 'N':
 		case 'n':
 			if(glIsEnabled(GL_LIGHT0)){ glDisable(GL_LIGHT0); }else{ glEnable(GL_LIGHT0); }
 			break;
+		case 'M':
 		case 'm':
 			if(glIsEnabled(GL_LIGHT1)){ glDisable(GL_LIGHT1); }else{ glEnable(GL_LIGHT1); }
 			break;
