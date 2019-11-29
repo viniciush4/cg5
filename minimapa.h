@@ -5,13 +5,17 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
+#include "arena.h"
+#include "inimigo.h"
+#include "base.h"
+#include "jogador.h"
 
 class Minimapa
 {
 	public:
 
         Minimapa();
-        void desenhar(GLfloat larguraJanela, GLfloat alturaJanela);
+        void desenhar(Arena &arena, Jogador &jogador, vector<Inimigo> &inimigos, vector<Base> &bases, GLfloat larguraJanela, GLfloat alturaJanela);
 
 };
 

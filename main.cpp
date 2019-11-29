@@ -6,10 +6,10 @@
 #include "tinyxml2.h"
 #include "configuracao.h"
 #include "pista.h"
-#include "arena.h"
-#include "inimigo.h"
-#include "base.h"
-#include "jogador.h"
+//#include "arena.h"
+//#include "inimigo.h"
+//#include "base.h"
+//#include "jogador.h"
 #include "OBJ_Loader.h"
 #include "imageloader.h"
 #include "minimapa.h"
@@ -503,7 +503,7 @@ void desenharMiniMapa()
 				glVertex3f(70, 20, 0.0);                          // Direita embaixo
 			glEnd();
 */
-			minimapa.desenhar(larguraJanela, alturaJanela);
+			minimapa.desenhar(arena, jogador, inimigos, bases, larguraJanela, alturaJanela);
 
 		glPopAttrib();
 
@@ -572,7 +572,8 @@ void desenharViewport1() {
 void desenharViewport2() {
 
 	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
-		desenharMiniMapa();
+	
+	desenharMiniMapa();
 	
 
 	if(camera == 1){
