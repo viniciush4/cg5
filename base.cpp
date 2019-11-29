@@ -18,7 +18,17 @@ Base::Base(float x, float y, float r){
 	this->r = r;
 }
 
-void Base::desenhar(){
+void Base::desenhar()
+{
+	glPushMatrix();
+        glTranslatef(x, y, r);
+
+        glColor3f(0, 1, 0);
+	//	glNormal3f(0.0, 0.0, 1.0);
+
+        glutSolidSphere(r,100,100);
+    glPopMatrix();
+
 }
 
 Base::~Base(){

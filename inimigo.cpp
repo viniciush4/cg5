@@ -43,7 +43,17 @@ Inimigo::Inimigo(float x, float y, float z, float r, float velocidade){
     this->tempo_desde_ultimo_tiro = 0;
 }
 
-void Inimigo::desenhar(){
+void Inimigo::desenhar()
+{
+    glPushMatrix();
+        glTranslatef(x, y, z+r);
+
+        glColor3f(1, 0, 0);
+	//	glNormal3f(0.0, 0.0, 1.0);
+
+        glutSolidSphere(r,100,100);
+    glPopMatrix();
+
 }
 
 void Inimigo::alterarAngulo(float incremento_xy, float incremento_xz){

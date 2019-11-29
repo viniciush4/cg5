@@ -12,6 +12,7 @@
 #include "jogador.h"
 #include "OBJ_Loader.h"
 #include "imageloader.h"
+#include "minimapa.h"
 
 
 
@@ -34,6 +35,11 @@ int alturaJanela = 500;
  * TEXTURAS DO JOGO
  */
 GLuint texturaCeu;
+
+/*
+ * MINI MAPA
+ */
+Minimapa minimapa;
 
 /*
  * MODELOS IMPORTADOS NO JOGO
@@ -161,6 +167,12 @@ void inicializarOpengl() {
 	
 	// Habilita o modelo de colorizacao de Gouraud
 	glShadeModel(GL_SMOOTH);
+
+//	glDepthFunc(GL_LEQUAL);
+
+	//Carregar
+	texturaCeu = LoadTextureRAW("Texturas/ceu.bmp");
+	//carregouAviaoJogador = aviaoJogador.LoadFile("Modelos/convertoplan_OBJ.obj");
 	
 }
 
@@ -304,9 +316,9 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		// // Cria o placar
 		// placar = Placar(arena.r, inimigos_terrestres.size());
 
-		//Carregar
-		texturaCeu = LoadTextureRAW("Texturas/ceu.bmp");
-		//carregouAviaoJogador = aviaoJogador.LoadFile("Modelos/convertoplan_OBJ.obj");
+		//Cria o mini mapa
+		minimapa = Minimapa();
+		
 
 	return true;
 }
@@ -457,8 +469,55 @@ void desenharAeromodelo()
 }
 
 
+void desenharMiniMapa()
+{
+ 	glLoadIdentity();
+	
+	//Draw text considering a 2D space (disable all 3d features)
+    glMatrixMode (GL_PROJECTION);
+    //Push to recover original PROJECTION MATRIX
+    glPushMatrix();
+        glLoadIdentity ();
+        glOrtho (0, larguraJanela, 0, alturaJanela, -1, 1);
+        
+		 //Push to recover original attributes
+		glPushAttrib(GL_ENABLE_BIT);
+			glDisable(GL_LIGHTING);
+			glDisable(GL_TEXTURE_2D);
+			
+/*			
+			//Draw text in the x, y, z position
+			glColor3f(0,1,0);
+			glRasterPos3f(arena.x, arena.y, 0);
+			const char* tmpStr;
+			tmpStr = "TESTE";
+			while( *tmpStr ){
+				glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *tmpStr);
+				tmpStr++;
+			}
+
+			glColor3f(0.0,1.0,0.0);
+		  	glBegin(GL_TRIANGLES);                                          // início triângulo
+				glVertex3f(70, 40, 0.0);                         // Topo
+				glVertex3f(30, 40, 0.0);                          // Esquerda embaixo
+				glVertex3f(70, 20, 0.0);                          // Direita embaixo
+			glEnd();
+*/
+			minimapa.desenhar(larguraJanela, alturaJanela);
+
+		glPopAttrib();
+
+    glPopMatrix();
+    glMatrixMode (GL_MODELVIEW);
+
+	
+
+}
+
 void desenharMundo() {
 	
+	
+
 	// Desenha uma esfera na posição da luz
 	// Vamos retirar isso depois
 	glPushMatrix();
@@ -475,7 +534,19 @@ void desenharMundo() {
 
 	pista.desenhar();
 
+	for(Base base: bases)
+	{
+		base.desenhar();			
+	}
+
+
 	jogador.desenhar();
+
+	//Desenha os inimigos aereos
+	for(Inimigo inimigo: inimigos)
+	{
+		inimigo.desenhar();			
+	}
 
 	// glPushMatrix();
 	// 	glColor3f(0.0f, 0.0f, 1.0f);
@@ -501,6 +572,8 @@ void desenharViewport1() {
 void desenharViewport2() {
 
 	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
+		desenharMiniMapa();
+	
 
 	if(camera == 1){
 		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
@@ -518,7 +591,10 @@ void desenharViewport2() {
 		
 	} 
 
+
+
 	desenharMundo();
+
 }
 
 /*
@@ -536,6 +612,9 @@ void display(void) {
 	desenharViewport1();
 
 	desenharViewport2();
+
+
+
 	
 	glutSwapBuffers();
 }
