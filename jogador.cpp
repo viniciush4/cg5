@@ -48,8 +48,10 @@ void Jogador::alterarAnguloXY(float coeficiente_ajuste){
 }
 
 void Jogador::alterarAnguloXZ(float coeficiente_ajuste){
-    angulo_xz += velocidade * coeficiente_ajuste;
-    angulo_canhao_arena_xz += velocidade * coeficiente_ajuste;
+    if(angulo_xz + velocidade * coeficiente_ajuste <= 15 && angulo_xz + velocidade * coeficiente_ajuste >= -15){
+        angulo_xz += velocidade * coeficiente_ajuste;
+        angulo_canhao_arena_xz += velocidade * coeficiente_ajuste;
+    }
 }
 
 void Jogador::alterarAnguloCanhaoXY(float incremento){

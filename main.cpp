@@ -168,7 +168,7 @@ void inicializarOpengl() {
 	// Habilita o modelo de colorizacao de Gouraud
 	glShadeModel(GL_SMOOTH);
 
-//	glDepthFunc(GL_LEQUAL);
+	// glDepthFunc(GL_LEQUAL);
 
 	//Carregar
 	texturaCeu = LoadTextureRAW("Texturas/ceu.bmp");
@@ -485,7 +485,7 @@ void desenharMiniMapa()
 			glDisable(GL_LIGHTING);
 			glDisable(GL_TEXTURE_2D);
 			
-/*			
+			/*			
 			//Draw text in the x, y, z position
 			glColor3f(0,1,0);
 			glRasterPos3f(arena.x, arena.y, 0);
@@ -502,8 +502,13 @@ void desenharMiniMapa()
 				glVertex3f(30, 40, 0.0);                          // Esquerda embaixo
 				glVertex3f(70, 20, 0.0);                          // Direita embaixo
 			glEnd();
+<<<<<<< HEAD
 */
 			minimapa.desenhar(arena, jogador, inimigos, bases, larguraJanela, alturaJanela);
+=======
+			
+
+>>>>>>> 5505ae46e04f24fe4e9b06a8014d3257220d3b00
 
 		glPopAttrib();
 
@@ -585,8 +590,8 @@ void desenharViewport2() {
 		posicionarObservador(
 			jogador.x - 50*cos(grausParaRadianos(jogador.angulo_xy)), 
 			jogador.y - 50*sin(grausParaRadianos(jogador.angulo_xy)), 
-			jogador.z + jogador.r + 50*sin(grausParaRadianos(jogador.angulo_xz)),
-			jogador.x, jogador.y, jogador.z, 0, 0, 1);
+			jogador.z - 50*sin(grausParaRadianos(jogador.angulo_xz)),
+			jogador.x, jogador.y, jogador.z+jogador.r, 0, 0, 1);
 	}
 	if(camera == 3){
 		
