@@ -82,12 +82,77 @@ GLdouble obsX=0, obsY=-10, obsZ=1000;
 GLdouble eyeX=0, eyeY=0, eyeZ=0;
 GLdouble upX=0, upY=0, upZ=1;
 
+
+
+bool verificarLimiteArena(Jogador jogador)
+{	//Calcula a distância do piloto até a borda da arena
+	float distancia = sqrt(pow(jogador.x - arena.x, 2.0) + pow(jogador.y - arena.y, 2.0));
+
+//	cout << "Distãncia: " << distancia << endl;
+
+	//Verifica se o piloto está fora da arena
+	if(distancia >= arena.r)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+//Realiza o teletransporte para o lado oposto da arena
+void teletransportarJogador(float angulo)
+{
+	angulo = angulo * M_PI / 180.0;
+
+	//Coeficiente angular
+	float m = 0.0;
+	
+	//Ajuste caso o ângulo do avião seja 90 graus
+	if(angulo >= 1.57 && angulo <= 1.58)
+	{
+		m = tanf(90.1 * M_PI / 180.0);
+	}
+	else if(angulo <= -1.57 && angulo >= -1.58)
+	{
+		m = tanf(-90.1 * M_PI / 180.0);
+	}
+	else
+	{ 
+		m = tanf(angulo);
+	}
+
+	//pilotoY - arenaY
+	float E = jogador.y - arena.y;	
+	
+	float coeficienteA = 1 + m * m;
+	float coeficienteB = -2 * arena.x -2 * m * m * jogador.x + 2 * E * m;
+	float coeficienteC = E * E - 2 * E * m * jogador.x + m * m * jogador.x * jogador.x + arena.x * arena.x - arena.r * arena.r;
+
+	float x1 = (-coeficienteB + sqrt(coeficienteB * coeficienteB - 4 * coeficienteA * coeficienteC))/(2 * coeficienteA);
+	float x2 = (-coeficienteB - sqrt(coeficienteB * coeficienteB - 4 * coeficienteA * coeficienteC))/(2 * coeficienteA);
+
+	float y1 = jogador.y + m * (x1 - jogador.x);
+	float y2 = jogador.y + m * (x2 - jogador.x);
+
+	float dist1 = sqrt( powf(x1 - jogador.x, 2) + powf(y1 - jogador.y, 2) );
+	float dist2 = sqrt( powf(x2 - jogador.x, 2) + powf(y2 - jogador.y, 2) ); 
+
+	if(dist1 < dist2)
+	{
+		jogador.x = x2;
+		jogador.y = y2;
+	}
+	else
+	{
+		jogador.x = x1;
+		jogador.y = y1;
+	}
+}
 /*
  * REGRAS DO JOGO
  */
-void teletransportarJogador() {
-}
-
 void reiniciarJogo() {
 	jogador = jogador_copia;
 	inimigos = inimigos_copia;
@@ -502,13 +567,8 @@ void desenharMiniMapa()
 				glVertex3f(30, 40, 0.0);                          // Esquerda embaixo
 				glVertex3f(70, 20, 0.0);                          // Direita embaixo
 			glEnd();
-<<<<<<< HEAD
 */
 			minimapa.desenhar(arena, jogador, inimigos, bases, larguraJanela, alturaJanela);
-=======
-			
-
->>>>>>> 5505ae46e04f24fe4e9b06a8014d3257220d3b00
 
 		glPopAttrib();
 
@@ -662,17 +722,25 @@ void idle(void) {
 
 		criarTirosInimigos();		
 
-		if(teclas['a'] == 1) {
+		if(teclas['a'] == 1 || teclas['A'] == 1) {
 			jogador.alterarAnguloXY(+1 * timeDiference/1000);
 		}
-		if(teclas['d'] == 1) {
+		if(teclas['d'] == 1 || teclas['D'] == 1) {
 			jogador.alterarAnguloXY(-1 * timeDiference/1000);
 		}
-		if(teclas['w'] == 1) {
+		if(teclas['w'] == 1 || teclas['W'] == 1) {
 			jogador.alterarAnguloXZ(+1 * timeDiference/1000);
 		}
-		if(teclas['s'] == 1) {
+		if(teclas['s'] == 1 || teclas['S'] == 1) {
 			jogador.alterarAnguloXZ(-1 * timeDiference/1000);
+		}
+
+
+		//Verificar se o piloto chegou ao final da arena
+		if(verificarLimiteArena(jogador))
+		{
+			teletransportarJogador(jogador.angulo_xy);
+			
 		}
 	}
 
