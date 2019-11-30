@@ -25,6 +25,7 @@ using namespace std;
 using namespace objl;
 
 
+
 /*
  * DIMENSÕES DO JOGO
  */
@@ -766,10 +767,10 @@ void keyPress(unsigned char key, int x, int y) {
 			estado = (estado == 0) ? 1 : estado;
 			break;
 		case '+':
-			// jogador.velocidade += (estado == 2) ? 1 : 0;
+			jogador.velocidade += (estado == 2) ? 1 : 0;
 			break;
 		case '-':
-			// jogador.velocidade -= (estado == 2) ? ((jogador.velocidade > 50) ? 1 : 0) : 0;
+			jogador.velocidade -= (estado == 2) ? ((jogador.velocidade > 50) ? 1 : 0) : 0;
 			break;
 		case 'I':
 		case 'i':

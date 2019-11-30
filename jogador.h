@@ -32,6 +32,28 @@ public:
 	void alterarAnguloCanhaoXZ(float incremento);
 	void andar(float coeficiente_ajuste);
 	void girarHelices(float coeficiente_ajuste);
+
+
+
+
+	void desenharFuselagem(float raio);
+	void desenharCabine(float raio);
+	void desenharCauda();
+	void desenharAsaDireita();
+	void desenharAsaEsquerda();
+	void desenhaHeliceDireita();
+	void desenhaHeliceEsquerda();
+
+
+
+
+
+
+
+
+
+
+
 	
 	virtual ~Jogador();
 };
