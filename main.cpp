@@ -170,7 +170,7 @@ void reiniciarJogo() {
 
 void atualizarEstadoJogador() {
 	jogador.girarHelices(timeDiference/1000);
-	jogador.andar(timeDiference/1000);
+	jogador.andar(timeDiference/1000, arena.altura);
 }
 
 void atualizarEstadoInimigos() {
@@ -241,7 +241,7 @@ void inicializarOpengl() {
 
 	//Carregar
 	texturaCeu = LoadTextureRAW("Texturas/ceu.bmp");
-	//carregouAviaoJogador = aviaoJogador.LoadFile("Modelos/convertoplan_OBJ.obj");
+//	carregouAviaoJogador = aviaoJogador.LoadFile("Modelos/piper_pa18.obj");
 	
 }
 
@@ -617,12 +617,16 @@ void desenharMundo() {
 		inimigo.desenhar();			
 	}
 
-	// glPushMatrix();
+//	 glPushMatrix();
 	// 	glColor3f(0.0f, 0.0f, 1.0f);
-	// 	glTranslatef(jogador.x, jogador.y, jogador.z);
-	// 	glRotatef(90, 1, 0, 0);
-	// 	desenharAeromodelo();
-	// glPopMatrix();
+//	 	glTranslatef(jogador.x, jogador.y, jogador.z);
+		
+//		glRotatef(-90, 0, 0, 1);
+	
+//		glRotatef(jogador.angulo_xy, 0, 0, 1);
+
+//	 	desenharAeromodelo();
+//	 glPopMatrix();
 	
 	
 }
@@ -704,7 +708,7 @@ void idle(void) {
 		jogador.velocidade += (pista.comprimento/8) * (timeDiference/1000);
 
 		jogador.girarHelices(timeDiference/1000);
-		jogador.andar(timeDiference/1000);
+		jogador.andar(timeDiference/1000, arena.altura);
 
 		if(distancia_jogador_fim_pista >= pista.comprimento/2)
 			jogador.alterarAnguloXZ((timeDiference/1000) * 0.5);			
@@ -732,11 +736,19 @@ void idle(void) {
 		if(teclas['d'] == 1 || teclas['D'] == 1) {
 			jogador.alterarAnguloXY(-1 * timeDiference/1000);
 		}
-		if(teclas['w'] == 1 || teclas['W'] == 1) {
-			jogador.alterarAnguloXZ(+1 * timeDiference/1000);
+		if(teclas['w'] == 1 || teclas['W'] == 1) 
+		{
+			if(jogador.z <= arena.altura)
+			{
+				jogador.alterarAnguloXZ(+1 * timeDiference/1000);
+			}
 		}
-		if(teclas['s'] == 1 || teclas['S'] == 1) {
-			jogador.alterarAnguloXZ(-1 * timeDiference/1000);
+		if(teclas['s'] == 1 || teclas['S'] == 1) 
+		{
+			if(jogador.z >= 0)
+			{
+				jogador.alterarAnguloXZ(-1 * timeDiference/1000);
+			}
 		}
 
 

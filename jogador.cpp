@@ -42,6 +42,10 @@ void Jogador::desenhar() {
 		glutSolidTeapot(r);
 	glPopMatrix();
 */
+
+	
+
+
     glPushMatrix();
 		
 		//Posiciona o avião de acordo com o ângulo da pista
@@ -89,6 +93,7 @@ void Jogador::desenhar() {
 
 void Jogador::desenharFuselagem(float raio)
 {
+	
 	//GLfloat mat_ambient_r[] = { 1.0, 0.0, 0.0, 1.0 };
     GLfloat mat_ambient_g[] = { 0.0, 1.0, 0.0, 1.0 };
     //GLfloat mat_ambient_b[] = { 0.0, 0.0, 1.0, 1.0 };
@@ -416,13 +421,21 @@ void Jogador::alterarAnguloCanhaoXZ(float incremento){
     }
 }
 
-void Jogador::andar(float coeficiente_ajuste){
+void Jogador::andar(float coeficiente_ajuste, float alturaArena){
     // Caminha em xy
     y += sin(grausParaRadianos(angulo_xy)) * velocidade * coeficiente_ajuste;
     x += cos(grausParaRadianos(angulo_xy)) * velocidade * coeficiente_ajuste;
     // Caminha em xz
-    z += sin(grausParaRadianos(angulo_xz)) * velocidade * coeficiente_ajuste;
-    // x += cos(grausParaRadianos(angulo_xz)) * velocidade * coeficiente_ajuste;
+	
+	if(z >= 0 && z <= (alturaArena - (sin(grausParaRadianos(angulo_xz)) * velocidade * coeficiente_ajuste)))
+    {
+		if(z + sin(grausParaRadianos(angulo_xz)) * velocidade * coeficiente_ajuste >= 0)
+		{
+			z += sin(grausParaRadianos(angulo_xz)) * velocidade * coeficiente_ajuste;
+		}
+		
+	}
+	// x += cos(grausParaRadianos(angulo_xz)) * velocidade * coeficiente_ajuste;
 }
 
 void Jogador::girarHelices(float coeficiente_ajuste){

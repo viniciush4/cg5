@@ -30,7 +30,7 @@ public:
 	void alterarAnguloXZ(float coeficiente_ajuste);
 	void alterarAnguloCanhaoXY(float incremento);
 	void alterarAnguloCanhaoXZ(float incremento);
-	void andar(float coeficiente_ajuste);
+	void andar(float coeficiente_ajuste, float alturaArena);
 	void girarHelices(float coeficiente_ajuste);
 
 
