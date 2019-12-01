@@ -70,6 +70,9 @@ int estado = 0;
 int controladorCanhaoX = 0;
 int controladorCanhaoZ = 0;
 
+int basesDestruidas = 0;
+int basesRestantes = 0;
+
 /*
  * VARIÁVEIS PARA AJUSTE DO TEMPO
  */
@@ -537,6 +540,33 @@ void desenharAeromodelo()
 
 }
 
+//Mensagem na tela
+void mensagem(void * font, string s, float x, float y, float z)
+{
+    glRasterPos3f(x, y, z);
+	
+
+    for(size_t i = 0; i < s.length(); i++)
+    {
+        glutBitmapCharacter(font, s[i]);
+    }
+}
+
+
+//Exibe o placar das bombas
+void exibirPlacar()
+{
+	glColor3f(0.0, 1.0, 0.0);
+	mensagem(GLUT_BITMAP_HELVETICA_12, "BASES", larguraJanela - 80, alturaJanela - 20 , 0);
+	glColor3f(1.0, 1.0, 1.0);
+	mensagem(GLUT_BITMAP_HELVETICA_10, "DESTRUIDAS = ", larguraJanela - 110, alturaJanela - 40, 0);
+	glColor3f(0.0, 1.0, 0.0);
+	mensagem(GLUT_BITMAP_HELVETICA_10, to_string(basesDestruidas), larguraJanela - 25, alturaJanela - 40, 0);
+	glColor3f(1.0, 1.0, 1.0);
+	mensagem(GLUT_BITMAP_HELVETICA_10, "FALTAM = ", larguraJanela - 110, alturaJanela - 55, 0);
+	glColor3f(0.0, 1.0, 0.0);
+	mensagem(GLUT_BITMAP_HELVETICA_10, to_string(basesRestantes), larguraJanela - 25, alturaJanela - 55, 0);
+}
 
 void desenharMiniMapa()
 {
@@ -554,7 +584,7 @@ void desenharMiniMapa()
 			glDisable(GL_LIGHTING);
 			glDisable(GL_TEXTURE_2D);
 			
-			/*			
+/*						
 			//Draw text in the x, y, z position
 			glColor3f(0,1,0);
 			glRasterPos3f(arena.x, arena.y, 0);
@@ -572,7 +602,10 @@ void desenharMiniMapa()
 				glVertex3f(70, 20, 0.0);                          // Direita embaixo
 			glEnd();
 */
+			exibirPlacar();
+
 			minimapa.desenhar(arena, jogador, inimigos, bases, larguraJanela, alturaJanela);
+
 
 		glPopAttrib();
 
