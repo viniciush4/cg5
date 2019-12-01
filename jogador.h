@@ -41,8 +41,13 @@ public:
 	void desenharCauda();
 	void desenharAsaDireita();
 	void desenharAsaEsquerda();
-	void desenhaHeliceDireita();
-	void desenhaHeliceEsquerda();
+	
+	void desenharPiramide();
+	void desenharHeliceDireita();
+	void desenharHeliceEsquerda();
+
+	void desenharCanhao();
+	
 
 
 

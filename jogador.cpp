@@ -68,25 +68,14 @@ void Jogador::desenhar() {
 		desenharAsaEsquerda();
 			
 		//Desenha a hélice direita
-		desenhaHeliceDireita();
+		desenharHeliceDireita();
 		
 		//Desenha a hélice esquerda
-		desenhaHeliceEsquerda();
-/*		
+		desenharHeliceEsquerda();
+
 		//Desenha o canhão
-		glPushMatrix();
-			glTranslatef(0, getR(), 0);
-			
-			glRotatef(anguloCanhao, 0, 0, 1);
-			desenharRetangulo(getR()/8, 2*getR()/5, 0.0, 0.0, 0.0);			
-		glPopMatrix();	
-		
+		desenharCanhao();
 
-
-
-
-
-*/
 
 
 	glPopMatrix();	
@@ -126,7 +115,7 @@ void Jogador::desenharCabine(float raio)
 		
 
 		glScalef(0.3, 1, 0.3);
-		glTranslatef(0, r/2, r);
+		glTranslatef(0, r/3, r);
 
 		glColor3fv(mat_ambient_k);
 		
@@ -194,7 +183,38 @@ void Jogador::desenharAsaEsquerda()
 
 }
 
-void Jogador::desenhaHeliceDireita()
+void Jogador::desenharPiramide()
+{
+	glPushMatrix();
+		glBegin(GL_QUADS);
+			glVertex3f(0.5,-1,-0.5);  
+			glVertex3f(0.5,-1,0.5);  
+			glVertex3f(-0.5,-1,0.5);  
+			glVertex3f(-0.5,-1,-0.5);
+		glEnd();
+
+		glBegin(GL_TRIANGLES);
+			glVertex3f(0,0,0);
+			glVertex3f(0.5,-1,-0.5);
+			glVertex3f(0.5,-1,0.5);
+
+			glVertex3f(0,0,0);
+			glVertex3f(-0.5,-1,-0.5);
+			glVertex3f(-0.5,-1,0.5);
+
+			glVertex3f(0,0,0);
+			glVertex3f(-0.5,-1,0.5);
+			glVertex3f(0.5,-1,0.5);
+
+			glVertex3f(0,0,0);
+			glVertex3f(0.5,-1,0.5);
+			glVertex3f(-0.5,-1,0.5);
+		glEnd();
+
+	glPopMatrix();
+}
+
+void Jogador::desenharHeliceDireita()
 {
 	//Desenha o suporte da hélice direita
 	glPushMatrix();
@@ -232,11 +252,36 @@ void Jogador::desenhaHeliceDireita()
 		}		
 
 	*/	
+
+		//Desenha a hélice direita
+		glPushMatrix();
+			GLfloat mat_ambient_y[] = { 1.0, 1.0, 0.0, 1.0 };
+
+			glScalef(0.5, 0.5, 0.5);
+			glTranslatef(0, (r/2), 0);
+			glRotatef(90,0,0,1);
+			glRotatef(angulo_helices,1,0,0);
+
+			glColor3fv(mat_ambient_y);
+			for(int i=0;i<3;i++){
+				glPushMatrix();
+					glScalef(0.15*r,0.6*r,1);
+					desenharPiramide();
+				glPopMatrix();
+
+				glRotatef(120,1,0,0);
+			}
+
+
+		glPopMatrix();
+
+
+
 	glPopMatrix();
 
 }
 
-void Jogador::desenhaHeliceEsquerda()
+void Jogador::desenharHeliceEsquerda()
 {
 	//Desenha o suporte da hélice esquerda
 	glPushMatrix();
@@ -272,12 +317,63 @@ void Jogador::desenhaHeliceEsquerda()
 			glPopMatrix();
 		}	
 */
+		//Desenha a hélice esquerda
+		glPushMatrix();
+			GLfloat mat_ambient_y[] = { 1.0, 1.0, 0.0, 1.0 };
+
+			glScalef(0.5, 0.5, 0.5);
+			glTranslatef(0, (r/2), 0);
+			glRotatef(90,0,0,1);
+			glRotatef(angulo_helices,1,0,0);
+
+			glColor3fv(mat_ambient_y);
+			for(int i=0;i<3;i++){
+				glPushMatrix();
+					glScalef(0.15*r,0.6*r,1);
+					desenharPiramide();
+				glPopMatrix();
+
+				glRotatef(120,1,0,0);
+			}
+
+
+		glPopMatrix();
+
+
+
 
 	glPopMatrix();	
 
 }
 
+void Jogador::desenharCanhao()
+{
+	//Desenha o canhão
+	glPushMatrix();
+		glTranslatef(0, r - (r/10), 0);
+		
+//		glRotatef(anguloCanhao, 0, 0, 1);
+//		desenharRetangulo(getR()/8, 2*getR()/5, 0.0, 0.0, 0.0);
+		
+		glRotatef(angulo_canhao_xy, 0, 0, 1);
+		glRotatef(angulo_canhao_xz, 1, 0, 0);
 
+		glPushMatrix();
+			GLfloat mat_ambient_k[] = { 0.0, 0.0, 0.0, 1.0 };
+
+			glRotatef(-90, 1, 0, 0);
+			GLUquadric* q = gluNewQuadric();
+			gluQuadricOrientation(q, GLU_INSIDE);
+			gluQuadricDrawStyle(q, GLU_FILL); //GLU_FILL, GLU_LINE, GLU_SILHOUETTE, GLU_POINT
+			gluQuadricNormals(q, GLU_FLAT); //GLU_NONE, GLU_FLAT, GLU_SMOOTH
+
+			glColor3fv(mat_ambient_k);
+			gluCylinder(q, r/12, r/12, 2*r/4, 30, 30);
+		glPopMatrix();			
+	glPopMatrix();	
+	
+
+}
 
 
 

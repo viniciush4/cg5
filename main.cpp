@@ -67,6 +67,9 @@ Pista pista;
 Arena arena;
 int estado = 0;
 
+int controladorCanhaoX = 0;
+int controladorCanhaoZ = 0;
+
 /*
  * VARIÁVEIS PARA AJUSTE DO TEMPO
  */
@@ -835,7 +838,51 @@ void specialKeys(int key, int x, int y) {
 	}
 }
 
-void passiveMotion(int x, int y){
+//Controla o canhão
+void passiveMotion(int x, int y)
+{	
+//	cout << "X= " << x << endl;
+
+//	if(jogando)
+//	{
+		if(x <= controladorCanhaoX)
+		{
+			if(jogador.angulo_canhao_xy >= -30 && jogador.angulo_canhao_xy <= 27)
+			{
+				jogador.angulo_canhao_xy += 3;
+			}
+			
+			controladorCanhaoX = x;
+		}
+		else
+		{
+			if(jogador.angulo_canhao_xy >= -27 && jogador.angulo_canhao_xy <= 30)
+			{
+				jogador.angulo_canhao_xy -= 3;
+			}
+			
+			controladorCanhaoX = x;
+		}
+
+		if(y <= controladorCanhaoZ)
+		{
+			if(jogador.angulo_canhao_xz >= -30 && jogador.angulo_canhao_xz <= 27)
+			{
+				jogador.angulo_canhao_xz += 3;
+			}
+			
+			controladorCanhaoZ = y;
+		}
+		else
+		{
+			if(jogador.angulo_canhao_xz >= -27 && jogador.angulo_canhao_xz <= 30)
+			{
+				jogador.angulo_canhao_xz -= 3;
+			}
+			
+			controladorCanhaoZ = y;
+		}
+//	}
 }
 
 void mouse(int button, int state, int x, int y) {
