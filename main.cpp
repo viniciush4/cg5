@@ -157,6 +157,30 @@ void teletransportarJogador(float angulo)
 		jogador.y = y1;
 	}
 }
+
+//Realiza o teletransporte para o lado oposto da arena
+void teletransportarInimigo(Inimigo& inimigo) {
+	double m = tanf(grausParaRadianos(inimigo.angulo_xy));
+	double E = inimigo.y - 0;
+	double A = 1+pow(m,2);
+	double B = -2*pow(m,2)*inimigo.x + 2*E*m;
+	double C = pow(E,2) - 2*E*m*inimigo.x + pow(m,2)*pow(inimigo.x,2) - pow(arena.r,2);
+
+	double x1 = (-B + sqrt(pow(B,2) - 4*A*C))/(2*A);
+	double x2 = (-B - sqrt(pow(B,2) - 4*A*C))/(2*A);
+
+	double y1 = inimigo.y + m*(x1-inimigo.x);
+	double y2 = inimigo.y + m*(x2-inimigo.x);
+
+	if(fabs(inimigo.x - x1) < fabs(inimigo.x - x2)){
+		inimigo.x = x2;
+		inimigo.y = y2;
+	}else{
+		inimigo.x = x1;
+		inimigo.y = y1;
+	}
+}
+
 /*
  * REGRAS DO JOGO
  */
@@ -177,6 +201,40 @@ void atualizarEstadoJogador() {
 }
 
 void atualizarEstadoInimigos() {
+	for(auto it=inimigos.begin(); it!=inimigos.end();++it){
+		Inimigo &inimigo = *it;
+		inimigo.girarHelices(timeDiference/1000);
+		inimigo.andar((timeDiference/1000) * configuracao.inimigo_velocidade);
+		// Colisão com a arena
+		float distancia = sqrt(pow(inimigo.x,2)+pow(inimigo.y,2));
+		if(distancia > arena.r) {
+			teletransportarInimigo(inimigo);
+		}
+		// Muda o ângulo xy (180 graus em 5 segundos)
+		float incremento_angulo = 180 / (5 / (timeDiference/1000));
+		incremento_angulo = inimigo.incrementar_angulo_xy ? incremento_angulo : -incremento_angulo;
+		inimigo.somatorio_incremento_angulo += incremento_angulo;
+		if(inimigo.incrementar_angulo_xy && inimigo.somatorio_incremento_angulo > 180){
+			inimigo.somatorio_incremento_angulo = 0;
+			inimigo.incrementar_angulo_xy = !inimigo.incrementar_angulo_xy;
+		}
+		if(!inimigo.incrementar_angulo_xy && inimigo.somatorio_incremento_angulo < -180){
+			inimigo.somatorio_incremento_angulo = 0;
+			inimigo.incrementar_angulo_xy = !inimigo.incrementar_angulo_xy;
+		}
+		inimigo.alterarAngulo(incremento_angulo, 0);
+		// Muda a altura z 
+		if(arena.altura-inimigo.z < inimigo.r && inimigo.incrementar_altura_z)
+			inimigo.incrementar_altura_z = false;
+		if(inimigo.z < inimigo.r)
+			inimigo.incrementar_altura_z = true;
+
+		if(inimigo.incrementar_altura_z)
+			inimigo.z = inimigo.z + 0.5;
+		else
+			inimigo.z = inimigo.z - 0.5;
+
+	}
 }
 
 void atualizarEstadoTirosJogador() {
@@ -364,29 +422,27 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 			bases.at(i).y *= -1;
 		}
 
-		// // Seta valores iniciais para os ângulos
+		// Seta valores iniciais para os ângulos do jogador
 		float angulo = atan2((pista.y2-pista.y1), (pista.x2-pista.x1));
 		jogador.angulo_xy = radianosParaGraus(angulo);
 		jogador.angulo_canhao_arena_xy = radianosParaGraus(angulo);
 
-		// // Calcula a velocidade dos inimigos
-		// float distancia 					= sqrt(pow(pista.y2-pista.y1,2) + pow(pista.x2-pista.x1,2));
-		// float velocidade_decolagem_final 	= (distancia / 8) * 4;
-		
-		// // Guarda instância Jogador
-		// jogador_base = jogador;
-		// // Guarda instâncias Inimigos aéreos
-		// for(int i=0; i < inimigos_aereos.size(); i++){
-		// 	inimigos_aereos.at(i).velocidade = velocidade_decolagem_final;
-        // 	inimigos_aereos_base.push_back(inimigos_aereos.at(i));
-		// }
-		// // Guarda instâncias Inimigos terrestres
-		// for(int i=0; i < inimigos_terrestres.size(); i++){
-		// 	inimigos_terrestres_base.push_back(inimigos_terrestres.at(i));
-		// }
+		// Seta valores iniciais para altura (z) e ângulos dos inimigos
+		for(int i=0; i < inimigos.size(); i++){
+        	float z = rand() % (int)arena.altura;
+			inimigos.at(i).z = z;
+		}
 
-		// // Cria o placar
-		// placar = Placar(arena.r, inimigos_terrestres.size());
+		// Guarda instância Jogador
+		jogador_copia = jogador;
+		// Guarda instâncias Inimigos aéreos
+		for(int i=0; i < inimigos.size(); i++){
+        	inimigos_copia.push_back(inimigos.at(i));
+		}
+		// Guarda instâncias Inimigos terrestres
+		for(int i=0; i < bases.size(); i++){
+			bases_copia.push_back(bases.at(i));
+		}
 
 		//Cria o mini mapa
 		minimapa = Minimapa();
@@ -584,7 +640,13 @@ void desenharMiniMapa()
 			glDisable(GL_LIGHTING);
 			glDisable(GL_TEXTURE_2D);
 			
-/*						
+			/*						
+			/*						
+			/*						
+			/*						
+			/*						
+			/*						
+			/*						
 			//Draw text in the x, y, z position
 			glColor3f(0,1,0);
 			glRasterPos3f(arena.x, arena.y, 0);
@@ -601,7 +663,7 @@ void desenharMiniMapa()
 				glVertex3f(30, 40, 0.0);                          // Esquerda embaixo
 				glVertex3f(70, 20, 0.0);                          // Direita embaixo
 			glEnd();
-*/
+			*/
 			exibirPlacar();
 
 			minimapa.desenhar(arena, jogador, inimigos, bases, larguraJanela, alturaJanela);
@@ -650,16 +712,16 @@ void desenharMundo() {
 		inimigo.desenhar();			
 	}
 
-//	 glPushMatrix();
-	// 	glColor3f(0.0f, 0.0f, 1.0f);
-//	 	glTranslatef(jogador.x, jogador.y, jogador.z);
+	//	 glPushMatrix();
+		// 	glColor3f(0.0f, 0.0f, 1.0f);
+	//	 	glTranslatef(jogador.x, jogador.y, jogador.z);
+			
+	//		glRotatef(-90, 0, 0, 1);
 		
-//		glRotatef(-90, 0, 0, 1);
-	
-//		glRotatef(jogador.angulo_xy, 0, 0, 1);
+	//		glRotatef(jogador.angulo_xy, 0, 0, 1);
 
-//	 	desenharAeromodelo();
-//	 glPopMatrix();
+	//	 	desenharAeromodelo();
+	//	 glPopMatrix();
 	
 	
 }
@@ -886,10 +948,10 @@ void specialKeys(int key, int x, int y) {
 //Controla o canhão
 void passiveMotion(int x, int y)
 {	
-//	cout << "X= " << x << endl;
+		//	cout << "X= " << x << endl;
 
-//	if(jogando)
-//	{
+		//	if(jogando)
+		//	{
 		if(x <= controladorCanhaoX)
 		{
 			if(jogador.angulo_canhao_xy >= -30 && jogador.angulo_canhao_xy <= 27)
@@ -927,7 +989,7 @@ void passiveMotion(int x, int y)
 			
 			controladorCanhaoZ = y;
 		}
-//	}
+	//	}
 }
 
 void mouse(int button, int state, int x, int y) {

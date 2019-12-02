@@ -21,7 +21,8 @@ Inimigo::Inimigo(){
     this->angulo_helices = 0;
     this->velocidade = 0;
     this->somatorio_incremento_angulo = 0;
-    this->incrementar_angulo = true;
+    this->incrementar_angulo_xy = true;
+    this->incrementar_altura_z = true;
     this->tempo_desde_ultimo_tiro = 0;
 }
 
@@ -39,7 +40,8 @@ Inimigo::Inimigo(float x, float y, float z, float r, float velocidade){
     this->angulo_helices = 0;
     this->velocidade = velocidade;
     this->somatorio_incremento_angulo = 0;
-    this->incrementar_angulo = true;
+    this->incrementar_angulo_xy = true;
+    this->incrementar_altura_z = true;
     this->tempo_desde_ultimo_tiro = 0;
 }
 
@@ -64,12 +66,12 @@ void Inimigo::alterarAngulo(float incremento_xy, float incremento_xz){
 }
 
 void Inimigo::andar(float coeficiente_ajuste){
-    // y += sin(grausParaRadianos(angulo)) * velocidade * coeficiente_ajuste;
-    // x += cos(grausParaRadianos(angulo)) * velocidade * coeficiente_ajuste;
+    y += sin(grausParaRadianos(angulo_xy)) * velocidade * coeficiente_ajuste;
+    x += cos(grausParaRadianos(angulo_xy)) * velocidade * coeficiente_ajuste;
 }
 
 void Inimigo::girarHelices(float coeficiente_ajuste){
-    // angulo_helices += velocidade * coeficiente_ajuste * 2;
+    angulo_helices += velocidade * coeficiente_ajuste * 2;
 }
 
 Inimigo::~Inimigo(){
