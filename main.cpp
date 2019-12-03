@@ -88,6 +88,9 @@ GLfloat anguloCamera=45, fAspect;
 GLdouble obsX=0, obsY=-10, obsZ=1000;
 GLdouble eyeX=0, eyeY=0, eyeZ=0;
 GLdouble upX=0, upY=0, upZ=1;
+float anguloCameraJogadorXY=0;
+int ultimaPosicaoMouseCameraX=0, ultimaPosicaoMouseCameraY=0;
+bool movimentarCamera3 = false;
 
 
 
@@ -426,8 +429,9 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		float angulo = atan2((pista.y2-pista.y1), (pista.x2-pista.x1));
 		jogador.angulo_xy = radianosParaGraus(angulo);
 		jogador.angulo_canhao_arena_xy = radianosParaGraus(angulo);
+		anguloCameraJogadorXY = radianosParaGraus(angulo);
 
-		// Seta valores iniciais para altura (z) e ângulos dos inimigos
+		// Seta valores iniciais para altura (z)
 		for(int i=0; i < inimigos.size(); i++){
         	float z = rand() % (int)arena.altura;
 			inimigos.at(i).z = z;
@@ -757,7 +761,12 @@ void desenharViewport2() {
 			jogador.x, jogador.y, jogador.z+jogador.r, 0, 0, 1);
 	}
 	if(camera == 3){
-		
+		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
+		posicionarObservador(
+			jogador.x - 50*cos(grausParaRadianos(anguloCameraJogadorXY)), 
+			jogador.y - 50*sin(grausParaRadianos(anguloCameraJogadorXY)), 
+			jogador.z + 40,
+			jogador.x, jogador.y, jogador.z+jogador.r, 0, 0, 1);
 	} 
 
 
@@ -992,6 +1001,17 @@ void passiveMotion(int x, int y)
 	//	}
 }
 
+void motion(int x, int y){
+	if (movimentarCamera3) {
+		if(x > ultimaPosicaoMouseCameraX)
+			anguloCameraJogadorXY -= 3;
+		if(x < ultimaPosicaoMouseCameraX)
+			anguloCameraJogadorXY += 3;
+
+		ultimaPosicaoMouseCameraX = x;
+	}
+}
+
 void mouse(int button, int state, int x, int y) {
 
 	if(button == 0 && state == 0 && estado == 2) {
@@ -999,6 +1019,14 @@ void mouse(int button, int state, int x, int y) {
 	}
 	if(button == 2 && state == 0 && estado == 2) {
 		// Cria bomba
+	}
+
+	// Seta flag que permite movimento da câmera 3
+	if(button == 0 && state == 0 && (teclas['b'] == 1 || teclas['B'] == 1)) {
+		movimentarCamera3 = true;
+	}
+	if(button == 0 && state == 1) {
+		movimentarCamera3 = false;
 	}
 }
 
@@ -1043,6 +1071,7 @@ int main(int argc, char** argv) {
 	glutKeyboardFunc(keyPress);
 	glutKeyboardUpFunc(keyUp);
 	glutPassiveMotionFunc(passiveMotion);
+	glutMotionFunc(motion);
 	glutMouseFunc(mouse);
 	inicializarOpengl();
 	glutMainLoop();

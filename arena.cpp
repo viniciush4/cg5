@@ -18,6 +18,8 @@ void Arena::desenhar(GLuint textura){
 	
 	// Desenha um cilindro
 	glPushMatrix();
+
+		glColor3f(1.0f, 1.0f, 1.0f);
 		
 		GLUquadric* q = gluNewQuadric();
 		gluQuadricOrientation(q, GLU_INSIDE);
