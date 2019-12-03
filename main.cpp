@@ -6,6 +6,7 @@
 #include "tinyxml2.h"
 #include "configuracao.h"
 #include "pista.h"
+#include "bomba.h"
 //#include "arena.h"
 //#include "inimigo.h"
 //#include "base.h"
@@ -61,6 +62,7 @@ vector<Inimigo> inimigos;
 vector<Inimigo> inimigos_copia;
 vector<Base> bases;
 vector<Base> bases_copia;
+vector<Bomba> bombas;
 Jogador jogador;
 Jogador jogador_copia;
 Pista pista;
@@ -249,6 +251,34 @@ void atualizarEstadoTirosInimigos() {
 }
 
 void atualizarEstadoBombas() {
+	for(auto it=bombas.begin(); it!=bombas.end();){
+		Bomba &bomba = *it;
+		// Posição
+		bomba.mover(timeDiference/1000);
+		// Condições de remoção da bomba (saiu da arena ou chegou ao raio mínimo)
+		float distancia = sqrt(pow(bomba.x,2)+pow(bomba.y,2));
+		if(distancia > arena.r || bomba.z <= 0){
+			
+			// Se a bomba está em cima de alguma base inimiga, deleta a base
+			for(auto it2=bases.begin(); it2!=bases.end();){
+				Base &base = *it2;
+				float distancia_base = sqrt(pow(bomba.x - base.x,2)+pow(bomba.y - base.y,2));
+				if(distancia_base < (bomba.r + base.r)){
+					basesDestruidas++;
+					basesRestantes--;
+					it2 = bases.erase(it2);
+					if(basesRestantes == 0){
+						estado = 3;
+					}
+				} else {
+					++it2;
+				}
+			}
+			it = bombas.erase(it);
+		} else {
+			++it;
+		}
+	}
 }
 
 void criarTirosInimigos() {
@@ -449,6 +479,10 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		for(int i=0; i < bases.size(); i++){
 			bases_copia.push_back(bases.at(i));
 		}
+
+		// Inicia o placar
+		basesDestruidas = 0;
+		basesRestantes = bases.size();
 
 		//Cria o mini mapa
 		minimapa = Minimapa();
@@ -707,6 +741,11 @@ void desenharMundo() {
 	for(Base base: bases)
 	{
 		base.desenhar();			
+	}
+
+	for(Bomba bomba: bombas)
+	{
+		bomba.desenhar();			
 	}
 
 
@@ -1055,7 +1094,16 @@ void mouse(int button, int state, int x, int y) {
 		// Cria tiro
 	}
 	if(button == 2 && state == 0 && estado == 2) {
-		// Cria bomba
+		Bomba bomba = Bomba(
+			jogador.x, 
+			jogador.y,
+			jogador.z,
+			jogador.r,
+			jogador.angulo_xy,
+			90,
+			jogador.velocidade
+		);
+		bombas.push_back(bomba);
 	}
 
 	// Seta flag que permite movimento da câmera 3
