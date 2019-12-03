@@ -837,11 +837,15 @@ void desenharMundo() {
 }
 
 void desenharViewport1() {
-	
+	// Se tiver bomba ativa
 	if(bombas.size() != 0) {
 		glViewport(0, (GLsizei)alturaJanela, (GLsizei)larguraJanela ,200);	
-		especificarParametrosVisualizacao(anguloCamera, larguraJanela, 200, 5, 5000.0);
-		posicionarObservador(bombas.at(0).x, bombas.at(0).y, bombas.at(0).z, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+		especificarParametrosVisualizacao(anguloCamera, larguraJanela, 200, 40, 5000.0);
+		posicionarObservador(
+			bombas.at(0).x, bombas.at(0).y, bombas.at(0).z,
+		 	bombas.at(0).x, bombas.at(0).y, bombas.at(0).z-10, 
+		 	cos(grausParaRadianos(bombas.at(0).angulo_xy)), sin(grausParaRadianos(bombas.at(0).angulo_xy)), 0.0
+		);
 		desenharMundo();
 	}
 }
