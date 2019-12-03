@@ -7,6 +7,8 @@
 #include "configuracao.h"
 #include "pista.h"
 #include "bomba.h"
+#include "placar.h"
+
 //#include "arena.h"
 //#include "inimigo.h"
 //#include "base.h"
@@ -67,13 +69,14 @@ Jogador jogador;
 Jogador jogador_copia;
 Pista pista;
 Arena arena;
+Placar placar;
 int estado = 0;
 
 int controladorCanhaoX = 0;
 int controladorCanhaoZ = 0;
 
-int basesDestruidas = 0;
-int basesRestantes = 0;
+// int basesDestruidas = 0;
+// int basesRestantes = 0;
 
 /*
  * VARIÁVEIS PARA AJUSTE DO TEMPO
@@ -197,8 +200,8 @@ void reiniciarJogo() {
 	bases = bases_copia;
 	// tiros.clear();
 	// tiros_inimigos.clear();
-	// bombas.clear();
-	// placar.resetarPlacar();
+	bombas.clear();
+	placar.resetarPlacar();
 	estado = 0;
 }
 
@@ -264,10 +267,9 @@ void atualizarEstadoBombas() {
 				Base &base = *it2;
 				float distancia_base = sqrt(pow(bomba.x - base.x,2)+pow(bomba.y - base.y,2));
 				if(distancia_base < (bomba.r + base.r)){
-					basesDestruidas++;
-					basesRestantes--;
+					placar.incrementarBasesDestruidas();
 					it2 = bases.erase(it2);
-					if(basesRestantes == 0){
+					if(placar.quantidade_bases_restantes == 0){
 						estado = 3;
 					}
 				} else {
@@ -481,8 +483,7 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		}
 
 		// Inicia o placar
-		basesDestruidas = 0;
-		basesRestantes = bases.size();
+		placar = Placar(bases.size());
 
 		//Cria o mini mapa
 		minimapa = Minimapa();
@@ -636,87 +637,92 @@ void desenharAeromodelo()
 
 }
 
-//Mensagem na tela
-void mensagem(void * font, string s, float x, float y, float z)
-{
-    glRasterPos3f(x, y, z);
+// //Mensagem na tela
+// void mensagem(void * font, string s, float x, float y, float z)
+// {
+//     glRasterPos3f(x, y, z);
 	
 
-    for(size_t i = 0; i < s.length(); i++)
-    {
-        glutBitmapCharacter(font, s[i]);
-    }
-}
+//     for(size_t i = 0; i < s.length(); i++)
+//     {
+//         glutBitmapCharacter(font, s[i]);
+//     }
+// }
 
 
-//Exibe o placar das bombas
-void exibirPlacar()
-{
-	glColor3f(0.0, 1.0, 0.0);
-	mensagem(GLUT_BITMAP_HELVETICA_12, "BASES", larguraJanela - 80, alturaJanela - 20 , 0);
-	glColor3f(1.0, 1.0, 1.0);
-	mensagem(GLUT_BITMAP_HELVETICA_10, "DESTRUIDAS = ", larguraJanela - 110, alturaJanela - 40, 0);
-	glColor3f(0.0, 1.0, 0.0);
-	mensagem(GLUT_BITMAP_HELVETICA_10, to_string(basesDestruidas), larguraJanela - 25, alturaJanela - 40, 0);
-	glColor3f(1.0, 1.0, 1.0);
-	mensagem(GLUT_BITMAP_HELVETICA_10, "FALTAM = ", larguraJanela - 110, alturaJanela - 55, 0);
-	glColor3f(0.0, 1.0, 0.0);
-	mensagem(GLUT_BITMAP_HELVETICA_10, to_string(basesRestantes), larguraJanela - 25, alturaJanela - 55, 0);
-}
+// //Exibe o placar das bombas
+// void exibirPlacar()
+// {
+// 	glColor3f(0.0, 1.0, 0.0);
+// 	mensagem(GLUT_BITMAP_HELVETICA_12, "BASES", larguraJanela - 80, alturaJanela - 20 , 0);
+// 	glColor3f(1.0, 1.0, 1.0);
+// 	mensagem(GLUT_BITMAP_HELVETICA_10, "DESTRUIDAS = ", larguraJanela - 110, alturaJanela - 40, 0);
+// 	glColor3f(0.0, 1.0, 0.0);
+// 	mensagem(GLUT_BITMAP_HELVETICA_10, to_string(basesDestruidas), larguraJanela - 25, alturaJanela - 40, 0);
+// 	glColor3f(1.0, 1.0, 1.0);
+// 	mensagem(GLUT_BITMAP_HELVETICA_10, "FALTAM = ", larguraJanela - 110, alturaJanela - 55, 0);
+// 	glColor3f(0.0, 1.0, 0.0);
+// 	mensagem(GLUT_BITMAP_HELVETICA_10, to_string(basesRestantes), larguraJanela - 25, alturaJanela - 55, 0);
+// }
 
-void desenharMiniMapa()
-{
- 	glLoadIdentity();
+// void desenharMiniMapa()
+// {
+//  	glLoadIdentity();
 	
-	//Draw text considering a 2D space (disable all 3d features)
-    glMatrixMode (GL_PROJECTION);
-    //Push to recover original PROJECTION MATRIX
-    glPushMatrix();
-        glLoadIdentity ();
-        glOrtho (0, larguraJanela, 0, alturaJanela, -1, 1);
+// 	//Draw text considering a 2D space (disable all 3d features)
+//     glMatrixMode (GL_PROJECTION);
+//     //Push to recover original PROJECTION MATRIX
+//     glPushMatrix();
+//         glLoadIdentity ();
+//         glOrtho (0, larguraJanela, 0, alturaJanela, -1, 1);
         
-		 //Push to recover original attributes
-		glPushAttrib(GL_ENABLE_BIT);
-			glDisable(GL_LIGHTING);
-			glDisable(GL_TEXTURE_2D);
+// 		 //Push to recover original attributes
+// 		glPushAttrib(GL_ENABLE_BIT);
+// 			glDisable(GL_LIGHTING);
+// 			glDisable(GL_TEXTURE_2D);
 			
-			/*						
-			/*						
-			/*						
-			/*						
-			/*						
-			/*						
-			/*						
-			//Draw text in the x, y, z position
-			glColor3f(0,1,0);
-			glRasterPos3f(arena.x, arena.y, 0);
-			const char* tmpStr;
-			tmpStr = "TESTE";
-			while( *tmpStr ){
-				glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *tmpStr);
-				tmpStr++;
-			}
+// 			/*						
+// 			/*						
+// 			/*						
+// 			/*						
+// 			/*						
+// 			/*						
+// 			/*						
+// 			//Draw text in the x, y, z position
+// 			glColor3f(0,1,0);
+// 			glRasterPos3f(arena.x, arena.y, 0);
+// 			const char* tmpStr;
+// 			tmpStr = "TESTE";
+// 			while( *tmpStr ){
+// 				glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *tmpStr);
+// 				tmpStr++;
+// 			}
 
-			glColor3f(0.0,1.0,0.0);
-		  	glBegin(GL_TRIANGLES);                                          // início triângulo
-				glVertex3f(70, 40, 0.0);                         // Topo
-				glVertex3f(30, 40, 0.0);                          // Esquerda embaixo
-				glVertex3f(70, 20, 0.0);                          // Direita embaixo
-			glEnd();
-			*/
-			exibirPlacar();
+// 			glColor3f(0.0,1.0,0.0);
+// 		  	glBegin(GL_TRIANGLES);                                          // início triângulo
+// 				glVertex3f(70, 40, 0.0);                         // Topo
+// 				glVertex3f(30, 40, 0.0);                          // Esquerda embaixo
+// 				glVertex3f(70, 20, 0.0);                          // Direita embaixo
+// 			glEnd();
+// 			*/
+// 			// exibirPlacar();
 
-			minimapa.desenhar(arena, jogador, inimigos, bases, larguraJanela, alturaJanela);
+// 			// placar.desenhar(alturaJanela, larguraJanela);
+
+// 			// if(estado == 3)
+// 			// 	placar.desenharMensagemFinal(alturaJanela, larguraJanela);
+
+// 			minimapa.desenhar(arena, jogador, inimigos, bases, larguraJanela, alturaJanela);
 
 
-		glPopAttrib();
+// 		glPopAttrib();
 
-    glPopMatrix();
-    glMatrixMode (GL_MODELVIEW);
+//     glPopMatrix();
+//     glMatrixMode (GL_MODELVIEW);
 
 	
 
-}
+// }
 
 void desenharMundo() {
 	
@@ -786,7 +792,7 @@ void desenharViewport2() {
 
 	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
 	
-	desenharMiniMapa();
+	// desenharMiniMapa();
 	
 
 	if(camera == 0){
@@ -831,6 +837,13 @@ void desenharViewport2() {
 
 
 	desenharMundo();
+
+	minimapa.desenhar(arena, jogador, inimigos, bases, larguraJanela, alturaJanela);
+
+	placar.desenhar(alturaJanela, larguraJanela);
+
+	if(estado == 3)
+		placar.desenharMensagemFinal(alturaJanela, larguraJanela);
 
 }
 
