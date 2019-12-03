@@ -9,7 +9,9 @@
 #include "arena.h"
 #include "inimigo.h"
 #include "base.h"
+#include "bomba.h"
 #include "jogador.h"
+#include "placar.h"
 //#include "OBJ_Loader.h"
 #include "imageloader.h"
 #include "minimapa.h"
@@ -75,17 +77,19 @@ vector<Inimigo> inimigos;
 vector<Inimigo> inimigos_copia;
 vector<Base> bases;
 vector<Base> bases_copia;
+vector<Bomba> bombas;
 Jogador jogador;
 Jogador jogador_copia;
 Pista pista;
 Arena arena;
+Placar placar;
 int estado = 0;
 
 int controladorCanhaoX = 0;
 int controladorCanhaoZ = 0;
 
-int basesDestruidas = 0;
-int basesRestantes = 0;
+// int basesDestruidas = 0;
+// int basesRestantes = 0;
 
 /*
  * VARIÁVEIS PARA AJUSTE DO TEMPO
@@ -102,6 +106,11 @@ GLfloat anguloCamera=45, fAspect;
 GLdouble obsX=0, obsY=-10, obsZ=1000;
 GLdouble eyeX=0, eyeY=0, eyeZ=0;
 GLdouble upX=0, upY=0, upZ=1;
+float anguloCameraJogadorXY=0;
+int ultimaPosicaoMouseCameraX=0, ultimaPosicaoMouseCameraY=0;
+bool movimentarCamera3 = false;
+int mouse_ultima_posicao_x = 0;
+int mouse_ultima_posicao_y = 0;
 
 
 
@@ -199,6 +208,30 @@ void teletransportarJogador(float angulo)
 		jogador.y = y1;
 	}
 }
+
+//Realiza o teletransporte para o lado oposto da arena
+void teletransportarInimigo(Inimigo& inimigo) {
+	double m = tanf(grausParaRadianos(inimigo.angulo_xy));
+	double E = inimigo.y - 0;
+	double A = 1+pow(m,2);
+	double B = -2*pow(m,2)*inimigo.x + 2*E*m;
+	double C = pow(E,2) - 2*E*m*inimigo.x + pow(m,2)*pow(inimigo.x,2) - pow(arena.r,2);
+
+	double x1 = (-B + sqrt(pow(B,2) - 4*A*C))/(2*A);
+	double x2 = (-B - sqrt(pow(B,2) - 4*A*C))/(2*A);
+
+	double y1 = inimigo.y + m*(x1-inimigo.x);
+	double y2 = inimigo.y + m*(x2-inimigo.x);
+
+	if(fabs(inimigo.x - x1) < fabs(inimigo.x - x2)){
+		inimigo.x = x2;
+		inimigo.y = y2;
+	}else{
+		inimigo.x = x1;
+		inimigo.y = y1;
+	}
+}
+
 /*
  * REGRAS DO JOGO
  */
@@ -208,8 +241,8 @@ void reiniciarJogo() {
 	bases = bases_copia;
 	// tiros.clear();
 	// tiros_inimigos.clear();
-	// bombas.clear();
-	// placar.resetarPlacar();
+	bombas.clear();
+	placar.resetarPlacar();
 	estado = 0;
 }
 
@@ -219,6 +252,40 @@ void atualizarEstadoJogador() {
 }
 
 void atualizarEstadoInimigos() {
+	for(auto it=inimigos.begin(); it!=inimigos.end();++it){
+		Inimigo &inimigo = *it;
+		inimigo.girarHelices(timeDiference/1000);
+		inimigo.andar((timeDiference/1000) * configuracao.inimigo_velocidade);
+		// Colisão com a arena
+		float distancia = sqrt(pow(inimigo.x,2)+pow(inimigo.y,2));
+		if(distancia > arena.r) {
+			teletransportarInimigo(inimigo);
+		}
+		// Muda o ângulo xy (180 graus em 5 segundos)
+		float incremento_angulo = 180 / (5 / (timeDiference/1000));
+		incremento_angulo = inimigo.incrementar_angulo_xy ? incremento_angulo : -incremento_angulo;
+		inimigo.somatorio_incremento_angulo += incremento_angulo;
+		if(inimigo.incrementar_angulo_xy && inimigo.somatorio_incremento_angulo > 180){
+			inimigo.somatorio_incremento_angulo = 0;
+			inimigo.incrementar_angulo_xy = !inimigo.incrementar_angulo_xy;
+		}
+		if(!inimigo.incrementar_angulo_xy && inimigo.somatorio_incremento_angulo < -180){
+			inimigo.somatorio_incremento_angulo = 0;
+			inimigo.incrementar_angulo_xy = !inimigo.incrementar_angulo_xy;
+		}
+		inimigo.alterarAngulo(incremento_angulo, 0);
+		// Muda a altura z 
+		if(arena.altura-inimigo.z < inimigo.r && inimigo.incrementar_altura_z)
+			inimigo.incrementar_altura_z = false;
+		if(inimigo.z < inimigo.r)
+			inimigo.incrementar_altura_z = true;
+
+		if(inimigo.incrementar_altura_z)
+			inimigo.z = inimigo.z + 0.5;
+		else
+			inimigo.z = inimigo.z - 0.5;
+
+	}
 }
 
 void atualizarEstadoTirosJogador() {
@@ -228,6 +295,33 @@ void atualizarEstadoTirosInimigos() {
 }
 
 void atualizarEstadoBombas() {
+	for(auto it=bombas.begin(); it!=bombas.end();){
+		Bomba &bomba = *it;
+		// Posição
+		bomba.mover(timeDiference/1000);
+		// Condições de remoção da bomba (saiu da arena ou chegou ao raio mínimo)
+		float distancia = sqrt(pow(bomba.x,2)+pow(bomba.y,2));
+		if(distancia > arena.r || bomba.z <= 0){
+			
+			// Se a bomba está em cima de alguma base inimiga, deleta a base
+			for(auto it2=bases.begin(); it2!=bases.end();){
+				Base &base = *it2;
+				float distancia_base = sqrt(pow(bomba.x - base.x,2)+pow(bomba.y - base.y,2));
+				if(distancia_base < (bomba.r + base.r)){
+					placar.incrementarBasesDestruidas();
+					it2 = bases.erase(it2);
+					if(placar.quantidade_bases_restantes == 0){
+						estado = 3;
+					}
+				} else {
+					++it2;
+				}
+			}
+			it = bombas.erase(it);
+		} else {
+			++it;
+		}
+	}
 }
 
 void criarTirosInimigos() {
@@ -406,29 +500,31 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 			bases.at(i).y *= -1;
 		}
 
-		// // Seta valores iniciais para os ângulos
+		// Seta valores iniciais para os ângulos do jogador
 		float angulo = atan2((pista.y2-pista.y1), (pista.x2-pista.x1));
 		jogador.angulo_xy = radianosParaGraus(angulo);
 		jogador.angulo_canhao_arena_xy = radianosParaGraus(angulo);
+		anguloCameraJogadorXY = radianosParaGraus(angulo);
 
-		// // Calcula a velocidade dos inimigos
-		// float distancia 					= sqrt(pow(pista.y2-pista.y1,2) + pow(pista.x2-pista.x1,2));
-		// float velocidade_decolagem_final 	= (distancia / 8) * 4;
-		
-		// // Guarda instância Jogador
-		// jogador_base = jogador;
-		// // Guarda instâncias Inimigos aéreos
-		// for(int i=0; i < inimigos_aereos.size(); i++){
-		// 	inimigos_aereos.at(i).velocidade = velocidade_decolagem_final;
-        // 	inimigos_aereos_base.push_back(inimigos_aereos.at(i));
-		// }
-		// // Guarda instâncias Inimigos terrestres
-		// for(int i=0; i < inimigos_terrestres.size(); i++){
-		// 	inimigos_terrestres_base.push_back(inimigos_terrestres.at(i));
-		// }
+		// Seta valores iniciais para altura (z)
+		for(size_t i=0; i < inimigos.size(); i++){
+        	float z = rand() % (int)arena.altura;
+			inimigos.at(i).z = z;
+		}
 
-		// // Cria o placar
-		// placar = Placar(arena.r, inimigos_terrestres.size());
+		// Guarda instância Jogador
+		jogador_copia = jogador;
+		// Guarda instâncias Inimigos aéreos
+		for(size_t i=0; i < inimigos.size(); i++){
+        	inimigos_copia.push_back(inimigos.at(i));
+		}
+		// Guarda instâncias Inimigos terrestres
+		for(size_t i=0; i < bases.size(); i++){
+			bases_copia.push_back(bases.at(i));
+		}
+
+		// Inicia o placar
+		placar = Placar(bases.size());
 
 		//Cria o mini mapa
 		minimapa = Minimapa();
@@ -598,82 +694,92 @@ void desenharAeromodelo()
 }
 */
 
-//Mensagem na tela
-void mensagem(void * font, string s, float x, float y, float z)
-{
-    glRasterPos3f(x, y, z);
+// //Mensagem na tela
+// void mensagem(void * font, string s, float x, float y, float z)
+// {
+//     glRasterPos3f(x, y, z);
 	
 
-    for(size_t i = 0; i < s.length(); i++)
-    {
-        glutBitmapCharacter(font, s[i]);
-    }
-}
+//     for(size_t i = 0; i < s.length(); i++)
+//     {
+//         glutBitmapCharacter(font, s[i]);
+//     }
+// }
 
 
-//Exibe o placar das bombas
-void exibirPlacar()
-{
-	glColor3f(0.0, 1.0, 0.0);
-	mensagem(GLUT_BITMAP_HELVETICA_12, "BASES", larguraJanela - 80, alturaJanela - 20 , 0);
-	glColor3f(1.0, 1.0, 1.0);
-	mensagem(GLUT_BITMAP_HELVETICA_10, "DESTRUIDAS = ", larguraJanela - 110, alturaJanela - 40, 0);
-	glColor3f(0.0, 1.0, 0.0);
-	mensagem(GLUT_BITMAP_HELVETICA_10, to_string(basesDestruidas), larguraJanela - 25, alturaJanela - 40, 0);
-	glColor3f(1.0, 1.0, 1.0);
-	mensagem(GLUT_BITMAP_HELVETICA_10, "FALTAM = ", larguraJanela - 110, alturaJanela - 55, 0);
-	glColor3f(0.0, 1.0, 0.0);
-	mensagem(GLUT_BITMAP_HELVETICA_10, to_string(basesRestantes), larguraJanela - 25, alturaJanela - 55, 0);
-}
+// //Exibe o placar das bombas
+// void exibirPlacar()
+// {
+// 	glColor3f(0.0, 1.0, 0.0);
+// 	mensagem(GLUT_BITMAP_HELVETICA_12, "BASES", larguraJanela - 80, alturaJanela - 20 , 0);
+// 	glColor3f(1.0, 1.0, 1.0);
+// 	mensagem(GLUT_BITMAP_HELVETICA_10, "DESTRUIDAS = ", larguraJanela - 110, alturaJanela - 40, 0);
+// 	glColor3f(0.0, 1.0, 0.0);
+// 	mensagem(GLUT_BITMAP_HELVETICA_10, to_string(basesDestruidas), larguraJanela - 25, alturaJanela - 40, 0);
+// 	glColor3f(1.0, 1.0, 1.0);
+// 	mensagem(GLUT_BITMAP_HELVETICA_10, "FALTAM = ", larguraJanela - 110, alturaJanela - 55, 0);
+// 	glColor3f(0.0, 1.0, 0.0);
+// 	mensagem(GLUT_BITMAP_HELVETICA_10, to_string(basesRestantes), larguraJanela - 25, alturaJanela - 55, 0);
+// }
 
-//Desenha o mini mapa e exibe o placar
-void desenharMiniMapa()
-{
- 	glLoadIdentity();
+// void desenharMiniMapa()
+// {
+//  	glLoadIdentity();
 	
-	//Draw text considering a 2D space (disable all 3d features)
-    glMatrixMode (GL_PROJECTION);
-    //Push to recover original PROJECTION MATRIX
-    glPushMatrix();
-        glLoadIdentity ();
-        glOrtho (0, larguraJanela, 0, alturaJanela, -1, 1);
+// 	//Draw text considering a 2D space (disable all 3d features)
+//     glMatrixMode (GL_PROJECTION);
+//     //Push to recover original PROJECTION MATRIX
+//     glPushMatrix();
+//         glLoadIdentity ();
+//         glOrtho (0, larguraJanela, 0, alturaJanela, -1, 1);
         
-		 //Push to recover original attributes
-		glPushAttrib(GL_ENABLE_BIT);
-			glDisable(GL_LIGHTING);
-			glDisable(GL_TEXTURE_2D);
+// 		 //Push to recover original attributes
+// 		glPushAttrib(GL_ENABLE_BIT);
+// 			glDisable(GL_LIGHTING);
+// 			glDisable(GL_TEXTURE_2D);
 			
-/*						
-			//Draw text in the x, y, z position
-			glColor3f(0,1,0);
-			glRasterPos3f(arena.x, arena.y, 0);
-			const char* tmpStr;
-			tmpStr = "TESTE";
-			while( *tmpStr ){
-				glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *tmpStr);
-				tmpStr++;
-			}
+// 			/*						
+// 			/*						
+// 			/*						
+// 			/*						
+// 			/*						
+// 			/*						
+// 			/*						
+// 			//Draw text in the x, y, z position
+// 			glColor3f(0,1,0);
+// 			glRasterPos3f(arena.x, arena.y, 0);
+// 			const char* tmpStr;
+// 			tmpStr = "TESTE";
+// 			while( *tmpStr ){
+// 				glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *tmpStr);
+// 				tmpStr++;
+// 			}
 
-			glColor3f(0.0,1.0,0.0);
-		  	glBegin(GL_TRIANGLES);                                          // início triângulo
-				glVertex3f(70, 40, 0.0);                         // Topo
-				glVertex3f(30, 40, 0.0);                          // Esquerda embaixo
-				glVertex3f(70, 20, 0.0);                          // Direita embaixo
-			glEnd();
-*/
-			exibirPlacar();
+// 			glColor3f(0.0,1.0,0.0);
+// 		  	glBegin(GL_TRIANGLES);                                          // início triângulo
+// 				glVertex3f(70, 40, 0.0);                         // Topo
+// 				glVertex3f(30, 40, 0.0);                          // Esquerda embaixo
+// 				glVertex3f(70, 20, 0.0);                          // Direita embaixo
+// 			glEnd();
+// 			*/
+// 			// exibirPlacar();
 
-			minimapa.desenhar(arena, jogador, inimigos, bases, larguraJanela, alturaJanela);
+// 			// placar.desenhar(alturaJanela, larguraJanela);
+
+// 			// if(estado == 3)
+// 			// 	placar.desenharMensagemFinal(alturaJanela, larguraJanela);
+
+// 			minimapa.desenhar(arena, jogador, inimigos, bases, larguraJanela, alturaJanela);
 
 
-		glPopAttrib();
+// 		glPopAttrib();
 
-    glPopMatrix();
-    glMatrixMode (GL_MODELVIEW);
+//     glPopMatrix();
+//     glMatrixMode (GL_MODELVIEW);
 
 	
 
-}
+// }
 
 void desenharMundo() {
 	
@@ -700,6 +806,11 @@ void desenharMundo() {
 		b.desenhar(base, modeloBase);			
 	}
 
+	for(Bomba bomba: bombas)
+	{
+		bomba.desenhar();			
+	}
+
 
 //	jogador.desenhar();
 
@@ -711,16 +822,16 @@ void desenharMundo() {
 		inimigo.desenhar();			
 	}
 
-//	 glPushMatrix();
-	// 	glColor3f(0.0f, 0.0f, 1.0f);
-//	 	glTranslatef(jogador.x, jogador.y, jogador.z);
+	//	 glPushMatrix();
+		// 	glColor3f(0.0f, 0.0f, 1.0f);
+	//	 	glTranslatef(jogador.x, jogador.y, jogador.z);
+			
+	//		glRotatef(-90, 0, 0, 1);
 		
-//		glRotatef(-90, 0, 0, 1);
-	
-//		glRotatef(jogador.angulo_xy, 0, 0, 1);
+	//		glRotatef(jogador.angulo_xy, 0, 0, 1);
 
-//	 	desenharAeromodelo();
-//	 glPopMatrix();
+	//	 	desenharAeromodelo();
+	//	 glPopMatrix();
 	
 	
 }
@@ -740,28 +851,58 @@ void desenharViewport2() {
 
 	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
 	
-	desenharMiniMapa();
+	// desenharMiniMapa();
 	
 
-	if(camera == 1){
+	if(camera == 0){
+		// Padrão
 		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
 		posicionarObservador(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
 	}
+	if(camera == 1){
+		// Cokpit
+		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 5, 5000.0);
+		posicionarObservador(
+			jogador.x + jogador.r * cos(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.y + jogador.r * sin(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.z,
+			jogador.x + (jogador.r + 1) * cos(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.y + (jogador.r + 1) * sin(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.z, 
+			0, 0, 1);
+	}
 	if(camera == 2){
+		// Canhão
 		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
 		posicionarObservador(
-			jogador.x - 50*cos(grausParaRadianos(jogador.angulo_xy)), 
-			jogador.y - 50*sin(grausParaRadianos(jogador.angulo_xy)), 
-			jogador.z - 50*sin(grausParaRadianos(jogador.angulo_xz)),
-			jogador.x, jogador.y, jogador.z+jogador.r, 0, 0, 1);
+			jogador.x + jogador.r * cos(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.y + jogador.r * sin(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.z+2,
+			jogador.x + jogador.r * cos(grausParaRadianos(jogador.angulo_xy)) + (0.5*jogador.r) * cos(grausParaRadianos(jogador.angulo_canhao_arena_xy)), 
+			jogador.y + jogador.r * sin(grausParaRadianos(jogador.angulo_xy)) + (0.5*jogador.r) * sin(grausParaRadianos(jogador.angulo_canhao_arena_xy)), 
+			jogador.z + (0.5*jogador.r) * sin(grausParaRadianos(jogador.angulo_canhao_arena_xz)), 
+			0, 0, 1);
 	}
 	if(camera == 3){
-		
+		// 3a pessoa
+		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
+		posicionarObservador(
+			jogador.x - 50*cos(grausParaRadianos(anguloCameraJogadorXY)), 
+			jogador.y - 50*sin(grausParaRadianos(anguloCameraJogadorXY)), 
+			jogador.z + 40,
+			jogador.x, jogador.y, jogador.z+jogador.r, 0, 0, 1);
 	} 
 
 
 
 	desenharMundo();
+
+	minimapa.desenhar(arena, jogador, inimigos, bases, larguraJanela, alturaJanela);
+
+	placar.desenhar(alturaJanela, larguraJanela);
+
+	if(estado == 3)
+		placar.desenharMensagemFinal(alturaJanela, larguraJanela);
 
 }
 
@@ -900,6 +1041,9 @@ void keyPress(unsigned char key, int x, int y) {
 			anguloCamera += inc;
 			break;
 		}
+		case '0':
+			camera = 0;
+			break;
 		case '1':
 			camera = 1;
 			break;
@@ -952,48 +1096,73 @@ void specialKeys(int key, int x, int y) {
 //Controla o canhão
 void passiveMotion(int x, int y)
 {	
-//	cout << "X= " << x << endl;
+		//	cout << "X= " << x << endl;
 
-//	if(jogando)
-//	{
-		if(x <= controladorCanhaoX)
-		{
-			if(jogador.angulo_canhao_xy >= -30 && jogador.angulo_canhao_xy <= 27)
-			{
-				jogador.angulo_canhao_xy += 3;
-			}
+		//	if(jogando)
+		//	{
+		// if(x <= controladorCanhaoX)
+		// {
+		// 	if(jogador.angulo_canhao_xy >= -30 && jogador.angulo_canhao_xy <= 29)
+		// 	{
+		// 		jogador.angulo_canhao_xy += 1;
+		// 	}
 			
-			controladorCanhaoX = x;
-		}
-		else
-		{
-			if(jogador.angulo_canhao_xy >= -27 && jogador.angulo_canhao_xy <= 30)
-			{
-				jogador.angulo_canhao_xy -= 3;
-			}
+		// 	controladorCanhaoX = x;
+		// }
+		// else
+		// {
+		// 	if(jogador.angulo_canhao_xy >= -29 && jogador.angulo_canhao_xy <= 30)
+		// 	{
+		// 		jogador.angulo_canhao_xy -= 1;
+		// 	}
 			
-			controladorCanhaoX = x;
-		}
+		// 	controladorCanhaoX = x;
+		// }
 
-		if(y <= controladorCanhaoZ)
-		{
-			if(jogador.angulo_canhao_xz >= -30 && jogador.angulo_canhao_xz <= 27)
-			{
-				jogador.angulo_canhao_xz += 3;
-			}
+		// if(y <= controladorCanhaoZ)
+		// {
+		// 	if(jogador.angulo_canhao_xz >= -30 && jogador.angulo_canhao_xz <= 29)
+		// 	{
+		// 		jogador.angulo_canhao_xz += 1;
+		// 	}
 			
-			controladorCanhaoZ = y;
-		}
-		else
-		{
-			if(jogador.angulo_canhao_xz >= -27 && jogador.angulo_canhao_xz <= 30)
-			{
-				jogador.angulo_canhao_xz -= 3;
-			}
+		// 	controladorCanhaoZ = y;
+		// }
+		// else
+		// {
+		// 	if(jogador.angulo_canhao_xz >= -29 && jogador.angulo_canhao_xz <= 30)
+		// 	{
+		// 		jogador.angulo_canhao_xz -= 1;
+		// 	}
 			
-			controladorCanhaoZ = y;
-		}
-//	}
+		// 	controladorCanhaoZ = y;
+		// }
+	//	}
+
+	if(x > mouse_ultima_posicao_x)
+		jogador.alterarAnguloCanhaoXY(-3);
+	if(x < mouse_ultima_posicao_x)
+		jogador.alterarAnguloCanhaoXY(3);
+
+	mouse_ultima_posicao_x = x;
+
+	if(y > mouse_ultima_posicao_y)
+		jogador.alterarAnguloCanhaoXZ(-3);
+	if(y < mouse_ultima_posicao_y)
+		jogador.alterarAnguloCanhaoXZ(3);
+
+	mouse_ultima_posicao_y = y;
+}
+
+void motion(int x, int y){
+	if (movimentarCamera3) {
+		if(x > ultimaPosicaoMouseCameraX)
+			anguloCameraJogadorXY -= 3;
+		if(x < ultimaPosicaoMouseCameraX)
+			anguloCameraJogadorXY += 3;
+
+		ultimaPosicaoMouseCameraX = x;
+	}
 }
 
 void mouse(int button, int state, int x, int y) {
@@ -1002,7 +1171,24 @@ void mouse(int button, int state, int x, int y) {
 		// Cria tiro
 	}
 	if(button == 2 && state == 0 && estado == 2) {
-		// Cria bomba
+		Bomba bomba = Bomba(
+			jogador.x, 
+			jogador.y,
+			jogador.z,
+			jogador.r,
+			jogador.angulo_xy,
+			90,
+			jogador.velocidade
+		);
+		bombas.push_back(bomba);
+	}
+
+	// Seta flag que permite movimento da câmera 3
+	if(button == 0 && state == 0 && (teclas['b'] == 1 || teclas['B'] == 1)) {
+		movimentarCamera3 = true;
+	}
+	if(button == 0 && state == 1) {
+		movimentarCamera3 = false;
 	}
 }
 
@@ -1047,6 +1233,7 @@ int main(int argc, char** argv) {
 	glutKeyboardFunc(keyPress);
 	glutKeyboardUpFunc(keyUp);
 	glutPassiveMotionFunc(passiveMotion);
+	glutMotionFunc(motion);
 	glutMouseFunc(mouse);
 	inicializarOpengl();
 	glutMainLoop();

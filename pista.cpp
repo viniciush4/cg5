@@ -28,11 +28,11 @@ Pista::Pista(float x1, float y1, float x2, float y2){
 }
 
 void Pista::desenhar(){
-    glColor3f(0, 0, 0);
-	glBegin(GL_LINES);
-        glVertex3f(x1, y1, 2.0);
-        glVertex3f(x2, y2, 2.0);
-    glEnd();
+    // glColor3f(0, 0, 0);
+	// glBegin(GL_LINES);
+    //     glVertex3f(x1, y1, 2.0);
+    //     glVertex3f(x2, y2, 2.0);
+    // glEnd();
 
 	// Desenha um plano que representa a pista
 	glPushMatrix();
@@ -42,10 +42,10 @@ void Pista::desenhar(){
 		glBegin(GL_QUADS);
 			glColor3f(1.0f, 1.0f, 0.0f);
 			glNormal3f(0.0, 0.0, 1.0);
-			glVertex3f(0, -largura/2, 1.0);
-			glVertex3f(comprimento, -largura/2, 1.0);
-			glVertex3f(comprimento, largura/2, 1.0);
-			glVertex3f(0, largura/2, 1.0);
+			glVertex3f(0, -largura/2, 0.5);
+			glVertex3f(comprimento, -largura/2, 0.5);
+			glVertex3f(comprimento, largura/2, 0.5);
+			glVertex3f(0, largura/2, 0.5);
 		glEnd();
 	glPopMatrix();
 }

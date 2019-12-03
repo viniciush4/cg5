@@ -24,7 +24,8 @@ public:
 	float angulo_helices;
 	float velocidade;
 	float somatorio_incremento_angulo;
-	bool incrementar_angulo;
+	bool incrementar_angulo_xy;
+	bool incrementar_altura_z;
 	float tempo_desde_ultimo_tiro;
 
 	Inimigo();
