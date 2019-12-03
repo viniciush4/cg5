@@ -31,6 +31,23 @@ Jogador::Jogador(float x, float y, float z, float r, float velocidade){
     this->velocidade = velocidade;
 }
 
+void Jogador::desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &modeloAviaoJogador)
+{
+	 glPushMatrix();
+		
+		//Posiciona o avião de acordo com o ângulo da pista
+		glTranslatef(x, y, z);		
+
+		glScalef(2,2,2);
+		glRotatef(90, 1, 0, 0);
+		glRotatef(90, 0, 1, 0);
+		
+		glRotatef(angulo_xy, 0, 1, 0);
+	
+		aviaoJogador.RenderOBJModel(&modeloAviaoJogador);
+	glPopMatrix();
+}
+
 void Jogador::desenhar() {
 /*
     glPushMatrix();

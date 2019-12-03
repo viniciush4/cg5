@@ -1,6 +1,11 @@
+#ifndef JOGADOR_H_
+#define JOGADOR_H_
+
 #include <iostream>
 #include <GL/glut.h>
 #include <math.h>
+
+#include "lerOBJ.h"
 
 
 #define grausParaRadianos(g) g*(M_PI/180)
@@ -47,7 +52,7 @@ public:
 	void desenharHeliceEsquerda();
 
 	void desenharCanhao();
-	
+	void desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &objfile);
 
 
 
@@ -62,3 +67,5 @@ public:
 	
 	virtual ~Jogador();
 };
+
+#endif /* JOGADOR_H_ */

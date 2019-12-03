@@ -1,3 +1,6 @@
+#ifndef ARENA_H_
+#define ARENA_H_
+
 #include <GL/glut.h>
 #include <math.h>
 
@@ -16,3 +19,5 @@ public:
 	
 	virtual ~Arena();
 };
+
+#endif /* ARENA_H_ */

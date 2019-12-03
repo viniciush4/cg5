@@ -1,3 +1,8 @@
+#ifndef CONFIGURACAO_H_
+#define CONFIGURACAO_H_
+
+#include <string>
+
 class Configuracao {
 public:
 	/*
@@ -21,3 +26,5 @@ public:
 	Configuracao();
 	virtual ~Configuracao();
 };
+
+#endif /* CONFIGURACAO_H_ */

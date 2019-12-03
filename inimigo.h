@@ -1,3 +1,14 @@
+#ifndef INIMIGO_H_
+#define INIMIGO_H_
+
+#include <iostream>
+#include <math.h>
+#include <GL/glut.h>
+
+using namespace std;
+
+#define grausParaRadianos(g) g*(M_PI/180)
+
 class Inimigo {
 public:
 	float x;
@@ -25,3 +36,5 @@ public:
 	
 	virtual ~Inimigo();
 };
+
+#endif /* INIMIGO_H_ */

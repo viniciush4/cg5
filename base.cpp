@@ -1,10 +1,5 @@
-#include <iostream>
 #include "base.h"
-#include <GL/glut.h>
 
-using namespace std;
-
-#define grausParaRadianos(g) g*(M_PI/180)
 
 Base::Base(){
 	this->x = 0;
@@ -18,8 +13,9 @@ Base::Base(float x, float y, float r){
 	this->r = r;
 }
 
-void Base::desenhar()
+void Base::desenhar(LerOBJ &base, struct obj_model_t &modeloBase)
 {
+/*
 	glPushMatrix();
         glTranslatef(x, y, r);
 
@@ -28,6 +24,22 @@ void Base::desenhar()
 
         glutSolidSphere(r,100,100);
     glPopMatrix();
+*/
+	glPushMatrix();
+
+        glTranslatef(x, y, r);
+		glScalef(0.5, 0.5, 0.5);
+
+        //glColor3f(0, 1, 0);
+	//	glNormal3f(0.0, 0.0, 1.0);
+		GLfloat mat_ambient_y[] = { 1.0, 1.0, 0.0, 1.0 };
+		glColor3fv(mat_ambient_y);
+
+		glRotatef(90, 1, 0, 0);
+        base.RenderOBJModel(&modeloBase);
+    glPopMatrix();
+
+	
 
 }
 

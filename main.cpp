@@ -6,13 +6,14 @@
 #include "tinyxml2.h"
 #include "configuracao.h"
 #include "pista.h"
-//#include "arena.h"
-//#include "inimigo.h"
-//#include "base.h"
-//#include "jogador.h"
-#include "OBJ_Loader.h"
+#include "arena.h"
+#include "inimigo.h"
+#include "base.h"
+#include "jogador.h"
+//#include "OBJ_Loader.h"
 #include "imageloader.h"
 #include "minimapa.h"
+#include "lerOBJ.h"
 
 
 
@@ -22,7 +23,7 @@
 
 using namespace tinyxml2;
 using namespace std;
-using namespace objl;
+//using namespace objl;
 
 
 
@@ -45,8 +46,21 @@ Minimapa minimapa;
 /*
  * MODELOS IMPORTADOS NO JOGO
  */
-Loader aviaoJogador;
-bool carregouAviaoJogador = false;
+//Loader aviaoJogador;
+//bool carregouAviaoJogador = false;
+
+//Avião do jogador
+struct obj_model_t modeloAviaoJogador;
+LerOBJ aviaoJogador = LerOBJ();
+
+//Bases
+struct obj_model_t modeloBase;
+LerOBJ base = LerOBJ();
+
+//Avião dos inimigos
+
+
+
 
 /*
  * MAPEAMENTO DAS TECLAS
@@ -106,6 +120,34 @@ bool verificarLimiteArena(Jogador jogador)
 	{
 		return false;
 	}
+}
+
+bool verificarColisaoInimigo()
+{
+	bool explodiu = false;
+	
+	//Percorre todos os inimigos aéreos
+	for(size_t i = 0; i < inimigos.size(); i++)
+	{
+		//Calcula a distância do piloto até o inimigo
+		float distancia = sqrt(pow(jogador.x - inimigos[i].x, 2.0) + pow(jogador.y - inimigos[i].y, 2.0));
+
+		//Verifica se houve colisão
+		if(distancia < inimigos[i].r + jogador.r)
+		{
+			explodiu = true;
+			//indiceInimigo = i;
+			
+			//Finaliza o jogo para poder ser reiniciado
+//			decolou = false;
+//			motorLigado = false;
+//			jogando = false;
+			
+			break;
+		}
+	}
+
+	return explodiu;
 }
 
 //Realiza o teletransporte para o lado oposto da arena
@@ -391,6 +433,21 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		//Cria o mini mapa
 		minimapa = Minimapa();
 		
+		//Carrega os modelos 3d
+
+		//Avião jogador
+		if(!aviaoJogador.ReadOBJModel("Modelos/F+15.obj", &modeloAviaoJogador))
+		{
+			cout << "Erro ao carregar o modelo avião do jogador!" << endl;
+			exit(EXIT_FAILURE);
+		}
+
+		//Bases
+		if(!base.ReadOBJModel("Modelos/Shelter_simple.obj", &modeloBase))
+		{
+			cout << "Erro ao carregar o modelo avião do jogador!" << endl;
+			exit(EXIT_FAILURE);
+		}
 
 	return true;
 }
@@ -491,7 +548,7 @@ void DrawAxes() {
     
 }
 
-
+/*
 void desenharAeromodelo()
 {
 	if(carregouAviaoJogador)
@@ -539,6 +596,7 @@ void desenharAeromodelo()
 	}
 
 }
+*/
 
 //Mensagem na tela
 void mensagem(void * font, string s, float x, float y, float z)
@@ -568,6 +626,7 @@ void exibirPlacar()
 	mensagem(GLUT_BITMAP_HELVETICA_10, to_string(basesRestantes), larguraJanela - 25, alturaJanela - 55, 0);
 }
 
+//Desenha o mini mapa e exibe o placar
 void desenharMiniMapa()
 {
  	glLoadIdentity();
@@ -636,13 +695,15 @@ void desenharMundo() {
 
 	pista.desenhar();
 
-	for(Base base: bases)
+	for(Base b: bases)
 	{
-		base.desenhar();			
+		b.desenhar(base, modeloBase);			
 	}
 
 
-	jogador.desenhar();
+//	jogador.desenhar();
+
+	jogador.desenharModeloAviao(aviaoJogador, modeloAviaoJogador);
 
 	//Desenha os inimigos aereos
 	for(Inimigo inimigo: inimigos)
@@ -789,8 +850,13 @@ void idle(void) {
 		if(verificarLimiteArena(jogador))
 		{
 			teletransportarJogador(jogador.angulo_xy);
-			
 		}
+
+		if(verificarColisaoInimigo())
+		{
+			cout << "Explodiu!" << endl;
+		}
+
 	}
 
 	// Início, decolando ou jogando
@@ -818,7 +884,7 @@ void keyPress(unsigned char key, int x, int y) {
 			jogador.velocidade += (estado == 2) ? 1 : 0;
 			break;
 		case '-':
-			jogador.velocidade -= (estado == 2) ? ((jogador.velocidade > 50) ? 1 : 0) : 0;
+			jogador.velocidade -= (estado == 2) ? ((jogador.velocidade > 1) ? 1 : 0) : 0;
 			break;
 		case 'I':
 		case 'i':

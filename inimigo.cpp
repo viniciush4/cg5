@@ -1,11 +1,6 @@
-#include <iostream>
+
 #include "inimigo.h"
-#include <math.h>
-#include <GL/glut.h>
 
-using namespace std;
-
-#define grausParaRadianos(g) g*(M_PI/180)
 
 Inimigo::Inimigo(){
 	this->x = 0;

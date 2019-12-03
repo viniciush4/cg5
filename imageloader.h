@@ -1,6 +1,9 @@
 #ifndef IMAGE_LOADER_H_INCLUDED
 #define IMAGE_LOADER_H_INCLUDED
 
+#include <assert.h>
+#include <fstream>
+
 //Represents an image
 class Image {
 	public:
