@@ -91,6 +91,8 @@ GLdouble upX=0, upY=0, upZ=1;
 float anguloCameraJogadorXY=0;
 int ultimaPosicaoMouseCameraX=0, ultimaPosicaoMouseCameraY=0;
 bool movimentarCamera3 = false;
+int mouse_ultima_posicao_x = 0;
+int mouse_ultima_posicao_y = 0;
 
 
 
@@ -748,19 +750,37 @@ void desenharViewport2() {
 	desenharMiniMapa();
 	
 
-	if(camera == 1){
+	if(camera == 0){
+		// Padrão
 		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
 		posicionarObservador(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
 	}
+	if(camera == 1){
+		// Cokpit
+		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 5, 5000.0);
+		posicionarObservador(
+			jogador.x + jogador.r * cos(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.y + jogador.r * sin(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.z,
+			jogador.x + (jogador.r + 1) * cos(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.y + (jogador.r + 1) * sin(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.z, 
+			0, 0, 1);
+	}
 	if(camera == 2){
+		// Canhão
 		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
 		posicionarObservador(
-			jogador.x - 50*cos(grausParaRadianos(jogador.angulo_xy)), 
-			jogador.y - 50*sin(grausParaRadianos(jogador.angulo_xy)), 
-			jogador.z - 50*sin(grausParaRadianos(jogador.angulo_xz)),
-			jogador.x, jogador.y, jogador.z+jogador.r, 0, 0, 1);
+			jogador.x + jogador.r * cos(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.y + jogador.r * sin(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.z+2,
+			jogador.x + jogador.r * cos(grausParaRadianos(jogador.angulo_xy)) + (0.5*jogador.r) * cos(grausParaRadianos(jogador.angulo_canhao_arena_xy)), 
+			jogador.y + jogador.r * sin(grausParaRadianos(jogador.angulo_xy)) + (0.5*jogador.r) * sin(grausParaRadianos(jogador.angulo_canhao_arena_xy)), 
+			jogador.z + (0.5*jogador.r) * sin(grausParaRadianos(jogador.angulo_canhao_arena_xz)), 
+			0, 0, 1);
 	}
 	if(camera == 3){
+		// 3a pessoa
 		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
 		posicionarObservador(
 			jogador.x - 50*cos(grausParaRadianos(anguloCameraJogadorXY)), 
@@ -905,6 +925,9 @@ void keyPress(unsigned char key, int x, int y) {
 			anguloCamera += inc;
 			break;
 		}
+		case '0':
+			camera = 0;
+			break;
 		case '1':
 			camera = 1;
 			break;
@@ -961,44 +984,58 @@ void passiveMotion(int x, int y)
 
 		//	if(jogando)
 		//	{
-		if(x <= controladorCanhaoX)
-		{
-			if(jogador.angulo_canhao_xy >= -30 && jogador.angulo_canhao_xy <= 27)
-			{
-				jogador.angulo_canhao_xy += 3;
-			}
+		// if(x <= controladorCanhaoX)
+		// {
+		// 	if(jogador.angulo_canhao_xy >= -30 && jogador.angulo_canhao_xy <= 29)
+		// 	{
+		// 		jogador.angulo_canhao_xy += 1;
+		// 	}
 			
-			controladorCanhaoX = x;
-		}
-		else
-		{
-			if(jogador.angulo_canhao_xy >= -27 && jogador.angulo_canhao_xy <= 30)
-			{
-				jogador.angulo_canhao_xy -= 3;
-			}
+		// 	controladorCanhaoX = x;
+		// }
+		// else
+		// {
+		// 	if(jogador.angulo_canhao_xy >= -29 && jogador.angulo_canhao_xy <= 30)
+		// 	{
+		// 		jogador.angulo_canhao_xy -= 1;
+		// 	}
 			
-			controladorCanhaoX = x;
-		}
+		// 	controladorCanhaoX = x;
+		// }
 
-		if(y <= controladorCanhaoZ)
-		{
-			if(jogador.angulo_canhao_xz >= -30 && jogador.angulo_canhao_xz <= 27)
-			{
-				jogador.angulo_canhao_xz += 3;
-			}
+		// if(y <= controladorCanhaoZ)
+		// {
+		// 	if(jogador.angulo_canhao_xz >= -30 && jogador.angulo_canhao_xz <= 29)
+		// 	{
+		// 		jogador.angulo_canhao_xz += 1;
+		// 	}
 			
-			controladorCanhaoZ = y;
-		}
-		else
-		{
-			if(jogador.angulo_canhao_xz >= -27 && jogador.angulo_canhao_xz <= 30)
-			{
-				jogador.angulo_canhao_xz -= 3;
-			}
+		// 	controladorCanhaoZ = y;
+		// }
+		// else
+		// {
+		// 	if(jogador.angulo_canhao_xz >= -29 && jogador.angulo_canhao_xz <= 30)
+		// 	{
+		// 		jogador.angulo_canhao_xz -= 1;
+		// 	}
 			
-			controladorCanhaoZ = y;
-		}
+		// 	controladorCanhaoZ = y;
+		// }
 	//	}
+
+	if(x > mouse_ultima_posicao_x)
+		jogador.alterarAnguloCanhaoXY(-3);
+	if(x < mouse_ultima_posicao_x)
+		jogador.alterarAnguloCanhaoXY(3);
+
+	mouse_ultima_posicao_x = x;
+
+	if(y > mouse_ultima_posicao_y)
+		jogador.alterarAnguloCanhaoXZ(-3);
+	if(y < mouse_ultima_posicao_y)
+		jogador.alterarAnguloCanhaoXZ(3);
+
+	mouse_ultima_posicao_y = y;
 }
 
 void motion(int x, int y){
