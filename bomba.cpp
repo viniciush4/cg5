@@ -33,7 +33,7 @@ void Bomba::desenhar(){
 void Bomba::mover(float coeficiente_ajuste){
     y += velocidade*coeficiente_ajuste*sin(grausParaRadianos(angulo_xy));
     x += velocidade*coeficiente_ajuste*cos(grausParaRadianos(angulo_xy));
-    z -= 5;
+    z -= velocidade*coeficiente_ajuste;
 }
 
 Bomba::~Bomba(){

@@ -103,9 +103,9 @@ GLdouble timeDiference;
  */
 int camera = 1;
 GLfloat anguloCamera=45, fAspect;
-GLdouble obsX=0, obsY=-10, obsZ=1000;
-GLdouble eyeX=0, eyeY=0, eyeZ=0;
-GLdouble upX=0, upY=0, upZ=1;
+GLfloat obsX=0, obsY=-10, obsZ=1000;
+GLfloat eyeX=0, eyeY=0, eyeZ=0;
+GLfloat upX=0, upY=0, upZ=1;
 float anguloCameraJogadorXY=0;
 int ultimaPosicaoMouseCameraX=0, ultimaPosicaoMouseCameraY=0;
 bool movimentarCamera3 = false;
@@ -553,7 +553,7 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
  * CÂMERAS, LUZES E DESENHO
  */
 
-void posicionarObservador(GLdouble obsX, GLdouble obsY, GLdouble obsZ, GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, GLdouble upX, GLdouble upY, GLdouble upZ) {
+void posicionarObservador(GLfloat obsX, GLfloat obsY, GLfloat obsZ, GLfloat eyeX, GLfloat eyeY, GLfloat eyeZ, GLfloat upX, GLfloat upY, GLfloat upZ) {
 	// Especifica sistema de coordenadas do modelo
 	glMatrixMode(GL_MODELVIEW);
 	// Inicializa sistema de coordenadas do modelo
@@ -838,13 +838,12 @@ void desenharMundo() {
 
 void desenharViewport1() {
 	
-	glViewport(0, (GLsizei)alturaJanela, (GLsizei)larguraJanela ,200);	
-	
-	especificarParametrosVisualizacao(anguloCamera, larguraJanela, 200, 0.1, 5000.0);
-	
-	posicionarObservador(200.0, -200.0, 200.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-
-	desenharMundo();
+	if(bombas.size() != 0) {
+		glViewport(0, (GLsizei)alturaJanela, (GLsizei)larguraJanela ,200);	
+		especificarParametrosVisualizacao(anguloCamera, larguraJanela, 200, 5, 5000.0);
+		posicionarObservador(bombas.at(0).x, bombas.at(0).y, bombas.at(0).z, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+		desenharMundo();
+	}
 }
 
 void desenharViewport2() {
@@ -1005,7 +1004,7 @@ void idle(void) {
 		atualizarEstadoInimigos();
 	}
 
-	if(teclas['r'] == 1) {
+	if(teclas['r'] == 1 || teclas['R'] == 1) {
 		reiniciarJogo();
 	}
 	
@@ -1171,16 +1170,18 @@ void mouse(int button, int state, int x, int y) {
 		// Cria tiro
 	}
 	if(button == 2 && state == 0 && estado == 2) {
-		Bomba bomba = Bomba(
-			jogador.x, 
-			jogador.y,
-			jogador.z,
-			jogador.r,
-			jogador.angulo_xy,
-			90,
-			jogador.velocidade
-		);
-		bombas.push_back(bomba);
+		if(bombas.size() == 0) {
+			Bomba bomba = Bomba(
+				jogador.x, 
+				jogador.y,
+				jogador.z,
+				jogador.r,
+				jogador.angulo_xy,
+				90,
+				jogador.velocidade
+			);
+			bombas.push_back(bomba);
+		}
 	}
 
 	// Seta flag que permite movimento da câmera 3
