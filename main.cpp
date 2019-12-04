@@ -125,10 +125,9 @@ int mouse_ultima_posicao_y = 0;
 
 
 bool verificarLimiteArena(Jogador jogador)
-{	//Calcula a distância do piloto até a borda da arena
+{	
+	//Calcula a distância do piloto até a borda da arena
 	float distancia = sqrt(pow(jogador.x - arena.x, 2.0) + pow(jogador.y - arena.y, 2.0));
-
-//	cout << "Distãncia: " << distancia << endl;
 
 	//Verifica se o piloto está fora da arena
 	if(distancia >= arena.r)
@@ -156,12 +155,7 @@ bool verificarColisaoInimigo()
 		{
 			explodiu = true;
 			//indiceInimigo = i;
-			
-			//Finaliza o jogo para poder ser reiniciado
-//			decolou = false;
-//			motorLigado = false;
-//			jogando = false;
-			
+						
 			break;
 		}
 	}
@@ -459,17 +453,14 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 				float velocidade = (distancia_pista / 8) * 4;
 				Inimigo i = Inimigo(x, y, 0, r, velocidade);
 				inimigos.push_back(i);
-				inimigos_copia.push_back(i);
 			}
 			if(!strcmp(fill,"orange")){
 				Base b = Base(x, y, r);
 				bases.push_back(b);
-				bases_copia.push_back(b);
 			}
 			if(!strcmp(fill,"green")){
 				Jogador j = Jogador(x, y, 0, r, 0);
 				jogador = j;
-				jogador_copia = j;
 			}
 		}
 
@@ -836,7 +827,7 @@ void desenharMundo() {
 	}
 
 
-//	jogador.desenhar();
+	//	jogador.desenhar();
 
 	jogador.desenharModeloAviao(aviaoJogador, modeloAviaoJogador, helice, modeloHelice);
 
@@ -1038,10 +1029,6 @@ void idle(void) {
 	if(estado != 3) {
 		atualizarEstadoInimigos();
 	}
-
-	if(teclas['r'] == 1 || teclas['R'] == 1) {
-		reiniciarJogo();
-	}
 	
 	// Marca a janela atual como precisando ser reexibida
 	glutPostRedisplay();
@@ -1074,6 +1061,11 @@ void keyPress(unsigned char key, int x, int y) {
 			int inc = anguloCamera >= 180 ? 0 : 1;
 			anguloCamera += inc;
 			break;
+		}
+		case 'R':
+		case 'r':
+		{
+			reiniciarJogo();
 		}
 		case '0':
 			camera = 0;
@@ -1252,9 +1244,6 @@ int main(int argc, char** argv) {
 
 	if (!inicializarObjetosJogo(argv[1]))
 		return EXIT_FAILURE;
-
-	cout << "Angulo xy: " << jogador.angulo_xy << endl;
-	cout << "Angulo xz: " << jogador.angulo_xz << endl;
 
 	glutInit (&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
