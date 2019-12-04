@@ -12,22 +12,23 @@ Arena::Arena(float x, float y, float r, float altura){
 	this->y = y;
 	this->r = r;
 	this->altura = altura;
+	this->textura = LoadTextureRAW("Texturas/ceu.bmp");
 }
 
-void Arena::desenhar(GLuint textura){
+void Arena::desenhar(){
 	
 	// Desenha um cilindro
-	glPushMatrix();
-
-		glColor3f(1.0f, 1.0f, 1.0f);
-		
-		GLUquadric* q = gluNewQuadric();
-		gluQuadricOrientation(q, GLU_INSIDE);
-		gluQuadricDrawStyle(q, GLU_FILL); //GLU_FILL, GLU_LINE, GLU_SILHOUETTE, GLU_POINT
-		gluQuadricNormals(q, GLU_FLAT); //GLU_NONE, GLU_FLAT, GLU_SMOOTH
-		gluQuadricTexture(q, GL_TRUE);// if you want to map a texture to it.	
-		glBindTexture(GL_TEXTURE_2D, textura);
-		gluCylinder(q, r, r, altura, 30, 30);
+	glPushMatrix();			
+		glPushAttrib(GL_TEXTURE_BIT);
+			glColor3f(1.0f, 1.0f, 1.0f);
+			GLUquadric* q = gluNewQuadric();
+			gluQuadricOrientation(q, GLU_INSIDE);
+			gluQuadricDrawStyle(q, GLU_FILL); //GLU_FILL, GLU_LINE, GLU_SILHOUETTE, GLU_POINT
+			gluQuadricNormals(q, GLU_FLAT); //GLU_NONE, GLU_FLAT, GLU_SMOOTH
+			gluQuadricTexture(q, GL_TRUE);// if you want to map a texture to it.	
+			glBindTexture(GL_TEXTURE_2D, this->textura);
+			gluCylinder(q, r, r, altura, 30, 30);
+		glPopAttrib();
 	glPopMatrix();
 	
 

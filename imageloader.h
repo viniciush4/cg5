@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <fstream>
+#include <GL/glut.h>
 
 //Represents an image
 class Image {
@@ -23,4 +24,5 @@ class Image {
 
 //Reads a bitmap image from file.
 Image* loadBMP(const char* filename);
+GLuint LoadTextureRAW( const char * filename );
 #endif

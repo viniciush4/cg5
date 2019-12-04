@@ -27,23 +27,11 @@ using namespace tinyxml2;
 using namespace std;
 //using namespace objl;
 
-
-
 /*
  * DIMENSÕES DO JOGO
  */
 int larguraJanela = 500;
 int alturaJanela = 500;
-
-/*
- * TEXTURAS DO JOGO
- */
-GLuint texturaCeu;
-
-/*
- * MINI MAPA
- */
-Minimapa minimapa;
 
 /*
  * MODELOS IMPORTADOS NO JOGO
@@ -60,9 +48,6 @@ struct obj_model_t modeloBase;
 LerOBJ base = LerOBJ();
 
 //Avião dos inimigos
-
-
-
 
 /*
  * MAPEAMENTO DAS TECLAS
@@ -83,13 +68,8 @@ Jogador jogador_copia;
 Pista pista;
 Arena arena;
 Placar placar;
+Minimapa minimapa;
 int estado = 0;
-
-int controladorCanhaoX = 0;
-int controladorCanhaoZ = 0;
-
-// int basesDestruidas = 0;
-// int basesRestantes = 0;
 
 /*
  * VARIÁVEIS PARA AJUSTE DO TEMPO
@@ -320,33 +300,7 @@ void atualizarEstadoBombas() {
 
 void criarTirosInimigos() {
 }
-
-
-//Carregar texturas
-GLuint LoadTextureRAW( const char * filename )
-{
-	GLuint texture;
-
-	Image* image = loadBMP(filename);
-
-	glGenTextures( 1, &texture );
-	glBindTexture( GL_TEXTURE_2D, texture );
-	glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,GL_MODULATE );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
-	glTexImage2D(GL_TEXTURE_2D,                //Always GL_TEXTURE_2D
-		                   0,                            //0 for now
-		                   GL_RGB,                       //Format OpenGL uses for image
-		                   image->width, image->height,  //Width and height
-		                   0,                            //The border of the image
-		                   GL_RGB, //GL_RGB, because pixels are stored in RGB format
-		                   GL_UNSIGNED_BYTE, //GL_UNSIGNED_BYTE, because pixels are stored
-		                                     //as unsigned numbers
-		                   image->pixels);               //The actual pixel data
-	delete image;
-
-	return texture;
-}	
+	
 
 /*
  * CONFIGURAÇÕES
@@ -372,9 +326,7 @@ void inicializarOpengl() {
 
 	// glDepthFunc(GL_LEQUAL);
 
-	//Carregar
-	texturaCeu = LoadTextureRAW("Texturas/ceu.bmp");
-//	carregouAviaoJogador = aviaoJogador.LoadFile("Modelos/piper_pa18.obj");
+	//	carregouAviaoJogador = aviaoJogador.LoadFile("Modelos/piper_pa18.obj");
 	
 }
 
@@ -788,7 +740,7 @@ void desenharMundo() {
 	
 	DrawAxes();
 
-	arena.desenhar(texturaCeu);
+	arena.desenhar();
 
 	pista.desenhar();
 
@@ -1089,51 +1041,7 @@ void specialKeys(int key, int x, int y) {
 }
 
 //Controla o canhão
-void passiveMotion(int x, int y)
-{	
-		//	cout << "X= " << x << endl;
-
-		//	if(jogando)
-		//	{
-		// if(x <= controladorCanhaoX)
-		// {
-		// 	if(jogador.angulo_canhao_xy >= -30 && jogador.angulo_canhao_xy <= 29)
-		// 	{
-		// 		jogador.angulo_canhao_xy += 1;
-		// 	}
-			
-		// 	controladorCanhaoX = x;
-		// }
-		// else
-		// {
-		// 	if(jogador.angulo_canhao_xy >= -29 && jogador.angulo_canhao_xy <= 30)
-		// 	{
-		// 		jogador.angulo_canhao_xy -= 1;
-		// 	}
-			
-		// 	controladorCanhaoX = x;
-		// }
-
-		// if(y <= controladorCanhaoZ)
-		// {
-		// 	if(jogador.angulo_canhao_xz >= -30 && jogador.angulo_canhao_xz <= 29)
-		// 	{
-		// 		jogador.angulo_canhao_xz += 1;
-		// 	}
-			
-		// 	controladorCanhaoZ = y;
-		// }
-		// else
-		// {
-		// 	if(jogador.angulo_canhao_xz >= -29 && jogador.angulo_canhao_xz <= 30)
-		// 	{
-		// 		jogador.angulo_canhao_xz -= 1;
-		// 	}
-			
-		// 	controladorCanhaoZ = y;
-		// }
-	//	}
-
+void passiveMotion(int x, int y) {	
 	if(x > mouse_ultima_posicao_x)
 		jogador.alterarAnguloCanhaoXY(-3);
 	if(x < mouse_ultima_posicao_x)
@@ -1149,7 +1057,7 @@ void passiveMotion(int x, int y)
 	mouse_ultima_posicao_y = y;
 }
 
-void motion(int x, int y){
+void motion(int x, int y) {
 	if (movimentarCamera3) {
 		if(x > ultimaPosicaoMouseCameraX)
 			anguloCameraJogadorXY -= 3;
@@ -1211,9 +1119,6 @@ void reshape(GLsizei w, GLsizei h) {
 
 int main(int argc, char** argv) {
 
-	if (!inicializarObjetosJogo(argv[1]))
-		return EXIT_FAILURE;
-
 	glutInit (&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(larguraJanela, alturaJanela + 200);
@@ -1229,6 +1134,10 @@ int main(int argc, char** argv) {
 	glutPassiveMotionFunc(passiveMotion);
 	glutMotionFunc(motion);
 	glutMouseFunc(mouse);
+
+	if (!inicializarObjetosJogo(argv[1]))
+		return EXIT_FAILURE;
+	
 	inicializarOpengl();
 	glutMainLoop();
 
