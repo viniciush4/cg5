@@ -55,6 +55,14 @@ Minimapa minimapa;
 struct obj_model_t modeloAviaoJogador;
 LerOBJ aviaoJogador = LerOBJ();
 
+//Hélice
+struct obj_model_t modeloHelice;
+LerOBJ helice = LerOBJ();
+
+//Bombas
+struct obj_model_t modeloBomba;
+LerOBJ bomba = LerOBJ();
+
 //Bases
 struct obj_model_t modeloBase;
 LerOBJ base = LerOBJ();
@@ -87,6 +95,8 @@ int estado = 0;
 
 int controladorCanhaoX = 0;
 int controladorCanhaoZ = 0;
+
+bool curvando = false;
 
 // int basesDestruidas = 0;
 // int basesRestantes = 0;
@@ -532,16 +542,30 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		//Carrega os modelos 3d
 
 		//Avião jogador
-		if(!aviaoJogador.ReadOBJModel("Modelos/F+15.obj", &modeloAviaoJogador))
+		if(!aviaoJogador.ReadOBJModel("Modelos/modeloAviao.obj", &modeloAviaoJogador))
 		{
 			cout << "Erro ao carregar o modelo avião do jogador!" << endl;
 			exit(EXIT_FAILURE);
 		}
 
-		//Bases
-		if(!base.ReadOBJModel("Modelos/Shelter_simple.obj", &modeloBase))
+		//Hélice
+		if(!helice.ReadOBJModel("Modelos/modeloHelice.obj", &modeloHelice))
 		{
-			cout << "Erro ao carregar o modelo avião do jogador!" << endl;
+			cout << "Erro ao carregar o modelo da hélice!" << endl;
+			exit(EXIT_FAILURE);
+		}
+
+		//Bomba
+		if(!bomba.ReadOBJModel("Modelos/modeloBomba.obj", &modeloBomba))
+		{
+			cout << "Erro ao carregar o modelo da bomba!" << endl;
+			exit(EXIT_FAILURE);
+		}
+
+		//Bases
+		if(!base.ReadOBJModel("Modelos/modeloBase.obj", &modeloBase))
+		{
+			cout << "Erro ao carregar o modelo da base!" << endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -803,23 +827,23 @@ void desenharMundo() {
 
 	for(Base b: bases)
 	{
-		b.desenhar(base, modeloBase);			
+		b.desenharModeloBase(base, modeloBase);			
 	}
 
-	for(Bomba bomba: bombas)
+	for(Bomba bomb: bombas)
 	{
-		bomba.desenhar();			
+		bomb.desenharModeloBomba(bomba, modeloBomba);			
 	}
 
 
 //	jogador.desenhar();
 
-	jogador.desenharModeloAviao(aviaoJogador, modeloAviaoJogador);
+	jogador.desenharModeloAviao(aviaoJogador, modeloAviaoJogador, helice, modeloHelice);
 
 	//Desenha os inimigos aereos
 	for(Inimigo inimigo: inimigos)
 	{
-		inimigo.desenhar();			
+		inimigo.desenharModeloAviao(aviaoJogador, modeloAviaoJogador, helice, modeloHelice);			
 	}
 
 	//	 glPushMatrix();
@@ -968,11 +992,19 @@ void idle(void) {
 
 		criarTirosInimigos();		
 
+		jogador.curvando = false;
+
 		if(teclas['a'] == 1 || teclas['A'] == 1) {
 			jogador.alterarAnguloXY(+1 * timeDiference/1000);
+
+			jogador.curvando = true;
+			jogador.alterarAnguloInclinacao(1 * timeDiference/1000);
 		}
 		if(teclas['d'] == 1 || teclas['D'] == 1) {
 			jogador.alterarAnguloXY(-1 * timeDiference/1000);
+
+			jogador.curvando = true;
+			jogador.alterarAnguloInclinacao(-1 * timeDiference/1000);
 		}
 		if(teclas['w'] == 1 || teclas['W'] == 1) 
 		{
@@ -988,7 +1020,6 @@ void idle(void) {
 				jogador.alterarAnguloXZ(-1 * timeDiference/1000);
 			}
 		}
-
 
 		//Verificar se o piloto chegou ao final da arena
 		if(verificarLimiteArena(jogador))

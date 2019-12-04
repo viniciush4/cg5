@@ -13,7 +13,7 @@ Base::Base(float x, float y, float r){
 	this->r = r;
 }
 
-void Base::desenhar(LerOBJ &base, struct obj_model_t &modeloBase)
+void Base::desenharModeloBase(LerOBJ &base, struct obj_model_t &modeloBase)
 {
 /*
 	glPushMatrix();
@@ -25,12 +25,14 @@ void Base::desenhar(LerOBJ &base, struct obj_model_t &modeloBase)
         glutSolidSphere(r,100,100);
     glPopMatrix();
 */
+
+
 	glPushMatrix();
 
-        glTranslatef(x, y, r);
-		glScalef(0.5, 0.5, 0.5);
+        glTranslatef(x, y, 0);
 
-        //glColor3f(0, 1, 0);
+		glScalef(6, 6, 6);
+
 	//	glNormal3f(0.0, 0.0, 1.0);
 		GLfloat mat_ambient_y[] = { 1.0, 1.0, 0.0, 1.0 };
 		glColor3fv(mat_ambient_y);

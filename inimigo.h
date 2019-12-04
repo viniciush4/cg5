@@ -5,6 +5,8 @@
 #include <math.h>
 #include <GL/glut.h>
 
+#include "lerOBJ.h"
+
 using namespace std;
 
 #define grausParaRadianos(g) g*(M_PI/180)
@@ -34,6 +36,8 @@ public:
 	void alterarAngulo(float incremento_xy, float incremento_xz);
 	void andar(float coeficiente_ajuste);
 	void girarHelices(float coeficiente_ajuste);
+
+	void desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &modeloAviaoJogador, LerOBJ &helice, struct obj_model_t &modeloHelice);
 	
 	virtual ~Inimigo();
 };
