@@ -20,6 +20,15 @@ Bomba::Bomba(float x, float y, float z, float r, float angulo_xy, float angulo_x
     this->velocidade = velocidade;
 }
 
+void Bomba::desenharModeloBomba(LerOBJ &bomba, struct obj_model_t &modeloBomba)
+{
+    glPushMatrix();
+        glTranslatef(x, y, z);
+        glScalef(8, 8, 8);
+        bomba.RenderOBJModel(&modeloBomba);
+    glPopMatrix();
+}
+
 void Bomba::desenhar(){
     glPushMatrix();
         glTranslatef(x, y, z);

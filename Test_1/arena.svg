@@ -9,31 +9,31 @@
   <circle
      cx="552"
      cy="296"
-     r="10"
+     r="20"
      fill="red"
      id="3" />
   <circle
      cx="257"
      cy="478"
-     r="10"
+     r="20"
      fill="red"
      id="4" />
   <circle
      cx="526"
      cy="702"
-     r="10"
+     r="20"
      fill="red"
      id="5" />
   <circle
      cx="526"
      cy="502"
-     r="10"
+     r="20"
      fill="orange"
      id="5" />
   <circle
      cx="626"
      cy="402"
-     r="10"
+     r="20"
      fill="orange"
      id="5" />
   <line
@@ -46,7 +46,7 @@
   <circle
      cx="403"
      cy="601"
-     r="10"
+     r="20"
      fill="green"
      id="6" />
 </svg>

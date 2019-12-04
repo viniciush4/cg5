@@ -12,7 +12,7 @@ Arena::Arena(float x, float y, float r, float altura){
 	this->y = y;
 	this->r = r;
 	this->altura = altura;
-	this->textura = LoadTextureRAW("Texturas/ceu.bmp");
+	// this->textura = LoadTextureRAW("Texturas/ceu.bmp");
 }
 
 void Arena::desenhar(){

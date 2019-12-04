@@ -1,6 +1,11 @@
+#ifndef BOMBA_H_
+#define BOMBA_H_
+
 #include <math.h>
 #include <GL/glut.h>
 #include <iostream>
+
+#include "lerOBJ.h"
 
 class Bomba {
 public:
@@ -17,6 +22,9 @@ public:
 
 	void desenhar();	
 	void mover(float coeficiente_ajuste);
+	void desenharModeloBomba(LerOBJ &bomba, struct obj_model_t &modeloBomba);
 	
 	virtual ~Bomba();
 };
+
+#endif /* BOMBA_H_ */
