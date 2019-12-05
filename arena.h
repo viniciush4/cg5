@@ -13,7 +13,8 @@ public:
 	float y;
 	float r;
 	float altura;
-	GLuint textura;
+	GLuint textura_ceu;
+	GLuint textura_chao;
 
 	Arena();
 	Arena(float x, float y, float r, float altura);
