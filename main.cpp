@@ -81,6 +81,10 @@ LerTextura carregarTexturaChao = LerTextura();
 GLuint texturaBase = 0;
 LerTextura carregarTexturaBase = LerTextura();
 
+//Pista
+GLuint texturaPista = 0;
+LerTextura carregarTexturaPista = LerTextura();
+
 /*
  * MAPEAMENTO DAS TECLAS
  */
@@ -569,7 +573,7 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		}
 
 		//Chão da arena
-		texturaChao = carregarTexturaChao.loadTGATexture("Texturas/chao.tga", 0);
+		texturaChao = carregarTexturaChao.loadTGATexture("Texturas/areia.tga", 0);
   		if(!texturaChao)
 		{
 			cout << "Erro ao carregar a textura do chão da arena!" << endl;
@@ -584,6 +588,13 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
    	 		exit (EXIT_FAILURE);
 		}
 
+		//Pista
+		texturaPista = carregarTexturaPista.loadTGATexture("Texturas/pista.tga", 0);
+  		if(!texturaPista)
+		{
+			cout << "Erro ao carregar a textura da pista!" << endl;
+   	 		exit (EXIT_FAILURE);
+		}
 
 	return true;
 }
@@ -703,7 +714,7 @@ void desenharMundo() {
 
 	arena.desenhar(texturaCeu, texturaChao);
 
-	pista.desenhar();
+	pista.desenhar(texturaPista);
 
 	for(Base b: bases)
 	{
@@ -770,12 +781,12 @@ void desenharViewport2() {
 		// Cokpit
 		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 5, 5000.0);
 		posicionarObservador(
-			jogador.x + jogador.r * cos(grausParaRadianos(jogador.angulo_xy)), 
-			jogador.y + jogador.r * sin(grausParaRadianos(jogador.angulo_xy)), 
-			jogador.z,
+			jogador.x + (jogador.r/2 - 2) * cos(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.y + (jogador.r/2 - 2) * sin(grausParaRadianos(jogador.angulo_xy)), 
+			jogador.z + jogador.r/2,
 			jogador.x + (jogador.r + 1) * cos(grausParaRadianos(jogador.angulo_xy)), 
 			jogador.y + (jogador.r + 1) * sin(grausParaRadianos(jogador.angulo_xy)), 
-			jogador.z, 
+			jogador.z + jogador.r/2, 
 			0, 0, 1);
 	}
 	if(camera == 2){

@@ -13,6 +13,6 @@ public:
 
 	Pista();
 	Pista(float x1, float y1, float x2, float y2);
-	void desenhar();
+	void desenhar(GLuint texturaPista);
 	virtual ~Pista();
 };

@@ -85,7 +85,7 @@ void Jogador::desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &mode
 			glTranslatef(0,r/13,r/4);
 			
 			//Movimentos do canhão
-			glRotatef(angulo_canhao_xy, 0, 0, 1);
+			glRotatef(angulo_canhao_xy, 0, 1, 0);
 			glRotatef(angulo_canhao_xz, -1, 0, 0);
 
 			glPushMatrix();

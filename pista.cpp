@@ -29,7 +29,7 @@ Pista::Pista(float x1, float y1, float x2, float y2){
 	// this->textura = LoadTextureRAW("Texturas/pista.bmp");
 }
 
-void Pista::desenhar(){
+void Pista::desenhar(GLuint texturaPista){
     // glColor3f(0, 0, 0);
 	// glBegin(GL_LINES);
     //     glVertex3f(x1, y1, 2.0);
@@ -55,26 +55,32 @@ void Pista::desenhar(){
 	// 	glPopAttrib();
 	// glPopMatrix();
 
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, texturaPista);
+
 	glPushMatrix();
 		// glPushAttrib(GL_TEXTURE_BIT);
 
-			glTranslatef(x1, y1, 1);
+			glTranslatef(x1, y1, 0.1);
 			glRotatef(angulo_xy, 0, 0, 1);
 
 			// glColor3f(1.0f, 1.0f, 1.0f);
 			// glNormal3f(0.0, 0.0, 1.0);
 
-			glBindTexture(GL_TEXTURE_2D, this->textura);
+//			glBindTexture(GL_TEXTURE_2D, this->textura);
 			glBegin(GL_QUADS);
 				
 				
-				glTexCoord2f(0.0, 0.0); glVertex3f(0, -largura/2, 0.5);
-				glTexCoord2f(0.0, 1.0); glVertex3f(comprimento, -largura/2, 0.5);
-				glTexCoord2f(1.0, 1.0); glVertex3f(comprimento, largura/2, 0.5);
-				glTexCoord2f(1.0, 0.0); glVertex3f(0, largura/2, 0.5);
+				glTexCoord2f(0.0, 0.0); glVertex3f(0, -largura/2, 0);
+				glTexCoord2f(0.0, 1.0); glVertex3f(comprimento, -largura/2, 0);
+				glTexCoord2f(1.0, 1.0); glVertex3f(comprimento, largura/2, 0);
+				glTexCoord2f(1.0, 0.0); glVertex3f(0, largura/2, 0);
 			glEnd();
 		// glPopAttrib();
 	glPopMatrix();
+
+
+	glDisable(GL_TEXTURE_2D);
 }
 
 Pista::~Pista(){
