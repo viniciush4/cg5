@@ -41,12 +41,17 @@ Inimigo::Inimigo(float x, float y, float z, float r, float velocidade){
 }
 
 
-void Inimigo::desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &modeloAviaoJogador, LerOBJ &helice, struct obj_model_t &modeloHelice)
+void Inimigo::desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &modeloAviaoJogador, LerOBJ &helice, struct obj_model_t &modeloHelice, GLuint texturaInimigo)
 {
-	 glPushMatrix();
+	GLfloat mat_ambient_w[] = { 1.0, 1.0, 1.0, 1.0 };
+	glColor3fv(mat_ambient_w);
+	
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, texturaInimigo);
 
-		GLfloat mat_ambient_r[] = { 1.0, 0.0, 0.0, 1.0 };
-		glColor3fv(mat_ambient_r);
+
+	glPushMatrix();
+
 
 		//Posiciona o avião de acordo com o ângulo da pista
 		glTranslatef(x, y, z);		
@@ -96,6 +101,8 @@ void Inimigo::desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &mode
 		glPopMatrix();
 
 	glPopMatrix();
+
+	glDisable(GL_TEXTURE_2D);
 }
 
 

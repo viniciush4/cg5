@@ -12,25 +12,32 @@ Arena::Arena(float x, float y, float r, float altura){
 	this->y = y;
 	this->r = r;
 	this->altura = altura;
-	// this->textura = LoadTextureRAW("Texturas/ceu.bmp");
+	//this->textura = LoadTextureRAW("Texturas/ceu.bmp");
 }
 
-void Arena::desenhar(){
+void Arena::desenhar(GLuint texturaCeu, GLuint texturaChao)
+{
 	
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, texturaCeu);
+
 	// Desenha um cilindro
 	glPushMatrix();			
 		glPushAttrib(GL_TEXTURE_BIT);
-			glColor3f(1.0f, 1.0f, 1.0f);
+			GLfloat mat_ambient_w[] = { 1.0, 1.0, 1.0, 1.0 };
+			glColor3fv(mat_ambient_w);
 			GLUquadric* q = gluNewQuadric();
 			gluQuadricOrientation(q, GLU_INSIDE);
 			gluQuadricDrawStyle(q, GLU_FILL); //GLU_FILL, GLU_LINE, GLU_SILHOUETTE, GLU_POINT
 			gluQuadricNormals(q, GLU_FLAT); //GLU_NONE, GLU_FLAT, GLU_SMOOTH
 			gluQuadricTexture(q, GL_TRUE);// if you want to map a texture to it.	
-			glBindTexture(GL_TEXTURE_2D, this->textura);
+//			glBindTexture(GL_TEXTURE_2D, textura);
 			gluCylinder(q, r, r, altura, 30, 30);
 		glPopAttrib();
 	glPopMatrix();
 	
+
+	glDisable(GL_TEXTURE_2D);
 
 /*
 	// Desenha o chão
@@ -45,24 +52,35 @@ void Arena::desenhar(){
 		glEnd();
 	glPopMatrix();
 */
+
+	
+
+	glEnable(GL_TEXTURE_2D);
+	
+	glBindTexture(GL_TEXTURE_2D, texturaChao);
 	
 	//Desenha o chão redondo
 	glPushMatrix();	
 		float angulo = 0.0;
 		int numVertices = 1000;
 
-		glColor3f(1.0f, 0.0f, 0.5f);
+//		glColor3f(1.0f, 0.0f, 0.5f);
+
+		glColor3fv(mat_ambient_w);
 		glNormal3f(0.0, 0.0, 1.0);
 
 		//Desenha o círculo		
 		glBegin(GL_POLYGON);
 			for(int i=0; i < numVertices; i++)
 			{
+				glTexCoord2f(r * cos(angulo), r * sin(angulo));
 				glVertex3f(r * cos(angulo), r * sin(angulo), 0.0);
 				angulo += 2 * M_PI / numVertices;
 			}
 		glEnd();
 	glPopMatrix();
+
+	glDisable(GL_TEXTURE_2D);
 }
 
 Arena::~Arena(){

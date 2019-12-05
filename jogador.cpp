@@ -35,12 +35,17 @@ Jogador::Jogador(float x, float y, float z, float r, float velocidade){
 	this->curvando = false;
 }
 
-void Jogador::desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &modeloAviaoJogador, LerOBJ &helice, struct obj_model_t &modeloHelice)
+void Jogador::desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &modeloAviaoJogador, LerOBJ &helice, struct obj_model_t &modeloHelice, GLuint texturaJogador)
 {
+	GLfloat mat_ambient_w[] = { 1.0, 1.0, 1.0, 1.0 };
+	glColor3fv(mat_ambient_w);
+	
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, texturaJogador);
+	
 	 glPushMatrix();
 
-		GLfloat mat_ambient_w[] = { 1.0, 1.0, 1.0, 1.0 };
-		glColor3fv(mat_ambient_w);
+		
 
 		//Posiciona o avião de acordo com o ângulo da pista
 		glTranslatef(x, y, z);		
@@ -99,6 +104,8 @@ void Jogador::desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &mode
 		glPopMatrix();
 
 	glPopMatrix();
+
+	glDisable(GL_TEXTURE_2D);
 }
 
 void Jogador::desenhar() {

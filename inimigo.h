@@ -37,7 +37,7 @@ public:
 	void andar(float coeficiente_ajuste);
 	void girarHelices(float coeficiente_ajuste);
 
-	void desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &modeloAviaoJogador, LerOBJ &helice, struct obj_model_t &modeloHelice);
+	void desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &modeloAviaoJogador, LerOBJ &helice, struct obj_model_t &modeloHelice, GLuint texturaInimigo);
 	
 	virtual ~Inimigo();
 };

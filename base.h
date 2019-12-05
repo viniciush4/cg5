@@ -18,7 +18,7 @@ public:
 
 	Base();
 	Base(float x, float y, float r);
-	void desenharModeloBase(LerOBJ &base, struct obj_model_t &modeloBase);
+	void desenharModeloBase(LerOBJ &base, struct obj_model_t &modeloBase, GLuint texturaBase);
 	
 	virtual ~Base();
 };

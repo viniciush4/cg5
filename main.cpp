@@ -2,6 +2,11 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
+#include <GL/glext.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 
 #include "tinyxml2.h"
 #include "configuracao.h"
@@ -12,10 +17,10 @@
 #include "bomba.h"
 #include "jogador.h"
 #include "placar.h"
-//#include "OBJ_Loader.h"
 #include "imageloader.h"
 #include "minimapa.h"
 #include "lerOBJ.h"
+#include "lerTextura.h"
 
 
 
@@ -25,7 +30,6 @@
 
 using namespace tinyxml2;
 using namespace std;
-//using namespace objl;
 
 /*
  * DIMENSÕES DO JOGO
@@ -36,8 +40,6 @@ int alturaJanela = 500;
 /*
  * MODELOS IMPORTADOS NO JOGO
  */
-//Loader aviaoJogador;
-//bool carregouAviaoJogador = false;
 
 //Avião do jogador
 struct obj_model_t modeloAviaoJogador;
@@ -55,7 +57,29 @@ LerOBJ bomba = LerOBJ();
 struct obj_model_t modeloBase;
 LerOBJ base = LerOBJ();
 
-//Avião dos inimigos
+/*
+* TEXTURAS
+*/
+
+//Jogador
+GLuint texturaJogador = 0;
+LerTextura carregarTexturaJogador = LerTextura();
+
+//Inimigo
+GLuint texturaInimigo = 0;
+LerTextura carregarTexturaInimigo = LerTextura();
+
+//Céu 
+GLuint texturaCeu = 0;
+LerTextura carregarTexturaCeu = LerTextura();
+
+//Chão
+GLuint texturaChao = 0;
+LerTextura carregarTexturaChao = LerTextura();
+
+//Base
+GLuint texturaBase = 0;
+LerTextura carregarTexturaBase = LerTextura();
 
 /*
  * MAPEAMENTO DAS TECLAS
@@ -512,11 +536,54 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		}
 
 		//Bases
-		if(!base.ReadOBJModel("Modelos/modeloBase.obj", &modeloBase))
+		if(!base.ReadOBJModel("Modelos/Shelter_simple.obj", &modeloBase))
 		{
 			cout << "Erro ao carregar o modelo da base!" << endl;
 			exit(EXIT_FAILURE);
 		}
+
+		//Carregar as texturas
+
+		//Jogador
+		texturaJogador = carregarTexturaJogador.loadTGATexture("Texturas/jogador.tga", 0);
+  		if(!texturaJogador)
+		{
+			cout << "Erro ao carregar a textura do Jogador!" << endl;
+   	 		exit (EXIT_FAILURE);
+		}
+
+		//Inimigo
+		texturaInimigo = carregarTexturaInimigo.loadTGATexture("Texturas/inimigo.tga", 0);
+  		if(!texturaInimigo)
+		{
+			cout << "Erro ao carregar a textura do Inimigo!" << endl;
+   	 		exit (EXIT_FAILURE);
+		}
+
+		//Céu da arena
+		texturaCeu = carregarTexturaCeu.loadTGATexture("Texturas/ceu.tga", 0);
+  		if(!texturaCeu)
+		{
+			cout << "Erro ao carregar a textura do céu da arena!" << endl;
+   	 		exit (EXIT_FAILURE);
+		}
+
+		//Chão da arena
+		texturaChao = carregarTexturaChao.loadTGATexture("Texturas/chao.tga", 0);
+  		if(!texturaChao)
+		{
+			cout << "Erro ao carregar a textura do chão da arena!" << endl;
+   	 		exit (EXIT_FAILURE);
+		}
+
+		//Base
+		texturaBase = carregarTexturaBase.loadTGATexture("Texturas/base.tga", 0);
+  		if(!texturaBase)
+		{
+			cout << "Erro ao carregar a textura da base!" << endl;
+   	 		exit (EXIT_FAILURE);
+		}
+
 
 	return true;
 }
@@ -617,142 +684,6 @@ void DrawAxes() {
     
 }
 
-/*
-void desenharAeromodelo()
-{
-	if(carregouAviaoJogador)
-	{
-		glPushMatrix();
-			//glTranslatef(0,-0.5,0);
-			//glRotatef(rodar, 0, 1, 0);
-			
-
-			for(size_t i = 0; i < aviaoJogador.LoadedMeshes.size(); i++)
-			{
-				Mesh curMesh = aviaoJogador.LoadedMeshes[i];
-			
-				GLfloat materialEmission[] = { 0.1, 0.1, 0.1, 1};
-				GLfloat materialColorA[] = { curMesh.MeshMaterial.Ka.X, curMesh.MeshMaterial.Ka.Y, curMesh.MeshMaterial.Ka.Z, 1};
-				GLfloat materialColorD[] = { curMesh.MeshMaterial.Kd.X, curMesh.MeshMaterial.Kd.Y, curMesh.MeshMaterial.Kd.Z, 1};
-				GLfloat mat_specular[] = { curMesh.MeshMaterial.Ks.X, curMesh.MeshMaterial.Ks.Y, curMesh.MeshMaterial.Ks.Z, 1};
-				GLfloat mat_shininess[] = { curMesh.MeshMaterial.Ns };
-				glColor3f(1,1,1);
-
-				glMaterialfv(GL_FRONT, GL_EMISSION, materialEmission);
-				glMaterialfv(GL_FRONT, GL_AMBIENT, materialColorA);
-				glMaterialfv(GL_FRONT, GL_DIFFUSE, materialColorD);
-				glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-				glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-			
-				
-				glBindTexture (GL_TEXTURE_2D, texturaCeu);
-				glBegin (GL_QUADS);
-				for(size_t j = 0; j < curMesh.Vertices.size(); j++)
-				{
-				   glNormal3f(curMesh.Vertices[j].Normal.X, curMesh.Vertices[j].Normal.Y, curMesh.Vertices[j].Normal.Z);
-				   glTexCoord2f (curMesh.Vertices[j].TextureCoordinate.X, curMesh.Vertices[j].TextureCoordinate.Y);
-				   glVertex3f (curMesh.Vertices[j].Position.X, curMesh.Vertices[j].Position.Y, curMesh.Vertices[j].Position.Z);
-				}
-				glEnd();
-		    
-		    }
-		glPopMatrix();
-	}
-	else
-	{
-		cout << "ERRO: Aeromodelo não encontrado na pasta específica!" << endl;
-		exit(EXIT_FAILURE);
-	}
-
-}
-*/
-
-// //Mensagem na tela
-// void mensagem(void * font, string s, float x, float y, float z)
-// {
-//     glRasterPos3f(x, y, z);
-	
-
-//     for(size_t i = 0; i < s.length(); i++)
-//     {
-//         glutBitmapCharacter(font, s[i]);
-//     }
-// }
-
-
-// //Exibe o placar das bombas
-// void exibirPlacar()
-// {
-// 	glColor3f(0.0, 1.0, 0.0);
-// 	mensagem(GLUT_BITMAP_HELVETICA_12, "BASES", larguraJanela - 80, alturaJanela - 20 , 0);
-// 	glColor3f(1.0, 1.0, 1.0);
-// 	mensagem(GLUT_BITMAP_HELVETICA_10, "DESTRUIDAS = ", larguraJanela - 110, alturaJanela - 40, 0);
-// 	glColor3f(0.0, 1.0, 0.0);
-// 	mensagem(GLUT_BITMAP_HELVETICA_10, to_string(basesDestruidas), larguraJanela - 25, alturaJanela - 40, 0);
-// 	glColor3f(1.0, 1.0, 1.0);
-// 	mensagem(GLUT_BITMAP_HELVETICA_10, "FALTAM = ", larguraJanela - 110, alturaJanela - 55, 0);
-// 	glColor3f(0.0, 1.0, 0.0);
-// 	mensagem(GLUT_BITMAP_HELVETICA_10, to_string(basesRestantes), larguraJanela - 25, alturaJanela - 55, 0);
-// }
-
-// void desenharMiniMapa()
-// {
-//  	glLoadIdentity();
-	
-// 	//Draw text considering a 2D space (disable all 3d features)
-//     glMatrixMode (GL_PROJECTION);
-//     //Push to recover original PROJECTION MATRIX
-//     glPushMatrix();
-//         glLoadIdentity ();
-//         glOrtho (0, larguraJanela, 0, alturaJanela, -1, 1);
-        
-// 		 //Push to recover original attributes
-// 		glPushAttrib(GL_ENABLE_BIT);
-// 			glDisable(GL_LIGHTING);
-// 			glDisable(GL_TEXTURE_2D);
-			
-// 			/*						
-// 			/*						
-// 			/*						
-// 			/*						
-// 			/*						
-// 			/*						
-// 			/*						
-// 			//Draw text in the x, y, z position
-// 			glColor3f(0,1,0);
-// 			glRasterPos3f(arena.x, arena.y, 0);
-// 			const char* tmpStr;
-// 			tmpStr = "TESTE";
-// 			while( *tmpStr ){
-// 				glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *tmpStr);
-// 				tmpStr++;
-// 			}
-
-// 			glColor3f(0.0,1.0,0.0);
-// 		  	glBegin(GL_TRIANGLES);                                          // início triângulo
-// 				glVertex3f(70, 40, 0.0);                         // Topo
-// 				glVertex3f(30, 40, 0.0);                          // Esquerda embaixo
-// 				glVertex3f(70, 20, 0.0);                          // Direita embaixo
-// 			glEnd();
-// 			*/
-// 			// exibirPlacar();
-
-// 			// placar.desenhar(alturaJanela, larguraJanela);
-
-// 			// if(estado == 3)
-// 			// 	placar.desenharMensagemFinal(alturaJanela, larguraJanela);
-
-// 			minimapa.desenhar(arena, jogador, inimigos, bases, larguraJanela, alturaJanela);
-
-
-// 		glPopAttrib();
-
-//     glPopMatrix();
-//     glMatrixMode (GL_MODELVIEW);
-
-	
-
-// }
 
 void desenharMundo() {
 	
@@ -770,13 +701,13 @@ void desenharMundo() {
 	
 	DrawAxes();
 
-	arena.desenhar();
+	arena.desenhar(texturaCeu, texturaChao);
 
 	pista.desenhar();
 
 	for(Base b: bases)
 	{
-		b.desenharModeloBase(base, modeloBase);			
+		b.desenharModeloBase(base, modeloBase, texturaBase);			
 	}
 
 	for(Bomba bomb: bombas)
@@ -787,12 +718,12 @@ void desenharMundo() {
 
 	//	jogador.desenhar();
 
-	jogador.desenharModeloAviao(aviaoJogador, modeloAviaoJogador, helice, modeloHelice);
+	jogador.desenharModeloAviao(aviaoJogador, modeloAviaoJogador, helice, modeloHelice, texturaJogador);
 
 	//Desenha os inimigos aereos
 	for(Inimigo inimigo: inimigos)
 	{
-		inimigo.desenharModeloAviao(aviaoJogador, modeloAviaoJogador, helice, modeloHelice);			
+		inimigo.desenharModeloAviao(aviaoJogador, modeloAviaoJogador, helice, modeloHelice, texturaInimigo);			
 	}
 
 	//	 glPushMatrix();

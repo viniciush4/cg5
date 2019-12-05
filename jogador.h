@@ -55,7 +55,7 @@ public:
 	void desenharHeliceEsquerda();
 
 	void desenharCanhao();
-	void desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &objfile, LerOBJ &helice, struct obj_model_t &modeloHelice);
+	void desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &objfile, LerOBJ &helice, struct obj_model_t &modeloHelice, GLuint texturaJogador);
 
 
 
