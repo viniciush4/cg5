@@ -61,7 +61,7 @@ void Pista::desenhar(GLuint texturaPista){
 	glPushMatrix();
 		// glPushAttrib(GL_TEXTURE_BIT);
 
-			glTranslatef(x1, y1, 0.1);
+			glTranslatef(x1, y1, 1);
 			glRotatef(angulo_xy, 0, 0, 1);
 
 			// glColor3f(1.0f, 1.0f, 1.0f);

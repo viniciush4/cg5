@@ -18,7 +18,7 @@ public:
 
 	Arena();
 	Arena(float x, float y, float r, float altura);
-	void desenhar(GLuint texturaCeu, GLuint texturaChao);
+	void desenhar(GLuint texturaCeu, GLuint texturaChao, GLuint texturaArvore);
 	
 	virtual ~Arena();
 };

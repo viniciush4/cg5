@@ -22,6 +22,9 @@ Bomba::Bomba(float x, float y, float z, float r, float angulo_xy, float angulo_x
 
 void Bomba::desenharModeloBomba(LerOBJ &bomba, struct obj_model_t &modeloBomba)
 {
+    GLfloat mat_ambient_g[] = { 0.0, 1.0, 0.0, 1.0 };
+	glColor3fv(mat_ambient_g);
+
     glPushMatrix();
         glTranslatef(x, y, z);
         glScalef(8, 8, 8);

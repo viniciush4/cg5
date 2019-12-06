@@ -85,6 +85,10 @@ LerTextura carregarTexturaBase = LerTextura();
 GLuint texturaPista = 0;
 LerTextura carregarTexturaPista = LerTextura();
 
+//Árvore
+GLuint texturaArvore = 0;
+LerTextura carregarTexturaArvore = LerTextura();
+
 /*
  * MAPEAMENTO DAS TECLAS
  */
@@ -540,7 +544,7 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		}
 
 		//Bases
-		if(!base.ReadOBJModel("Modelos/Shelter_simple.obj", &modeloBase))
+		if(!base.ReadOBJModel("Modelos/modeloBase.obj", &modeloBase))
 		{
 			cout << "Erro ao carregar o modelo da base!" << endl;
 			exit(EXIT_FAILURE);
@@ -593,6 +597,14 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
   		if(!texturaPista)
 		{
 			cout << "Erro ao carregar a textura da pista!" << endl;
+   	 		exit (EXIT_FAILURE);
+		}
+
+		//Árvore
+		texturaArvore = carregarTexturaArvore.loadTGATexture("Texturas/arvore.tga", 0);
+  		if(!texturaArvore)
+		{
+			cout << "Erro ao carregar a textura da árvore!" << endl;
    	 		exit (EXIT_FAILURE);
 		}
 
@@ -712,7 +724,7 @@ void desenharMundo() {
 	
 	DrawAxes();
 
-	arena.desenhar(texturaCeu, texturaChao);
+	arena.desenhar(texturaCeu, texturaChao, texturaArvore);
 
 	pista.desenhar(texturaPista);
 

@@ -52,6 +52,7 @@ void Jogador::desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &mode
 		glScalef(4,4,4);
 		glRotatef(90, 1, 0, 0);
 		glRotatef(90, 0, 1, 0);
+		glTranslatef(0, 2, 0);
 		
 		//Movimento do avião
 		glRotatef(angulo_xy, 0, 1, 0);
@@ -68,12 +69,12 @@ void Jogador::desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &mode
 
 		//Desenha as hélices
 		glPushMatrix();
-			glTranslatef(r/8.5,r/25,r/7);
+			glTranslatef(r/8.5,-r/35,r/9);
 			glRotatef(angulo_helices,0,0,1);
 			helice.RenderOBJModel(&modeloHelice);
 		glPopMatrix();
 		glPushMatrix();
-			glTranslatef(-r/8.5,r/25,r/7);
+			glTranslatef(-r/8.5,-r/35,r/9);
 			glRotatef(angulo_helices,0,0,1);
 			helice.RenderOBJModel(&modeloHelice);
 		glPopMatrix();
@@ -82,7 +83,7 @@ void Jogador::desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &mode
 		glPushMatrix();
 			
 			//Desenha na ponta do avião
-			glTranslatef(0,r/13,r/4);
+			glTranslatef(0, 0.14, r/4.7);
 			
 			//Movimentos do canhão
 			glRotatef(angulo_canhao_xy, 0, 1, 0);
@@ -98,7 +99,7 @@ void Jogador::desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &mode
 				gluQuadricDrawStyle(q, GLU_FILL); //GLU_FILL, GLU_LINE, GLU_SILHOUETTE, GLU_POINT
 				gluQuadricNormals(q, GLU_FLAT); //GLU_NONE, GLU_FLAT, GLU_SMOOTH
 
-				gluCylinder(q, r/80, r/80, r/14, 30, 30);
+				gluCylinder(q, r/100, r/100, r/14, 30, 30);
 			glPopMatrix();			
 		
 		glPopMatrix();
