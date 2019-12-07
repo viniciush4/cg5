@@ -22,7 +22,9 @@
 #include "lerOBJ.h"
 #include "lerTextura.h"
 
-
+#include "Camera3dPerson.h"
+#include "CameraCannon.h"
+#include "Camera1stPerson.h"
 
 #define grausParaRadianos(g) g*(M_PI/180)
 #define radianosParaGraus(r) r*(180/M_PI)
@@ -111,13 +113,9 @@ Placar placar;
 Minimapa minimapa;
 int estado = 0;
 
-int controladorCanhaoX = 0;
-int controladorCanhaoZ = 0;
-
 bool curvando = false;
-
-// int basesDestruidas = 0;
-// int basesRestantes = 0;
+bool rButtonDown = false;
+int scrollUp = 0;
 
 /*
  * VARIÁVEIS PARA AJUSTE DO TEMPO
@@ -129,18 +127,35 @@ GLdouble timeDiference;
 /*
  * VARIÁVEIS DA CÂMERA
  */
-int camera = 1;
-GLfloat anguloCamera=45, fAspect;
-GLfloat obsX=0, obsY=-10, obsZ=1000;
-GLfloat eyeX=0, eyeY=0, eyeZ=0;
-GLfloat upX=0, upY=0, upZ=1;
-float anguloCameraJogadorXY=0;
-int ultimaPosicaoMouseCameraX=0, ultimaPosicaoMouseCameraY=0;
-bool movimentarCamera3 = false;
+// int camera = 1;
+// GLfloat anguloCamera=45, fAspect;
+// GLfloat obsX=0, obsY=-10, obsZ=1000;
+// GLfloat eyeX=0, eyeY=0, eyeZ=0;
+// GLfloat upX=0, upY=0, upZ=1;
+// float anguloCameraJogadorXY=0;
+// int ultimaPosicaoMouseCameraX=0, ultimaPosicaoMouseCameraY=0;
+// bool movimentarCamera3 = false;
 int mouse_ultima_posicao_x = 0;
 int mouse_ultima_posicao_y = 0;
 
+//Camera controls
+int toggleCam = 0;
+int camAngle = 60;
+int lastX = 0;
+int lastY = 0;
 
+double camZAngle;
+double camYAngle;
+
+bool cam1 = false;
+bool cam2 = false;
+bool cam3 = true;
+
+double camDist = 0;
+
+Camera3dPerson* camera;
+CameraCannon* cameraCannon;
+Camera1stPerson* camera1stPerson;
 
 bool verificarLimiteArena(Jogador jogador)
 {	
@@ -495,7 +510,7 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		float angulo = atan2((pista.y2-pista.y1), (pista.x2-pista.x1));
 		jogador.angulo_xy = radianosParaGraus(angulo);
 		jogador.angulo_canhao_arena_xy = radianosParaGraus(angulo);
-		anguloCameraJogadorXY = radianosParaGraus(angulo);
+		// anguloCameraJogadorXY = radianosParaGraus(angulo);
 
 		// Seta valores iniciais para altura (z)
 		for(size_t i=0; i < inimigos.size(); i++){
@@ -608,6 +623,25 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
    	 		exit (EXIT_FAILURE);
 		}
 
+		camera = new Camera3dPerson(-3*2*jogador.r,0,0, //Position
+                                  0,0,0,        //look point
+                                  0,0,1        //up vector
+                                );
+		camera->setZAngle(jogador.angulo_xy);
+
+		cameraCannon = new CameraCannon(jogador.r*0.9*cos(grausParaRadianos(jogador.angulo_xy)),jogador.r*0.9*sin(grausParaRadianos(jogador.angulo_xy)),7,
+										0,0,0,
+										0,0,1
+									);
+
+		camera1stPerson = new Camera1stPerson(jogador.r,0,jogador.r,
+											0,0,0,
+											0,0,1
+											);
+
+		camZAngle = camera->getZAngle();
+    	camYAngle = camera->getYAngle();
+
 	return true;
 }
 
@@ -616,23 +650,23 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
  * CÂMERAS, LUZES E DESENHO
  */
 
-void posicionarObservador(GLfloat obsX, GLfloat obsY, GLfloat obsZ, GLfloat eyeX, GLfloat eyeY, GLfloat eyeZ, GLfloat upX, GLfloat upY, GLfloat upZ) {
-	// Especifica sistema de coordenadas do modelo
-	glMatrixMode(GL_MODELVIEW);
-	// Inicializa sistema de coordenadas do modelo
-	glLoadIdentity();
-	// Especifica posição do observador e do alvo
-    gluLookAt(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
-}
+// void posicionarObservador(GLfloat obsX, GLfloat obsY, GLfloat obsZ, GLfloat eyeX, GLfloat eyeY, GLfloat eyeZ, GLfloat upX, GLfloat upY, GLfloat upZ) {
+// 	// Especifica sistema de coordenadas do modelo
+// 	glMatrixMode(GL_MODELVIEW);
+// 	// Inicializa sistema de coordenadas do modelo
+// 	glLoadIdentity();
+// 	// Especifica posição do observador e do alvo
+//     gluLookAt(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
+// }
 
-void especificarParametrosVisualizacao(GLfloat angle, GLfloat fAspectW, GLfloat fAspectH, GLfloat zMin, GLfloat zMax) {
-	// Especifica sistema de coordenadas de projeção
-	glMatrixMode(GL_PROJECTION);
-	// Inicializa sistema de coordenadas de projeção
-	glLoadIdentity();
-	// Especifica a projeção perspectiva(angulo,aspecto,zMin,zMax)
-	gluPerspective(angle, (GLfloat)fAspectW / (GLfloat)fAspectH, zMin, zMax);
-}
+// void especificarParametrosVisualizacao(GLfloat angle, GLfloat fAspectW, GLfloat fAspectH, GLfloat zMin, GLfloat zMax) {
+// 	// Especifica sistema de coordenadas de projeção
+// 	glMatrixMode(GL_PROJECTION);
+// 	// Inicializa sistema de coordenadas de projeção
+// 	glLoadIdentity();
+// 	// Especifica a projeção perspectiva(angulo,aspecto,zMin,zMax)
+// 	gluPerspective(angle, (GLfloat)fAspectW / (GLfloat)fAspectH, zMin, zMax);
+// }
 
 void especificarIluminacao(void) {
 
@@ -766,13 +800,15 @@ void desenharMundo() {
 void desenharViewport1() {
 	// Se tiver bomba ativa
 	if(bombas.size() != 0) {
-		glViewport(0, (GLsizei)alturaJanela, (GLsizei)larguraJanela ,200);	
-		especificarParametrosVisualizacao(anguloCamera, larguraJanela, 200, 40, 5000.0);
-		posicionarObservador(
-			bombas.at(0).x, bombas.at(0).y, bombas.at(0).z,
-		 	bombas.at(0).x, bombas.at(0).y, bombas.at(0).z-10, 
-		 	cos(grausParaRadianos(bombas.at(0).angulo_xy)), sin(grausParaRadianos(bombas.at(0).angulo_xy)), 0.0
-		);
+		glViewport(0, (GLsizei)alturaJanela, (GLsizei)larguraJanela ,200);
+		glLoadIdentity();
+		camera->changeCamera(45,larguraJanela,200);	
+		// especificarParametrosVisualizacao(anguloCamera, larguraJanela, 200, 40, 5000.0);
+		// posicionarObservador(
+		// 	bombas.at(0).x, bombas.at(0).y, bombas.at(0).z,
+		//  	bombas.at(0).x, bombas.at(0).y, bombas.at(0).z-10, 
+		//  	cos(grausParaRadianos(bombas.at(0).angulo_xy)), sin(grausParaRadianos(bombas.at(0).angulo_xy)), 0.0
+		// );
 		desenharMundo();
 	}
 }
@@ -780,50 +816,62 @@ void desenharViewport1() {
 void desenharViewport2() {
 
 	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
+	glLoadIdentity();
+  	camera->changeCamera(45,larguraJanela,alturaJanela);
 	
 	// desenharMiniMapa();
 	
 
-	if(camera == 0){
-		// Padrão
-		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
-		posicionarObservador(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
-	}
-	if(camera == 1){
-		// Cokpit
-		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 5, 5000.0);
-		posicionarObservador(
-			jogador.x + (jogador.r/2 - 2) * cos(grausParaRadianos(jogador.angulo_xy)), 
-			jogador.y + (jogador.r/2 - 2) * sin(grausParaRadianos(jogador.angulo_xy)), 
-			jogador.z + jogador.r/2,
-			jogador.x + (jogador.r + 1) * cos(grausParaRadianos(jogador.angulo_xy)), 
-			jogador.y + (jogador.r + 1) * sin(grausParaRadianos(jogador.angulo_xy)), 
-			jogador.z + jogador.r/2, 
-			0, 0, 1);
-	}
-	if(camera == 2){
-		// Canhão
-		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
-		posicionarObservador(
-			jogador.x + jogador.r * cos(grausParaRadianos(jogador.angulo_xy)), 
-			jogador.y + jogador.r * sin(grausParaRadianos(jogador.angulo_xy)), 
-			jogador.z+2,
-			jogador.x + jogador.r * cos(grausParaRadianos(jogador.angulo_xy)) + (0.5*jogador.r) * cos(grausParaRadianos(jogador.angulo_canhao_arena_xy)), 
-			jogador.y + jogador.r * sin(grausParaRadianos(jogador.angulo_xy)) + (0.5*jogador.r) * sin(grausParaRadianos(jogador.angulo_canhao_arena_xy)), 
-			jogador.z + (0.5*jogador.r) * sin(grausParaRadianos(jogador.angulo_canhao_arena_xz)), 
-			0, 0, 1);
-	}
-	if(camera == 3){
-		// 3a pessoa
-		especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
-		posicionarObservador(
-			jogador.x - 50*cos(grausParaRadianos(anguloCameraJogadorXY)), 
-			jogador.y - 50*sin(grausParaRadianos(anguloCameraJogadorXY)), 
-			jogador.z + 40,
-			jogador.x, jogador.y, jogador.z+jogador.r, 0, 0, 1);
-	} 
+	// if(camera == 0){
+	// 	// Padrão
+	// 	especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
+	// 	posicionarObservador(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
+	// }
+	// if(camera == 1){
+	// 	// Cokpit
+	// 	especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 5, 5000.0);
+	// 	posicionarObservador(
+	// 		jogador.x + (jogador.r/2 - 2) * cos(grausParaRadianos(jogador.angulo_xy)), 
+	// 		jogador.y + (jogador.r/2 - 2) * sin(grausParaRadianos(jogador.angulo_xy)), 
+	// 		jogador.z + jogador.r/2,
+	// 		jogador.x + (jogador.r + 1) * cos(grausParaRadianos(jogador.angulo_xy)), 
+	// 		jogador.y + (jogador.r + 1) * sin(grausParaRadianos(jogador.angulo_xy)), 
+	// 		jogador.z + jogador.r/2, 
+	// 		0, 0, 1);
+	// }
+	// if(camera == 2){
+	// 	// Canhão
+	// 	especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
+	// 	posicionarObservador(
+	// 		jogador.x + jogador.r * cos(grausParaRadianos(jogador.angulo_xy)), 
+	// 		jogador.y + jogador.r * sin(grausParaRadianos(jogador.angulo_xy)), 
+	// 		jogador.z+2,
+	// 		jogador.x + jogador.r * cos(grausParaRadianos(jogador.angulo_xy)) + (0.5*jogador.r) * cos(grausParaRadianos(jogador.angulo_canhao_arena_xy)), 
+	// 		jogador.y + jogador.r * sin(grausParaRadianos(jogador.angulo_xy)) + (0.5*jogador.r) * sin(grausParaRadianos(jogador.angulo_canhao_arena_xy)), 
+	// 		jogador.z + (0.5*jogador.r) * sin(grausParaRadianos(jogador.angulo_canhao_arena_xz)), 
+	// 		0, 0, 1);
+	// }
+	// if(camera == 3){
+	// 	// 3a pessoa
+	// 	especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
+	// 	posicionarObservador(
+	// 		jogador.x - 50*cos(grausParaRadianos(anguloCameraJogadorXY)), 
+	// 		jogador.y - 50*sin(grausParaRadianos(anguloCameraJogadorXY)), 
+	// 		jogador.z + 40,
+	// 		jogador.x, jogador.y, jogador.z+jogador.r, 0, 0, 1);
+	// } 
 
+	if(cam3){
+		camera->record();
+	}
+	if(cam2){
+		cameraCannon->record();
+	}
+	if(cam1){
+		camera1stPerson->record();
+	}
 
+	cameraCannon->draw();
 
 	desenharMundo();
 
@@ -864,6 +912,20 @@ void idle(void) {
 	currentTime = glutGet(GLUT_ELAPSED_TIME);
 	timeDiference = currentTime - previousTime;
 	previousTime = currentTime;
+
+	camDist = scrollUp*timeDiference*0.1;
+  	scrollUp = 0;
+
+	// if(cam3){
+		camera->setDist(camDist);
+		camera->update(jogador.x,jogador.y,jogador.z,camYAngle,camZAngle);
+	// }
+	// if(cam2){
+		cameraCannon->update(jogador.x,jogador.y,jogador.z,jogador.z+0.14*jogador.r, -jogador.angulo_canhao_xz,jogador.angulo_canhao_xy, jogador.angulo_xy);
+	// }
+	// if(cam1){
+		// camera1stPerson->update(player->getCenterx(),player->getCentery(),player->getCenterz(),player->getTotalAngle());
+	// }
 
 	// Decolando
 	if(estado == 1){
@@ -960,37 +1022,37 @@ void keyPress(unsigned char key, int x, int y) {
 		case '-':
 			jogador.velocidade -= (estado == 2) ? ((jogador.velocidade > 1) ? 1 : 0) : 0;
 			break;
-		case 'I':
-		case 'i':
-		{
-			int inc = anguloCamera <= 5 ? 0 : 1;
-			anguloCamera -= inc;
-			break;
-		}
-		case 'O':
-		case 'o':
-		{
-			int inc = anguloCamera >= 180 ? 0 : 1;
-			anguloCamera += inc;
-			break;
-		}
+		// case 'I':
+		// case 'i':
+		// {
+		// 	int inc = anguloCamera <= 5 ? 0 : 1;
+		// 	anguloCamera -= inc;
+		// 	break;
+		// }
+		// case 'O':
+		// case 'o':
+		// {
+		// 	int inc = anguloCamera >= 180 ? 0 : 1;
+		// 	anguloCamera += inc;
+		// 	break;
+		// }
 		case 'R':
 		case 'r':
 		{
 			reiniciarJogo();
 		}
-		case '0':
-			camera = 0;
-			break;
-		case '1':
-			camera = 1;
-			break;
-		case '2':
-			camera = 2;
-			break;
-		case '3':
-			camera = 3;
-			break;
+		// case '0':
+		// 	camera = 0;
+		// 	break;
+		// case '1':
+		// 	camera = 1;
+		// 	break;
+		// case '2':
+		// 	camera = 2;
+		// 	break;
+		// case '3':
+		// 	camera = 3;
+		// 	break;
 		case 'N':
 		case 'n':
 			if(glIsEnabled(GL_LIGHT0)){ glDisable(GL_LIGHT0); }else{ glEnable(GL_LIGHT0); }
@@ -1002,6 +1064,23 @@ void keyPress(unsigned char key, int x, int y) {
 		default:
 			break;  	
 	}
+
+	if(key == '1'){
+        cam1 = true;
+        cam2 = false;
+        cam3 = false;
+    }
+
+    if(key == '2'){
+        cam2 = true;
+        cam1 = false;
+        cam3 = false;
+    }
+    if(key == '3'){
+        cam3 = true;
+        cam1 = false;
+        cam2 = false;
+    }
 }
 
 void keyUp(unsigned char key, int x, int y) {
@@ -1009,26 +1088,26 @@ void keyUp(unsigned char key, int x, int y) {
 }
 
 void specialKeys(int key, int x, int y) {
-	switch (key) {
-		case GLUT_KEY_LEFT:
-			obsX -=10;
-			break;
-		case GLUT_KEY_RIGHT: 
-			obsX +=10;
-			break;
-		case GLUT_KEY_UP: 
-			obsY +=10;
-			break;
-		case GLUT_KEY_DOWN: 
-			obsY -=10;
-			break;
-		case GLUT_KEY_HOME : 
-			obsZ +=10;
-			break;
-		case GLUT_KEY_END : 
-			obsZ -=10;
-			break;
-	}
+	// switch (key) {
+	// 	case GLUT_KEY_LEFT:
+	// 		obsX -=10;
+	// 		break;
+	// 	case GLUT_KEY_RIGHT: 
+	// 		obsX +=10;
+	// 		break;
+	// 	case GLUT_KEY_UP: 
+	// 		obsY +=10;
+	// 		break;
+	// 	case GLUT_KEY_DOWN: 
+	// 		obsY -=10;
+	// 		break;
+	// 	case GLUT_KEY_HOME : 
+	// 		obsZ +=10;
+	// 		break;
+	// 	case GLUT_KEY_END : 
+	// 		obsZ -=10;
+	// 		break;
+	// }
 }
 
 //Controla o canhão
@@ -1049,14 +1128,27 @@ void passiveMotion(int x, int y) {
 }
 
 void motion(int x, int y) {
-	if (movimentarCamera3) {
-		if(x > ultimaPosicaoMouseCameraX)
-			anguloCameraJogadorXY -= 3;
-		if(x < ultimaPosicaoMouseCameraX)
-			anguloCameraJogadorXY += 3;
+	// if (movimentarCamera3) {
+	// 	if(x > ultimaPosicaoMouseCameraX)
+	// 		anguloCameraJogadorXY -= 3;
+	// 	if(x < ultimaPosicaoMouseCameraX)
+	// 		anguloCameraJogadorXY += 3;
 
-		ultimaPosicaoMouseCameraX = x;
-	}
+	// 	ultimaPosicaoMouseCameraX = x;
+	// }
+
+	if(rButtonDown){
+      if(cam3 && (teclas['E'] == 1 || teclas['e'] == 1)){
+          camZAngle -= x - lastX;
+          camYAngle += y - lastY;
+
+          camZAngle = (int)camZAngle % 360;
+          camYAngle = (int)camYAngle % 360;
+
+          lastX = x;
+          lastY = y;
+      }
+  }
 }
 
 void mouse(int button, int state, int x, int y) {
@@ -1064,7 +1156,7 @@ void mouse(int button, int state, int x, int y) {
 	if(button == 0 && state == 0 && estado == 2) {
 		// Cria tiro
 	}
-	if(button == 2 && state == 0 && estado == 2) {
+	if(button == 2 && state == 0 && estado == 2 && !(teclas['E'] == 1 || teclas['e'] == 1)) {
 		if(bombas.size() == 0) {
 			Bomba bomba = Bomba(
 				jogador.x, 
@@ -1080,11 +1172,31 @@ void mouse(int button, int state, int x, int y) {
 	}
 
 	// Seta flag que permite movimento da câmera 3
-	if(button == 0 && state == 0 && (teclas['b'] == 1 || teclas['B'] == 1)) {
-		movimentarCamera3 = true;
+	// if(button == 0 && state == 0 && (teclas['b'] == 1 || teclas['B'] == 1)) {
+	// 	movimentarCamera3 = true;
+	// }
+	// if(button == 0 && state == 1) {
+	// 	movimentarCamera3 = false;
+	// }
+
+	if (button == GLUT_RIGHT_BUTTON) {
+        if(state == GLUT_DOWN){
+            lastX = x;
+            lastY = y;
+			rButtonDown = true;
+        }else{
+            rButtonDown = false;
+        }
+
+    }
+
+	scrollUp = 0;
+
+	if(button == 4){
+		scrollUp = -1;
 	}
-	if(button == 0 && state == 1) {
-		movimentarCamera3 = false;
+	if(button == 3){
+		scrollUp = 1;
 	}
 }
 
@@ -1095,10 +1207,12 @@ void reshape(GLsizei w, GLsizei h) {
 	// Calcula a correcao de aspecto
 	//	fAspect = (GLfloat)w/(GLfloat)h;
 
+	camera->changeCamera(camAngle, w, h);
+
 	// Especifica o tamanho da viewport
 	glViewport (0, 0, (GLsizei)w, (GLsizei)h);
 
-	especificarParametrosVisualizacao(anguloCamera, w, h, 0.1, 500.0);
+	// especificarParametrosVisualizacao(anguloCamera, w, h, 0.1, 500.0);
 
 	larguraJanela = w;
 	alturaJanela = h - 200;	

@@ -49,7 +49,7 @@ void Arena::desenhar(GLuint texturaCeu, GLuint texturaChao, GLuint texturaArvore
 			gluQuadricNormals(q, GLU_FLAT); //GLU_NONE, GLU_FLAT, GLU_SMOOTH
 			gluQuadricTexture(q, GL_TRUE);// if you want to map a texture to it.	
 			//			glBindTexture(GL_TEXTURE_2D, this->textura_ceu);
-			gluCylinder(q, r+50, r+50, altura, 30, 30);
+			gluCylinder(q, r+80, r+80, altura, 30, 30);
 		glPopAttrib();
 	glPopMatrix();
 	
@@ -73,10 +73,10 @@ void Arena::desenhar(GLuint texturaCeu, GLuint texturaChao, GLuint texturaArvore
 			glBegin(GL_QUADS);
 				
 				
-				glTexCoord2f(0.0, 0.0); glVertex3f(-r-50, -r-50, 0.0);
-				glTexCoord2f(0.0, 1.0); glVertex3f(r+50, -r-50, 0.0);
-				glTexCoord2f(1.0, 1.0); glVertex3f(r+50, r+50, 0.0);
-				glTexCoord2f(1.0, 0.0); glVertex3f(-r-50, r+50, 0.0);
+				glTexCoord2f(0.0, 0.0); glVertex3f(-r-80, -r-80, 0.0);
+				glTexCoord2f(0.0, 1.0); glVertex3f(r+80, -r-80, 0.0);
+				glTexCoord2f(1.0, 1.0); glVertex3f(r+80, r+80, 0.0);
+				glTexCoord2f(1.0, 0.0); glVertex3f(-r-80, r+80, 0.0);
 			glEnd();
 		glPopAttrib();
 	glPopMatrix();

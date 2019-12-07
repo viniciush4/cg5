@@ -48,7 +48,10 @@ void Jogador::desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &mode
 		
 
 		//Posiciona o avião de acordo com o ângulo da pista
-		glTranslatef(x, y, z);		
+		glTranslatef(x, y, z);	
+
+		// glutSolidSphere(r,100,100);
+
 		glScalef(4,4,4);
 		glRotatef(90, 1, 0, 0);
 		glRotatef(90, 0, 1, 0);
