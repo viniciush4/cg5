@@ -43,7 +43,7 @@ void Jogador::desenharModeloAviao(LerOBJ &aviaoJogador, struct obj_model_t &mode
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texturaJogador);
 	
-	 glPushMatrix();
+	glPushMatrix();
 
 		
 
@@ -512,7 +512,7 @@ void Jogador::alterarAnguloCanhaoXZ(float incremento){
 
 void Jogador::andar(float coeficiente_ajuste, float alturaArena){
 
-	cout << z << endl;
+//	cout << z << endl;
 
     // Caminha em xy
     y += sin(grausParaRadianos(angulo_xy)) * velocidade * coeficiente_ajuste;

@@ -198,7 +198,7 @@ int LerOBJ::FirstPass (FILE *fp, struct obj_model_t *mdl)
 		fprintf (stderr, "error: no vertex found!\n");
 		return 0;
 	}
-
+/*
 	printf ("first pass results: found\n");
 	printf ("   * %i vertices\n", mdl->num_verts);
 	printf ("   * %i texture coords.\n", mdl->num_texCoords);
@@ -206,7 +206,7 @@ int LerOBJ::FirstPass (FILE *fp, struct obj_model_t *mdl)
 	printf ("   * %i faces\n", mdl->num_faces);
 	printf ("   * has texture coords.: %s\n", mdl->has_texCoords ? "yes" : "no");
 	printf ("   * has normals: %s\n", mdl->has_normals ? "yes" : "no");
-
+*/
 	return 1;
 }
 
@@ -370,12 +370,13 @@ int LerOBJ::SecondPass (FILE *fp, struct obj_model_t *mdl)
 		}
 	}
 
+/*
 	printf ("second pass results: read\n");
 	printf ("   * %li vertices\n", pvert - mdl->vertices);
 	printf ("   * %li texture coords.\n", puvw - mdl->texCoords);
 	printf ("   * %li normal vectors\n", pnorm - mdl->normals);
 	printf ("   * %li faces\n", pface - mdl->faces);
-
+*/
 	return 1;
 }
 

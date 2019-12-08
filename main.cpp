@@ -331,8 +331,47 @@ void atualizarEstadoInimigos() {
 	}
 }
 
+//Verifica se a bala ou a bomba está fora da arena
+bool verificarLimiteBalaArena(float x, float y, float r)
+{
+	float distancia = sqrt(pow(x - arena.x, 2.0) + pow(y - arena.y, 2.0));
+
+	if(distancia >= arena.r - r)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool derrubarInimigo(float x, float y, float z, float r)
+{
+	//Percorre todos os inimigos 
+	for(auto it = inimigos.begin(); it != inimigos.end();)
+	{
+		Inimigo &inimigo = *it;
+
+		float distancia = sqrt(pow(x - inimigo.x, 2.0) + pow(y - inimigo.y, 2.0)  + pow(z - inimigo.z, 2.0));
+		
+		//Verificar se as balas sairam da arena
+		if(distancia < inimigo.r/2 + r)
+		{
+			it = inimigos.erase(it);
+			return true;		
+		}
+		else
+		{	
+			++it;
+		}	
+	}
+	return false;
+}
+
 void atualizarEstadoTirosJogador() 
 {
+
 	for(auto it = balas.begin(); it != balas.end();)
 	{
 		Bala &bala = *it;
@@ -341,19 +380,19 @@ void atualizarEstadoTirosJogador()
 		bala.mover(timeDiference/1000);
 		
 		//Verificar se as balas sairam da arena
-//		if(verificarLimiteArtilharia(bala.getX(), bala.getY(), bala.getRaio()/5))
-//		{
-//			it = balas.erase(it);		
-//		}		
+		if(verificarLimiteBalaArena(bala.x, bala.y, (bala.r/100)*4))
+		{
+			it = balas.erase(it);		
+		}		
 		//Verificar se acertou o inimigo
-//		else if(derrubarInimigo(bala.getX(), bala.getY(), bala.getRaio()/5))
-//		{
-//			it = balas.erase(it);			
-//		}
-//		else
-//		{	
+		else if(derrubarInimigo(bala.x, bala.y, bala.z, bala.r/100))
+		{
+			it = balas.erase(it);			
+		}
+		else
+		{	
 			++it;
-//		}	
+		}	
 	}
 }
 
@@ -806,7 +845,7 @@ void desenharMundo() {
 		bomb.desenharModeloBomba(bomba, modeloBomba);			
 	}
 
-	cout << "Balas= " << balas.size() << endl;
+//	cout << "Balas= " << balas.size() << endl;
 
 	for(Bala bala: balas)
 	{
@@ -1039,7 +1078,7 @@ void idle(void) {
 
 		if(verificarColisaoInimigo())
 		{
-			estado = 3;
+//			estado = 3;
 		}
 
 	}
