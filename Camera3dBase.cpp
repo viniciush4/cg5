@@ -1,4 +1,4 @@
-#include "Camera3dPerson.h"
+#include "Camera3dBase.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
@@ -7,7 +7,7 @@
 
 using namespace std;
 
-Camera3dPerson::Camera3dPerson(double x, double y, double z, double look_x, double look_y, double look_z,double up_x,double up_y,double up_z) {
+Camera3dBase::Camera3dBase(double x, double y, double z, double look_x, double look_y, double look_z,double up_x,double up_y,double up_z) {
     this->x = x;
     this->y = y;
     this->z = z;
@@ -28,7 +28,7 @@ Camera3dPerson::Camera3dPerson(double x, double y, double z, double look_x, doub
     this->y_angle = 30;    
 }
 
-void Camera3dPerson::setDist(double dist){    
+void Camera3dBase::setDist(double dist){    
     if(this->x <= 0){
         this->x += dist;
     }else{
@@ -36,7 +36,7 @@ void Camera3dPerson::setDist(double dist){
     }    
 }
 
-void Camera3dPerson::update(double x, double y, double z,double y_angle, double z_angle){
+void Camera3dBase::update(double x, double y, double z,double y_angle, double z_angle){
     
     this->xt = x;
     this->yt = y;
@@ -54,20 +54,20 @@ void Camera3dPerson::update(double x, double y, double z,double y_angle, double 
     }    
 }
 
-double Camera3dPerson::getYAngle() const{
+double Camera3dBase::getYAngle() const{
     return this->y_angle;
 }
 
-double Camera3dPerson::getZAngle() const{
+double Camera3dBase::getZAngle() const{
     return this->z_angle;
 }
 
-void Camera3dPerson::setZAngle(double z_angle){
+void Camera3dBase::setZAngle(double z_angle){
     this->z_angle = z_angle;
     this->z_angle_inicial = z_angle;
 }
 
-void Camera3dPerson::record(){
+void Camera3dBase::record(){
     
     
     gluLookAt(this->x,this->y,this->z,                  //Position
@@ -87,7 +87,7 @@ void Camera3dPerson::record(){
 
 }
 
-void Camera3dPerson::changeCamera(int angle, int w, int h){
+void Camera3dBase::changeCamera(int angle, int w, int h){
     glMatrixMode (GL_PROJECTION);
 
     glLoadIdentity();    
@@ -98,7 +98,7 @@ void Camera3dPerson::changeCamera(int angle, int w, int h){
     glMatrixMode (GL_MODELVIEW);
 }
 
-void Camera3dPerson::draw(){
+void Camera3dBase::draw(){
     glPushMatrix();
         GLfloat mat_ambient_r[] = { 1.0, 1.0, 0.0, 1.0 };
         glColor3fv(mat_ambient_r);
@@ -114,6 +114,6 @@ void Camera3dPerson::draw(){
 
 }
 
-Camera3dPerson::~Camera3dPerson() {
+Camera3dBase::~Camera3dBase() {
 }
 
