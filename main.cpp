@@ -15,6 +15,7 @@
 #include "inimigo.h"
 #include "base.h"
 #include "bomba.h"
+#include "bala.h"
 #include "jogador.h"
 #include "placar.h"
 #include "imageloader.h"
@@ -105,6 +106,7 @@ vector<Inimigo> inimigos_copia;
 vector<Base> bases;
 vector<Base> bases_copia;
 vector<Bomba> bombas;
+vector<Bala> balas;
 Jogador jogador;
 Jogador jogador_copia;
 Pista pista;
@@ -279,6 +281,7 @@ void reiniciarJogo() {
 	// tiros.clear();
 	// tiros_inimigos.clear();
 	bombas.clear();
+	balas.clear();
 	placar.resetarPlacar();
 	estado = 0;
 }
@@ -325,7 +328,30 @@ void atualizarEstadoInimigos() {
 	}
 }
 
-void atualizarEstadoTirosJogador() {
+void atualizarEstadoTirosJogador() 
+{
+	for(auto it = balas.begin(); it != balas.end();)
+	{
+		Bala &bala = *it;
+		
+		//Mover as balas em linha reta
+		bala.mover(timeDiference/1000);
+		
+		//Verificar se as balas sairam da arena
+//		if(verificarLimiteArtilharia(bala.getX(), bala.getY(), bala.getRaio()/5))
+//		{
+//			it = balas.erase(it);		
+//		}		
+		//Verificar se acertou o inimigo
+//		else if(derrubarInimigo(bala.getX(), bala.getY(), bala.getRaio()/5))
+//		{
+//			it = balas.erase(it);			
+//		}
+//		else
+//		{	
+			++it;
+//		}	
+	}
 }
 
 void atualizarEstadoTirosInimigos() {
@@ -772,6 +798,13 @@ void desenharMundo() {
 		bomb.desenharModeloBomba(bomba, modeloBomba);			
 	}
 
+	cout << "Balas= " << balas.size() << endl;
+
+	for(Bala bala: balas)
+	{
+		bala.desenhar();		
+	}
+
 
 	//	jogador.desenhar();
 
@@ -1153,8 +1186,29 @@ void motion(int x, int y) {
 
 void mouse(int button, int state, int x, int y) {
 
-	if(button == 0 && state == 0 && estado == 2) {
+//	if(button == 0 && state == 0 && estado == 2) {
 		// Cria tiro
+//	}
+	//Verifica se o botão esquerdo está pressionado
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && estado == 2)
+	{
+		//Atirar
+		Bala bala = Bala(
+			jogador.x, 
+			jogador.y,
+			jogador.z,
+			jogador.r,
+			jogador.angulo_xy,
+			jogador.angulo_xz,
+			jogador.angulo_canhao_xy,  
+			jogador.angulo_canhao_xz,
+			jogador.angulo_canhao_arena_xy,
+			jogador.angulo_canhao_arena_xz,
+			configuracao.jogador_velocidade_tiro*jogador.velocidade
+		);
+
+		balas.push_back(bala);
+		
 	}
 	if(button == 2 && state == 0 && estado == 2 && !(teclas['E'] == 1 || teclas['e'] == 1)) {
 		if(bombas.size() == 0) {
