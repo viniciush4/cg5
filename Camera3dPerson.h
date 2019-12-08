@@ -33,6 +33,7 @@ class Camera3dPerson {
     
     double y_angle;
     double z_angle;
+    double z_angle_inicial;
     
 public:
     Camera3dPerson(double x, double y, double z, double look_x, double look_y, double look_z,double up_x,double up_y,double up_z);
@@ -46,6 +47,7 @@ public:
     double getYAngle() const;
 
     void setZAngle(double z_angle);
+    void draw();
     
     virtual ~Camera3dPerson();
 

@@ -39,16 +39,15 @@ Camera1stPerson::Camera1stPerson(double x, double y, double z, double look_x, do
     this->up_z = up_z;
 }
 
-void Camera1stPerson::update(double x, double y, double z,double player_angle){
+void Camera1stPerson::update(double x, double y, double z, double z_angle, double y_angle){
 
-    this->xt = x + this->x*cos(player_angle*(M_PI/180.0));     
-    this->yt = y + this->x*sin(player_angle*(M_PI/180.0));
-    this->zt = z + this->z; 
+    this->xt = x + this->x*cos(z_angle*(M_PI/180.0));     
+    this->yt = y + this->x*sin(z_angle*(M_PI/180.0));
+    this->zt = z + this->z + this->x*sin(y_angle*(M_PI/180.0)); 
 
-    this->look_x = xt + 5*cos((player_angle)*(M_PI/180.0));
-    this->look_y = yt + 5*sin((player_angle)*(M_PI/180.0));
-    this->look_z = zt;
-
+    this->look_x = xt + 5*cos(z_angle*(M_PI/180.0));
+    this->look_y = yt + 5*sin(z_angle*(M_PI/180.0));
+    this->look_z = zt + 5*sin(y_angle*(M_PI/180.0));
 }
 
 void Camera1stPerson::record(){
@@ -57,6 +56,22 @@ void Camera1stPerson::record(){
              this->look_x,this->look_y,this->look_z,  //look point
              this->up_x,this->up_y,this->up_z);       //UpVector
 
+
+}
+
+void Camera1stPerson::draw(){
+    glPushMatrix();
+        GLfloat mat_ambient_r[] = { 1.0, 0.0, 0.0, 1.0 };
+        glColor3fv(mat_ambient_r);
+        glTranslatef(xt,yt,zt);
+        glutSolidCube(0.5);
+    glPopMatrix();
+
+    glPushMatrix();
+        glColor3fv(mat_ambient_r);
+        glTranslatef(look_x,look_y,look_z);
+        glutSolidCube(0.5);
+    glPopMatrix();
 
 }
 

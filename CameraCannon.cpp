@@ -45,9 +45,9 @@ void CameraCannon::update(double x, double y, double z,double heightCannon,doubl
     this->yt = y + this->x*sin(player_angle*(M_PI/180.0)) + heightCannon*sin(y_angle*(M_PI/180.0)) * sin((z_angle + player_angle)*(M_PI/180.0));
     this->zt = z + this->z + heightCannon*cos(y_angle*(M_PI/180.0));    
 
-    this->look_x = xt + 5*cos((z_angle + player_angle)*(M_PI/180.0));
-    this->look_y = yt + 5*sin((z_angle + player_angle)*(M_PI/180.0));
-    this->look_z = zt - 5*sin(y_angle*(M_PI/180.0));
+    this->look_x = xt + 15*cos((z_angle + player_angle)*(M_PI/180.0));
+    this->look_y = yt + 15*sin((z_angle + player_angle)*(M_PI/180.0));
+    this->look_z = zt - 15*sin(y_angle*(M_PI/180.0));
 
 }
 

@@ -25,6 +25,7 @@
 #include "Camera3dPerson.h"
 #include "CameraCannon.h"
 #include "Camera1stPerson.h"
+#include "CameraBomba.h"
 
 #define grausParaRadianos(g) g*(M_PI/180)
 #define radianosParaGraus(r) r*(180/M_PI)
@@ -147,15 +148,17 @@ int lastY = 0;
 double camZAngle;
 double camYAngle;
 
-bool cam1 = false;
+bool cam1 = true;
 bool cam2 = false;
-bool cam3 = true;
+bool cam3 = false;
+bool cam4 = false;
 
 double camDist = 0;
 
 Camera3dPerson* camera;
 CameraCannon* cameraCannon;
 Camera1stPerson* camera1stPerson;
+CameraBomba* cameraBomba;
 
 bool verificarLimiteArena(Jogador jogador)
 {	
@@ -634,7 +637,12 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 										0,0,1
 									);
 
-		camera1stPerson = new Camera1stPerson(jogador.r,0,jogador.r,
+		camera1stPerson = new Camera1stPerson(jogador.r,0,11,
+											0,0,0,
+											0,0,1
+											);
+
+		cameraBomba = new CameraBomba(jogador.x,jogador.y,jogador.z,
 											0,0,0,
 											0,0,1
 											);
@@ -809,6 +817,7 @@ void desenharViewport1() {
 		//  	bombas.at(0).x, bombas.at(0).y, bombas.at(0).z-10, 
 		//  	cos(grausParaRadianos(bombas.at(0).angulo_xy)), sin(grausParaRadianos(bombas.at(0).angulo_xy)), 0.0
 		// );
+		cameraBomba->record();
 		desenharMundo();
 	}
 }
@@ -872,6 +881,8 @@ void desenharViewport2() {
 	}
 
 	cameraCannon->draw();
+	camera1stPerson->draw();
+
 
 	desenharMundo();
 
@@ -916,6 +927,13 @@ void idle(void) {
 	camDist = scrollUp*timeDiference*0.1;
   	scrollUp = 0;
 
+	if(bombas.size() != 0){
+		cameraBomba->update(
+			bombas.at(0).x, bombas.at(0).y, bombas.at(0).z,
+	 		bombas.at(0).x, bombas.at(0).y, bombas.at(0).z-10, 
+	 		cos(grausParaRadianos(bombas.at(0).angulo_xy)), sin(grausParaRadianos(bombas.at(0).angulo_xy)), 0.0
+		);
+	}
 	// if(cam3){
 		camera->setDist(camDist);
 		camera->update(jogador.x,jogador.y,jogador.z,camYAngle,camZAngle);
@@ -924,7 +942,7 @@ void idle(void) {
 		cameraCannon->update(jogador.x,jogador.y,jogador.z,jogador.z+0.14*jogador.r, -jogador.angulo_canhao_xz,jogador.angulo_canhao_xy, jogador.angulo_xy);
 	// }
 	// if(cam1){
-		// camera1stPerson->update(player->getCenterx(),player->getCentery(),player->getCenterz(),player->getTotalAngle());
+		camera1stPerson->update(jogador.x,jogador.y,jogador.z,jogador.angulo_xy,jogador.angulo_xz);
 	// }
 
 	// Decolando
@@ -973,17 +991,11 @@ void idle(void) {
 		}
 		if(teclas['w'] == 1 || teclas['W'] == 1) 
 		{
-			if(jogador.z <= arena.altura)
-			{
-				jogador.alterarAnguloXZ(+1 * timeDiference/1000);
-			}
+			jogador.alterarAnguloXZ(+1 * timeDiference/1000);
 		}
 		if(teclas['s'] == 1 || teclas['S'] == 1) 
 		{
-			if(jogador.z >= 0)
-			{
-				jogador.alterarAnguloXZ(-1 * timeDiference/1000);
-			}
+			jogador.alterarAnguloXZ(-1 * timeDiference/1000);
 		}
 
 		//Verificar se o piloto chegou ao final da arena
@@ -994,7 +1006,7 @@ void idle(void) {
 
 		if(verificarColisaoInimigo())
 		{
-			cout << "Explodiu!" << endl;
+			estado = 3;
 		}
 
 	}

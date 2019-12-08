@@ -511,6 +511,9 @@ void Jogador::alterarAnguloCanhaoXZ(float incremento){
 }
 
 void Jogador::andar(float coeficiente_ajuste, float alturaArena){
+
+	cout << z << endl;
+
     // Caminha em xy
     y += sin(grausParaRadianos(angulo_xy)) * velocidade * coeficiente_ajuste;
     x += cos(grausParaRadianos(angulo_xy)) * velocidade * coeficiente_ajuste;
@@ -522,7 +525,11 @@ void Jogador::andar(float coeficiente_ajuste, float alturaArena){
 		{
 			z += sin(grausParaRadianos(angulo_xz)) * velocidade * coeficiente_ajuste;
 		}
-		
+	}
+
+	if(z <= 0){
+		angulo_canhao_arena_xz -= angulo_xz;
+		angulo_xz -= angulo_xz; // ou seja, zero
 	}
 	// x += cos(grausParaRadianos(angulo_xz)) * velocidade * coeficiente_ajuste;
 }

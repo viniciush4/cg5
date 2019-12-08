@@ -64,16 +64,7 @@ void Camera3dPerson::update(double x, double y, double z,double y_angle, double 
         else{
           this->y_angle = -60;
         }
-    }  
-
-    if(abs(this->z_angle) > 180){
-        if(this->z_angle > 0)
-          this->z_angle = 180;
-        else{
-          this->z_angle = -180;
-        }
     }    
-    
 }
 
 double Camera3dPerson::getYAngle() const{
@@ -86,6 +77,7 @@ double Camera3dPerson::getZAngle() const{
 
 void Camera3dPerson::setZAngle(double z_angle){
     this->z_angle = z_angle;
+    this->z_angle_inicial = z_angle;
 }
 
 void Camera3dPerson::record(){
@@ -117,6 +109,22 @@ void Camera3dPerson::changeCamera(int angle, int w, int h){
             (GLfloat)w / (GLfloat)h, 3, 5000.0);
 
     glMatrixMode (GL_MODELVIEW);
+}
+
+void Camera3dPerson::draw(){
+    glPushMatrix();
+        GLfloat mat_ambient_r[] = { 1.0, 1.0, 0.0, 1.0 };
+        glColor3fv(mat_ambient_r);
+        glTranslatef(xt,yt,zt);
+        glutSolidCube(0.5);
+    glPopMatrix();
+
+    glPushMatrix();
+        glColor3fv(mat_ambient_r);
+        glTranslatef(look_x,look_y,look_z);
+        glutSolidCube(0.5);
+    glPopMatrix();
+
 }
 
 Camera3dPerson::~Camera3dPerson() {
