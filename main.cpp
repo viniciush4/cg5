@@ -24,6 +24,7 @@
 #include "lerTextura.h"
 
 #include "Camera3dPerson.h"
+#include "Camera3dBase.h"
 #include "CameraCannon.h"
 #include "Camera1stPerson.h"
 #include "CameraBomba.h"
@@ -149,21 +150,24 @@ int lastY = 0;
 
 double camZAngle;
 double camYAngle;
+double camZAngleBase;
+double camYAngleBase;
 
 bool cam1 = true;
 bool cam2 = false;
 bool cam3 = false;
 bool cam4 = false;
+bool cam5 = false;
 
 double camDist = 0;
 
 Camera3dPerson* camera;
+Camera3dBase* camera3dBase;
 CameraCannon* cameraCannon;
 Camera1stPerson* camera1stPerson;
 CameraBomba* cameraBomba;
 
-bool verificarLimiteArena(Jogador jogador)
-{	
+bool verificarLimiteArena(Jogador jogador) {	
 	//Calcula a distância do piloto até a borda da arena
 	float distancia = sqrt(pow(jogador.x - arena.x, 2.0) + pow(jogador.y - arena.y, 2.0));
 
@@ -178,77 +182,44 @@ bool verificarLimiteArena(Jogador jogador)
 	}
 }
 
-bool verificarColisaoInimigo()
-{
+bool verificarColisaoInimigo() {
 	bool explodiu = false;
 	
 	//Percorre todos os inimigos aéreos
-	for(size_t i = 0; i < inimigos.size(); i++)
-	{
+	for(size_t i = 0; i < inimigos.size(); i++)	{
 		//Calcula a distância do piloto até o inimigo
-		float distancia = sqrt(pow(jogador.x - inimigos[i].x, 2.0) + pow(jogador.y - inimigos[i].y, 2.0));
+		float distancia = sqrt(pow(jogador.x - inimigos[i].x, 2.0) + pow(jogador.y - inimigos[i].y, 2.0) + pow(jogador.z - inimigos[i].z, 2.0));
 
 		//Verifica se houve colisão
-		if(distancia < inimigos[i].r + jogador.r)
-		{
-			explodiu = true;
-			//indiceInimigo = i;
-						
+		if(distancia < inimigos[i].r/2 + jogador.r/2) {
+			explodiu = true;	
 			break;
 		}
 	}
-
 	return explodiu;
 }
 
-//Realiza o teletransporte para o lado oposto da arena
-void teletransportarJogador(float angulo)
-{
-	angulo = angulo * M_PI / 180.0;
+void teletransportarJogador(){
+	double m = tanf(grausParaRadianos(jogador.angulo_xy));
+	double E = jogador.y - 0;
+	double A = 1+pow(m,2);
+	double B = -2*pow(m,2)*jogador.x + 2*E*m;
+	double C = pow(E,2) - 2*E*m*jogador.x + pow(m,2)*pow(jogador.x,2) - pow(arena.r,2);
 
-	//Coeficiente angular
-	float m = 0.0;
-	
-	//Ajuste caso o ângulo do avião seja 90 graus
-	if(angulo >= 1.57 && angulo <= 1.58)
-	{
-		m = tanf(90.1 * M_PI / 180.0);
-	}
-	else if(angulo <= -1.57 && angulo >= -1.58)
-	{
-		m = tanf(-90.1 * M_PI / 180.0);
-	}
-	else
-	{ 
-		m = tanf(angulo);
-	}
+	double x1 = (-B + sqrt(pow(B,2) - 4*A*C))/(2*A);
+	double x2 = (-B - sqrt(pow(B,2) - 4*A*C))/(2*A);
 
-	//pilotoY - arenaY
-	float E = jogador.y - arena.y;	
-	
-	float coeficienteA = 1 + m * m;
-	float coeficienteB = -2 * arena.x -2 * m * m * jogador.x + 2 * E * m;
-	float coeficienteC = E * E - 2 * E * m * jogador.x + m * m * jogador.x * jogador.x + arena.x * arena.x - arena.r * arena.r;
+	double y1 = jogador.y + m*(x1-jogador.x);
+	double y2 = jogador.y + m*(x2-jogador.x);
 
-	float x1 = (-coeficienteB + sqrt(coeficienteB * coeficienteB - 4 * coeficienteA * coeficienteC))/(2 * coeficienteA);
-	float x2 = (-coeficienteB - sqrt(coeficienteB * coeficienteB - 4 * coeficienteA * coeficienteC))/(2 * coeficienteA);
-
-	float y1 = jogador.y + m * (x1 - jogador.x);
-	float y2 = jogador.y + m * (x2 - jogador.x);
-
-	float dist1 = sqrt( powf(x1 - jogador.x, 2) + powf(y1 - jogador.y, 2) );
-	float dist2 = sqrt( powf(x2 - jogador.x, 2) + powf(y2 - jogador.y, 2) ); 
-
-	if(dist1 < dist2)
-	{
+	if(fabs(jogador.x - x1) < fabs(jogador.x - x2)){
 		jogador.x = x2;
 		jogador.y = y2;
-	}
-	else
-	{
+	}else{
 		jogador.x = x1;
 		jogador.y = y1;
 	}
+
 }
 
 //Realiza o teletransporte para o lado oposto da arena
@@ -281,7 +252,6 @@ void reiniciarJogo() {
 	jogador = jogador_copia;
 	inimigos = inimigos_copia;
 	bases = bases_copia;
-	// tiros.clear();
 	// tiros_inimigos.clear();
 	bombas.clear();
 	balas.clear();
@@ -673,6 +643,11 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 											0,0,1
 											);
 
+		camera3dBase = new Camera3dBase(bases[0].x,bases[0].y,0,
+										0,0,0,
+										0,0,1
+										);
+
 		camZAngle = camera->getZAngle();
     	camYAngle = camera->getYAngle();
 
@@ -806,8 +781,6 @@ void desenharMundo() {
 		bomb.desenharModeloBomba(bomba, modeloBomba);			
 	}
 
-	cout << "Balas= " << balas.size() << endl;
-
 	for(Bala bala: balas)
 	{
 		bala.desenhar();		
@@ -860,7 +833,7 @@ void desenharViewport2() {
 	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
 	glLoadIdentity();
   	camera->changeCamera(45,larguraJanela,alturaJanela);
-	
+
 	// desenharMiniMapa();
 	
 
@@ -903,6 +876,9 @@ void desenharViewport2() {
 	// 		jogador.x, jogador.y, jogador.z+jogador.r, 0, 0, 1);
 	// } 
 
+	if(cam5){
+		camera3dBase->record();
+	}
 	if(cam3){
 		camera->record();
 	}
@@ -960,7 +936,13 @@ void idle(void) {
 	camDist = scrollUp*timeDiference*0.1;
   	scrollUp = 0;
 
-	if(bombas.size() != 0){
+	// cam5
+	if(bases.size() != 0){ 
+		camera3dBase->setDist(camDist);
+		camera3dBase->update(bases.at(0).x,bases.at(0).y,0,camYAngleBase,camZAngleBase);
+	}
+	// cam4
+	if(bombas.size() != 0){ 
 		cameraBomba->update(
 			bombas.at(0).x, bombas.at(0).y, bombas.at(0).z,
 	 		bombas.at(0).x, bombas.at(0).y, bombas.at(0).z-10, 
@@ -1034,11 +1016,12 @@ void idle(void) {
 		//Verificar se o piloto chegou ao final da arena
 		if(verificarLimiteArena(jogador))
 		{
-			teletransportarJogador(jogador.angulo_xy);
+			teletransportarJogador();
 		}
 
 		if(verificarColisaoInimigo())
 		{
+			cout << "Colidiu com inimigo" << endl;
 			estado = 3;
 		}
 
@@ -1114,17 +1097,32 @@ void keyPress(unsigned char key, int x, int y) {
         cam1 = true;
         cam2 = false;
         cam3 = false;
+		cam5 = false;
     }
-
     if(key == '2'){
-        cam2 = true;
         cam1 = false;
+		cam2 = true;
         cam3 = false;
+		cam5 = false;
     }
     if(key == '3'){
-        cam3 = true;
         cam1 = false;
         cam2 = false;
+		cam3 = true;
+		cam5 = false;
+    }
+	if(key == '5'){
+		if(bases.size() != 0) {
+			cam1 = false;
+			cam2 = false;
+			cam3 = false;
+			cam5 = true;
+		} else {
+			cam1 = true;
+			cam2 = false;
+			cam3 = false;
+			cam5 = false;
+		}
     }
 }
 
@@ -1197,10 +1195,6 @@ void motion(int x, int y) {
 }
 
 void mouse(int button, int state, int x, int y) {
-
-//	if(button == 0 && state == 0 && estado == 2) {
-		// Cria tiro
-//	}
 	//Verifica se o botão esquerdo está pressionado
 	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && estado == 2)
 	{
