@@ -158,6 +158,7 @@ bool cam2 = false;
 bool cam3 = false;
 bool cam4 = false;
 bool cam5 = false;
+bool desenhar_cameras = false;
 
 double camDist = 0;
 
@@ -810,18 +811,15 @@ void desenharMundo() {
 
 	pista.desenhar(texturaPista);
 
-	for(Base b: bases)
-	{
+	for(Base b: bases) {
 		b.desenharModeloBase(base, modeloBase, texturaBase);			
 	}
 
-	for(Bomba bomb: bombas)
-	{
+	for(Bomba bomb: bombas) {
 		bomb.desenharModeloBomba(bomba, modeloBomba);			
 	}
 
-	for(Bala bala: balas)
-	{
+	for(Bala bala: balas) {
 		bala.desenhar();		
 	}
 
@@ -831,8 +829,7 @@ void desenharMundo() {
 	jogador.desenharModeloAviao(aviaoJogador, modeloAviaoJogador, helice, modeloHelice, texturaJogador);
 
 	//Desenha os inimigos aereos
-	for(Inimigo inimigo: inimigos)
-	{
+	for(Inimigo inimigo: inimigos) {
 		inimigo.desenharModeloAviao(aviaoJogador, modeloAviaoJogador, helice, modeloHelice, texturaInimigo);			
 	}
 
@@ -915,21 +912,23 @@ void desenharViewport2() {
 	// 		jogador.x, jogador.y, jogador.z+jogador.r, 0, 0, 1);
 	// } 
 
-	if(cam5){
+	if (cam5) {
 		camera3dBase->record();
 	}
-	if(cam3){
+	if (cam3) {
 		camera->record();
 	}
-	if(cam2){
+	if (cam2) {
 		cameraCannon->record();
 	}
-	if(cam1){
+	if (cam1) {
 		camera1stPerson->record();
 	}
-
-	cameraCannon->draw();
-	camera1stPerson->draw();
+	if (desenhar_cameras) {
+		cameraCannon->draw();
+		camera1stPerson->draw();
+	}
+	
 
 
 	desenharMundo();
@@ -1118,9 +1117,9 @@ void keyPress(unsigned char key, int x, int y) {
 		// case '2':
 		// 	camera = 2;
 		// 	break;
-		// case '3':
-		// 	camera = 3;
-		// 	break;
+		case '9':
+			desenhar_cameras = !desenhar_cameras;
+			break;
 		case 'N':
 		case 'n':
 			if(glIsEnabled(GL_LIGHT0)){ glDisable(GL_LIGHT0); }else{ glEnable(GL_LIGHT0); }
