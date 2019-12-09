@@ -1,7 +1,7 @@
-#ifndef CAMERA3DPERSON_H
-#define CAMERA3DPERSON_H
+#ifndef CAMERA3PJOGADOR_H
+#define CAMERA3PJOGADOR_H
 
-class Camera3dPerson {
+class Camera3pJogador {
     double x;
     double y;
     double z;
@@ -23,7 +23,7 @@ class Camera3dPerson {
     double z_angle_inicial;
     
 public:
-    Camera3dPerson(double x, double y, double z, double look_x, double look_y, double look_z,double up_x,double up_y,double up_z);
+    Camera3pJogador(double x, double y, double z, double look_x, double look_y, double look_z,double up_x,double up_y,double up_z);
     void record();
     void update(double x, double y, double z,double y_angle, double z_angle);
     void changeCamera(int angle, int w, int h);
@@ -36,9 +36,9 @@ public:
     void setZAngle(double z_angle);
     void draw();
     
-    virtual ~Camera3dPerson();
+    virtual ~Camera3pJogador();
 
 };
 
-#endif /* CAMERA3DPERSON_H */
+#endif /* CAMERA3PJOGADOR_H */
 

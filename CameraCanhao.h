@@ -1,7 +1,7 @@
-#ifndef CAMERACANNON_H
-#define CAMERACANNON_H
+#ifndef CAMERACANHAO_H
+#define CAMERACANHAO_H
 
-class CameraCannon {
+class CameraCanhao {
     double x;
     double y;
     double z;         
@@ -19,14 +19,14 @@ class CameraCannon {
     double up_z;
     
 public:
-    CameraCannon(double x, double y, double z, double look_x, double look_y, double look_z,double up_x,double up_y,double up_z);
+    CameraCanhao(double x, double y, double z, double look_x, double look_y, double look_z,double up_x,double up_y,double up_z);
     void update(double x, double y, double z,double heightCannon,double y_angle, double z_angle,double player_angle);
     void draw();
     void record();
-    virtual ~CameraCannon();
+    virtual ~CameraCanhao();
 private:
 
 };
 
-#endif /* CAMERACANNON_H */
+#endif /* CAMERACANHAO_H */
 

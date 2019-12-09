@@ -1,27 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * File:   Camera1stPerson.cpp
- * Author: 2014100467
- *
- * Created on 21 de Novembro de 2018, 16:08
- */
-
 #include <cmath>
 #include <GL/glu.h>
 #include <GL/glut.h>
 #include <iostream>
 
-#include "Camera1stPerson.h"
+#include "Camera1pJogador.h"
 
 using namespace std;
 
 
-Camera1stPerson::Camera1stPerson(double x, double y, double z, double look_x, double look_y, double look_z,double up_x,double up_y,double up_z){
+Camera1pJogador::Camera1pJogador(double x, double y, double z, double look_x, double look_y, double look_z,double up_x,double up_y,double up_z){
     this->x = x;
     this->y = y;
     this->z = z;
@@ -39,7 +26,7 @@ Camera1stPerson::Camera1stPerson(double x, double y, double z, double look_x, do
     this->up_z = up_z;
 }
 
-void Camera1stPerson::update(double x, double y, double z, double z_angle, double y_angle){
+void Camera1pJogador::update(double x, double y, double z, double z_angle, double y_angle){
 
     this->xt = x + this->x*cos(z_angle*(M_PI/180.0));     
     this->yt = y + this->x*sin(z_angle*(M_PI/180.0));
@@ -50,7 +37,7 @@ void Camera1stPerson::update(double x, double y, double z, double z_angle, doubl
     this->look_z = zt + 5*sin(y_angle*(M_PI/180.0));
 }
 
-void Camera1stPerson::record(){
+void Camera1pJogador::record(){
 
    gluLookAt(this->xt,this->yt ,this->zt,                  //Position
              this->look_x,this->look_y,this->look_z,  //look point
@@ -59,7 +46,7 @@ void Camera1stPerson::record(){
 
 }
 
-void Camera1stPerson::draw(){
+void Camera1pJogador::draw(){
     glPushMatrix();
         GLfloat mat_ambient_r[] = { 1.0, 0.0, 0.0, 1.0 };
         glColor3fv(mat_ambient_r);
@@ -75,5 +62,5 @@ void Camera1stPerson::draw(){
 
 }
 
-Camera1stPerson::~Camera1stPerson() {
+Camera1pJogador::~Camera1pJogador() {
 }

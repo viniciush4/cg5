@@ -23,10 +23,10 @@
 #include "lerOBJ.h"
 #include "lerTextura.h"
 
-#include "Camera3dPerson.h"
-#include "Camera3dBase.h"
-#include "CameraCannon.h"
-#include "Camera1stPerson.h"
+#include "Camera3pJogador.h"
+#include "Camera3pBase.h"
+#include "CameraCanhao.h"
+#include "Camera1pJogador.h"
 #include "CameraBomba.h"
 
 #define grausParaRadianos(g) g*(M_PI/180)
@@ -131,7 +131,7 @@ GLdouble timeDiference;
 /*
  * VARIÁVEIS DA CÂMERA
  */
-// int camera = 1;
+// int camera3pJogador = 1;
 // GLfloat anguloCamera=45, fAspect;
 // GLfloat obsX=0, obsY=-10, obsZ=1000;
 // GLfloat eyeX=0, eyeY=0, eyeZ=0;
@@ -162,10 +162,10 @@ bool desenhar_cameras = false;
 
 double camDist = 0;
 
-Camera3dPerson* camera;
-Camera3dBase* camera3dBase;
-CameraCannon* cameraCannon;
-Camera1stPerson* camera1stPerson;
+Camera3pJogador* camera3pJogador;
+Camera3pBase* camera3pBase;
+CameraCanhao* cameraCanhao;
+Camera1pJogador* camera1pJogador;
 CameraBomba* cameraBomba;
 
 bool verificarLimiteArena(Jogador jogador) {	
@@ -662,34 +662,41 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
    	 		exit (EXIT_FAILURE);
 		}
 
-		camera = new Camera3dPerson(-3*2*jogador.r,0,0, //Position
-                                  0,0,0,        //look point
-                                  0,0,1        //up vector
-                                );
-		camera->setZAngle(jogador.angulo_xy);
+		camera3pJogador = new Camera3pJogador(
+			-3*2*jogador.r,0,0,
+            0,0,0,
+            0,0,1
+		);
 
-		cameraCannon = new CameraCannon(jogador.r*0.9*cos(grausParaRadianos(jogador.angulo_xy)),jogador.r*0.9*sin(grausParaRadianos(jogador.angulo_xy)),7,
-										0,0,0,
-										0,0,1
-									);
+		cameraCanhao = new CameraCanhao(
+			jogador.r*0.9*cos(grausParaRadianos(jogador.angulo_xy)),jogador.r*0.9*sin(grausParaRadianos(jogador.angulo_xy)),7,
+			0,0,0,
+			0,0,1
+		);
 
-		camera1stPerson = new Camera1stPerson(jogador.r,0,11,
-											0,0,0,
-											0,0,1
-											);
+		camera1pJogador = new Camera1pJogador(
+			jogador.r,0,11,
+			0,0,0,
+			0,0,1
+		);
 
-		cameraBomba = new CameraBomba(jogador.x,jogador.y,jogador.z,
-											0,0,0,
-											0,0,1
-											);
+		cameraBomba = new CameraBomba(
+			jogador.x,jogador.y,jogador.z,
+			0,0,0,
+			0,0,1
+		);
 
-		camera3dBase = new Camera3dBase(bases[0].x,bases[0].y,0,
-										0,0,0,
-										0,0,1
-										);
+		camera3pBase = new Camera3pBase(
+			-3*2*bases[0].r,0,0,
+			0,0,0,
+			0,0,1
+		);
 
-		camZAngle = camera->getZAngle();
-    	camYAngle = camera->getYAngle();
+		camera3pJogador->setZAngle(jogador.angulo_xy);
+		camZAngle = camera3pJogador->getZAngle();
+    	camYAngle = camera3pJogador->getYAngle();
+		camZAngleBase = 0;
+		camYAngleBase = 30;
 
 	return true;
 }
@@ -754,41 +761,41 @@ void especificarIluminacao(void) {
 }
 
 // Vamos retirar depois
-void DrawAxes() {
-    GLfloat mat_ambient_r[] = { 1.0, 0.0, 0.0, 1.0 };
-    GLfloat mat_ambient_g[] = { 0.0, 1.0, 0.0, 1.0 };
-    GLfloat mat_ambient_b[] = { 0.0, 0.0, 1.0, 1.0 };
+// void DrawAxes() {
+//     GLfloat mat_ambient_r[] = { 1.0, 0.0, 0.0, 1.0 };
+//     GLfloat mat_ambient_g[] = { 0.0, 1.0, 0.0, 1.0 };
+//     GLfloat mat_ambient_b[] = { 0.0, 0.0, 1.0, 1.0 };
 
-    glPushAttrib(GL_ENABLE_BIT);
-        glDisable(GL_LIGHTING);
-        glDisable(GL_TEXTURE_2D);
+//     glPushAttrib(GL_ENABLE_BIT);
+//         glDisable(GL_LIGHTING);
+//         glDisable(GL_TEXTURE_2D);
  
-        //x axis
-        glPushMatrix();
-            glColor3fv(mat_ambient_r);
-            glScalef(5, 0.1, 0.1);
-            glTranslatef(0, 0, 0); // put in one end
-            glutSolidCube(20.0);
-        glPopMatrix();
+//         //x axis
+//         glPushMatrix();
+//             glColor3fv(mat_ambient_r);
+//             glScalef(5, 0.1, 0.1);
+//             glTranslatef(0, 0, 0); // put in one end
+//             glutSolidCube(20.0);
+//         glPopMatrix();
 
-        //y axis
-        glPushMatrix();
-            glColor3fv(mat_ambient_g);
-            glScalef(0.1, 5, 0.1);
-            glTranslatef(0, 0, 0); // put in one end
-            glutSolidCube(20.0);
-        glPopMatrix();
+//         //y axis
+//         glPushMatrix();
+//             glColor3fv(mat_ambient_g);
+//             glScalef(0.1, 5, 0.1);
+//             glTranslatef(0, 0, 0); // put in one end
+//             glutSolidCube(20.0);
+//         glPopMatrix();
 
-        //z axis
-        glPushMatrix();
-            glColor3fv(mat_ambient_b);
-            glScalef(0.1, 0.1, 5);
-            glTranslatef(0, 0, 0); // put in one end
-            glutSolidCube(20.0);
-        glPopMatrix();
-    glPopAttrib();
+//         //z axis
+//         glPushMatrix();
+//             glColor3fv(mat_ambient_b);
+//             glScalef(0.1, 0.1, 5);
+//             glTranslatef(0, 0, 0); // put in one end
+//             glutSolidCube(20.0);
+//         glPopMatrix();
+//     glPopAttrib();
     
-}
+// }
 
 
 void desenharMundo() {
@@ -797,15 +804,15 @@ void desenharMundo() {
 
 	// Desenha uma esfera na posição da luz
 	// Vamos retirar isso depois
-	glPushMatrix();
-		glTranslatef(0, 0, 50);
-		glColor3f(1.0f, 1.0f, 0.0f);
-		glutSolidSphere (10.0, 50, 50);
-		glColor3f(0.0f, 0.0f, 1.0f);
-	glPopMatrix();
+	// glPushMatrix();
+	// 	glTranslatef(0, 0, 50);
+	// 	glColor3f(1.0f, 1.0f, 0.0f);
+	// 	glutSolidSphere (10.0, 50, 50);
+	// 	glColor3f(0.0f, 0.0f, 1.0f);
+	// glPopMatrix();
 
 	
-	DrawAxes();
+	// DrawAxes();
 
 	arena.desenhar(texturaCeu, texturaChao, texturaArvore);
 
@@ -852,7 +859,7 @@ void desenharViewport1() {
 	if(bombas.size() != 0) {
 		glViewport(0, (GLsizei)alturaJanela, (GLsizei)larguraJanela ,200);
 		glLoadIdentity();
-		camera->changeCamera(45,larguraJanela,200);	
+		camera3pJogador->changeCamera(45,larguraJanela,200);	
 		// especificarParametrosVisualizacao(anguloCamera, larguraJanela, 200, 40, 5000.0);
 		// posicionarObservador(
 		// 	bombas.at(0).x, bombas.at(0).y, bombas.at(0).z,
@@ -868,17 +875,17 @@ void desenharViewport2() {
 
 	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
 	glLoadIdentity();
-  	camera->changeCamera(45,larguraJanela,alturaJanela);
+  	camera3pJogador->changeCamera(45,larguraJanela,alturaJanela);
 
 	// desenharMiniMapa();
 	
 
-	// if(camera == 0){
+	// if(camera3pJogador == 0){
 	// 	// Padrão
 	// 	especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
 	// 	posicionarObservador(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
 	// }
-	// if(camera == 1){
+	// if(camera3pJogador == 1){
 	// 	// Cokpit
 	// 	especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 5, 5000.0);
 	// 	posicionarObservador(
@@ -890,7 +897,7 @@ void desenharViewport2() {
 	// 		jogador.z + jogador.r/2, 
 	// 		0, 0, 1);
 	// }
-	// if(camera == 2){
+	// if(camera3pJogador == 2){
 	// 	// Canhão
 	// 	especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
 	// 	posicionarObservador(
@@ -902,7 +909,7 @@ void desenharViewport2() {
 	// 		jogador.z + (0.5*jogador.r) * sin(grausParaRadianos(jogador.angulo_canhao_arena_xz)), 
 	// 		0, 0, 1);
 	// }
-	// if(camera == 3){
+	// if(camera3pJogador == 3){
 	// 	// 3a pessoa
 	// 	especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
 	// 	posicionarObservador(
@@ -913,20 +920,20 @@ void desenharViewport2() {
 	// } 
 
 	if (cam5) {
-		camera3dBase->record();
+		camera3pBase->record();
 	}
 	if (cam3) {
-		camera->record();
+		camera3pJogador->record();
 	}
 	if (cam2) {
-		cameraCannon->record();
+		cameraCanhao->record();
 	}
 	if (cam1) {
-		camera1stPerson->record();
+		camera1pJogador->record();
 	}
 	if (desenhar_cameras) {
-		cameraCannon->draw();
-		camera1stPerson->draw();
+		cameraCanhao->draw();
+		camera1pJogador->draw();
 	}
 	
 
@@ -976,8 +983,8 @@ void idle(void) {
 
 	// cam5
 	if(bases.size() != 0){ 
-		camera3dBase->setDist(camDist);
-		camera3dBase->update(bases.at(0).x,bases.at(0).y,0,camYAngleBase,camZAngleBase);
+		camera3pBase->setDist(camDist);
+		camera3pBase->update(bases.at(0).x,bases.at(0).y,0,camYAngleBase,camZAngleBase);
 	}
 	// cam4
 	if(bombas.size() != 0){ 
@@ -988,14 +995,14 @@ void idle(void) {
 		);
 	}
 	// if(cam3){
-		camera->setDist(camDist);
-		camera->update(jogador.x,jogador.y,jogador.z,camYAngle,camZAngle);
+		camera3pJogador->setDist(camDist);
+		camera3pJogador->update(jogador.x,jogador.y,jogador.z,camYAngle,camZAngle);
 	// }
 	// if(cam2){
-		cameraCannon->update(jogador.x,jogador.y,jogador.z,jogador.z+0.14*jogador.r, -jogador.angulo_canhao_xz,jogador.angulo_canhao_xy, jogador.angulo_xy);
+		cameraCanhao->update(jogador.x,jogador.y,jogador.z,jogador.z+0.14*jogador.r, -jogador.angulo_canhao_xz,jogador.angulo_canhao_xy, jogador.angulo_xy);
 	// }
 	// if(cam1){
-		camera1stPerson->update(jogador.x,jogador.y,jogador.z,jogador.angulo_xy,jogador.angulo_xz);
+		camera1pJogador->update(jogador.x,jogador.y,jogador.z,jogador.angulo_xy,jogador.angulo_xz);
 	// }
 
 	// Decolando
@@ -1109,13 +1116,13 @@ void keyPress(unsigned char key, int x, int y) {
 			break;
 		}
 		// case '0':
-		// 	camera = 0;
+		// 	camera3pJogador = 0;
 		// 	break;
 		// case '1':
-		// 	camera = 1;
+		// 	camera3pJogador = 1;
 		// 	break;
 		// case '2':
-		// 	camera = 2;
+		// 	camera3pJogador = 2;
 		// 	break;
 		case '9':
 			desenhar_cameras = !desenhar_cameras;
@@ -1319,7 +1326,7 @@ void reshape(GLsizei w, GLsizei h) {
 	// Calcula a correcao de aspecto
 	//	fAspect = (GLfloat)w/(GLfloat)h;
 
-	camera->changeCamera(camAngle, w, h);
+	camera3pJogador->changeCamera(camAngle, w, h);
 
 	// Especifica o tamanho da viewport
 	glViewport (0, 0, (GLsizei)w, (GLsizei)h);
