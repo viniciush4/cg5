@@ -5,5 +5,5 @@
 		<caminho>./Test_1/</caminho>
 	</arquivoDaArena>
 	<jogador velTiro="2.0"  vel="1.0"></jogador>
-	<inimigo freqTiro="1" vel="0.5" velTiro="1.0"></inimigo>
+	<inimigo freqTiro="5" vel="0.5" velTiro="1.0"></inimigo>
 </aplicacao>

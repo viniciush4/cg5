@@ -109,6 +109,7 @@ vector<Base> bases;
 vector<Base> bases_copia;
 vector<Bomba> bombas;
 vector<Bala> balas;
+vector<Bala> balasInimigas;
 Jogador jogador;
 Jogador jogador_copia;
 Pista pista;
@@ -141,6 +142,7 @@ GLdouble timeDiference;
 // bool movimentarCamera3 = false;
 int mouse_ultima_posicao_x = 0;
 int mouse_ultima_posicao_y = 0;
+float momentoTiro = 0;
 
 //Camera controls
 int toggleCam = 0;
@@ -340,6 +342,20 @@ bool derrubarInimigo(float x, float y, float z, float r)
 	return false;
 }
 
+bool derrubarJogador(float x, float y, float z, float r)
+{
+	float distancia = sqrt(pow(x - jogador.x, 2.0) + pow(y - jogador.y, 2.0) + pow(z - jogador.z, 2.0));
+	
+	if(distancia < jogador.r/2 + r)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 void atualizarEstadoTirosJogador() 
 {
 
@@ -367,7 +383,32 @@ void atualizarEstadoTirosJogador()
 	}
 }
 
-void atualizarEstadoTirosInimigos() {
+void atualizarEstadoTirosInimigos() 
+{
+	for(auto it = balasInimigas.begin(); it != balasInimigas.end();)
+	{
+		Bala &balaInimiga = *it;
+		
+		//Mover as balas em linha reta
+		balaInimiga.moverBalaInimiga(timeDiference/1000);
+	
+		//Verificar se as balas sairam da arena
+		if(verificarLimiteBalaArena(balaInimiga.x, balaInimiga.y, (balaInimiga.r/100)*4))
+		{
+			it = balasInimigas.erase(it);		
+		}			
+		//Verificar se acertou o jogador
+		else if(derrubarJogador(balaInimiga.x, balaInimiga.y, balaInimiga.z, balaInimiga.r/100))
+		{
+			it = balasInimigas.erase(it);
+			estado = 3;			
+		}
+		else
+		{	
+			++it;
+		}	
+	}
+
 }
 
 void atualizarEstadoBombas() {
@@ -400,7 +441,62 @@ void atualizarEstadoBombas() {
 	}
 }
 
-void criarTirosInimigos() {
+void criarTirosInimigos() 
+{
+	//Frequência do tiro do inimigo
+
+	momentoTiro += timeDiference * configuracao.inimigo_frequencia_tiro;
+	if(momentoTiro >= 1000)
+	{
+
+		for(auto it = inimigos.begin(); it != inimigos.end();)
+		{
+			Inimigo &inimigo = *it;
+			
+			//Criar bala inimiga
+			Bala bala = Bala(
+				inimigo.x, 
+				inimigo.y,
+				inimigo.z,
+				inimigo.r,
+				inimigo.angulo_xy,
+				inimigo.angulo_xz,
+				inimigo.angulo_canhao_xy,  
+				inimigo.angulo_canhao_xz,
+				inimigo.angulo_canhao_arena_xy,
+				inimigo.angulo_canhao_arena_xz,
+				0,
+				false,
+				configuracao.inimigo_velocidade_tiro*inimigo.velocidade
+			);
+
+			balasInimigas.push_back(bala);
+
+			cout << "Inimigo: " << inimigo.x << ", " << inimigo.y << ", " << inimigo.z << ", " << inimigo.angulo_canhao_arena_xz << endl;
+			cout << "Bala   : " << bala.x << ", " << bala.y << ", " << bala.z << ", " << bala.angulo_canhao_arena_xz << endl;
+
+/*
+			//Verificar se as balas sairam da arena
+			if(verificarLimiteBalaArena(bala.x, bala.y, (bala.r/100)*4))
+			{
+				it = balas.erase(it);		
+			}		
+			//Verificar se acertou o inimigo
+			else if(derrubarInimigo(bala.x, bala.y, bala.z, bala.r/100))
+			{
+				it = balas.erase(it);			
+			}
+			else
+			{	
+				++it;
+			}	
+		}
+*/
+			++it;
+		}	
+
+		momentoTiro = 0.0;
+	}
 }
 	
 
@@ -830,6 +926,12 @@ void desenharMundo() {
 		bala.desenhar();		
 	}
 
+	for(Bala balaInimiga: balasInimigas)
+	{
+		balaInimiga.desenharBalaInimiga();		
+	}
+
+
 
 	//	jogador.desenhar();
 
@@ -1201,19 +1303,21 @@ void specialKeys(int key, int x, int y) {
 
 //Controla o canhão
 void passiveMotion(int x, int y) {	
-	if(x > mouse_ultima_posicao_x)
-		jogador.alterarAnguloCanhaoXY(-3);
-	if(x < mouse_ultima_posicao_x)
-		jogador.alterarAnguloCanhaoXY(3);
+	if (estado != 3){
+		if(x > mouse_ultima_posicao_x)
+			jogador.alterarAnguloCanhaoXY(-3);
+		if(x < mouse_ultima_posicao_x)
+			jogador.alterarAnguloCanhaoXY(3);
 
-	mouse_ultima_posicao_x = x;
+		mouse_ultima_posicao_x = x;
 
-	if(y > mouse_ultima_posicao_y)
-		jogador.alterarAnguloCanhaoXZ(-3);
-	if(y < mouse_ultima_posicao_y)
-		jogador.alterarAnguloCanhaoXZ(3);
+		if(y > mouse_ultima_posicao_y)
+			jogador.alterarAnguloCanhaoXZ(-3);
+		if(y < mouse_ultima_posicao_y)
+			jogador.alterarAnguloCanhaoXZ(3);
 
-	mouse_ultima_posicao_y = y;
+		mouse_ultima_posicao_y = y;
+	}
 }
 
 void motion(int x, int y) {
@@ -1346,8 +1450,8 @@ int main(int argc, char** argv) {
 	glutInit (&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(larguraJanela, alturaJanela + 200);
-	glutInitWindowPosition(0, 0); // Deixar assim por enquanto... para a janela não abrir em cma do código
-	// glutInitWindowPosition((glutGet(GLUT_SCREEN_WIDTH)-larguraJanela)/2,(glutGet(GLUT_SCREEN_HEIGHT)-alturaJanela)/2);
+//	glutInitWindowPosition(0, 0); // Deixar assim por enquanto... para a janela não abrir em cma do código
+	glutInitWindowPosition((glutGet(GLUT_SCREEN_WIDTH)-larguraJanela)/2,(glutGet(GLUT_SCREEN_HEIGHT)-alturaJanela)/2);
 	glutCreateWindow("TRABALHO FINAL");
 	glutReshapeFunc(reshape);
 	glutSpecialFunc(specialKeys);

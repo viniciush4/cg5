@@ -101,21 +101,56 @@ void Bala::desenhar()
     glPopMatrix();
 }
 
+void Bala::desenharBalaInimiga(){
+
+	glPushMatrix();
+
+
+		//Posiciona o avião de acordo com o ângulo da pista
+		glTranslatef(x, y, z);		
+		glScalef(4,4,4);
+		glRotatef(90, 1, 0, 0);
+		glRotatef(90, 0, 1, 0);
+		
+		//Movimento do avião
+		glRotatef(angulo_xy, 0, 1, 0);
+		glRotatef(angulo_xz, -1, 0, 0);
+		
+		//Desenha o canhão
+		glPushMatrix();
+			
+			//Desenha na ponta do avião
+			glTranslatef(0, 0.14, r/4.7);
+			
+			glPushMatrix();
+				GLfloat mat_ambient_k[] = { 0.0, 0.0, 0.0, 1.0 };
+				glColor3fv(mat_ambient_k);
+
+				glTranslatef(0, 0, r/14);
+
+				glutSolidSphere(r/100,100,100);
+			glPopMatrix();			
+		
+		glPopMatrix();
+
+	glPopMatrix();
+
+	glDisable(GL_TEXTURE_2D);
+}
+
 void Bala::mover(float coeficiente_ajuste)
 {
-//  bala.moverBalaEixoX(velocidadeFinalTiro * (tempo/1000) * cos(bala.getAnguloAviao() + bala.getAnguloCanhao() * M_PI / 180.0));
-//	bala.moverBalaEixoY(velocidadeFinalTiro * (tempo/1000) * sin(bala.getAnguloAviao() + bala.getAnguloCanhao() * M_PI / 180.0));
-
-   
- //   x += velocidade*coeficiente_ajuste*cos(grausParaRadianos(angulo_canhao_arena_xy));
- //   y += velocidade*coeficiente_ajuste*sin(grausParaRadianos(angulo_canhao_arena_xy));
- //   z += velocidade*coeficiente_ajuste*sin(grausParaRadianos(angulo_canhao_arena_xz));
-
     y += sin(grausParaRadianos(angulo_canhao_arena_xy)) * velocidade * coeficiente_ajuste;
     x += cos(grausParaRadianos(angulo_canhao_arena_xy)) * velocidade * coeficiente_ajuste;
     z += sin(grausParaRadianos(angulo_canhao_arena_xz)) * velocidade * coeficiente_ajuste;
 
+}
 
+void Bala::moverBalaInimiga(float coeficiente_ajuste)
+{
+    y += sin(grausParaRadianos(angulo_xy)) * velocidade * coeficiente_ajuste;
+    x += cos(grausParaRadianos(angulo_xy)) * velocidade * coeficiente_ajuste;
+    z += sin(grausParaRadianos(angulo_xz)) * velocidade * coeficiente_ajuste;
 }
 
 Bala::~Bala(){

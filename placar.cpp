@@ -87,7 +87,7 @@ void Placar::desenharMensagemFinal(int altura_janela, int largura_janela){
                     glPushMatrix();
                         glTranslatef(largura_janela/2-130, altura_janela/2, 0);
                         glPushMatrix();
-                            glColor3f(1, 1, 1);
+                            glColor3f(0, 1, 0);
                             glRasterPos3f(0, 0, 0);
                             for (size_t i = 0; i < 22; i++) {
                                 glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, buffer[i]);
@@ -115,7 +115,7 @@ void Placar::desenharMensagemFinal(int altura_janela, int largura_janela){
                     glPushMatrix();
                         glTranslatef(largura_janela/2-120, altura_janela/2, 0);
                         glPushMatrix();
-                            glColor3f(1, 1, 1);
+                            glColor3f(1, 0, 0);
                             glRasterPos3f(0, 0, 0);
                             for (size_t i = 0; i < 22; i++) {
                                 glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, buffer[i]);
