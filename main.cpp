@@ -1107,6 +1107,7 @@ void keyPress(unsigned char key, int x, int y) {
 		case 'r':
 		{
 			reiniciarJogo();
+			break;
 		}
 		// case '0':
 		// 	camera = 0;
@@ -1230,6 +1231,17 @@ void motion(int x, int y) {
           lastX = x;
           lastY = y;
       }
+
+	  if(cam5 && (teclas['E'] == 1 || teclas['e'] == 1)){
+          camZAngleBase -= x - lastX;
+          camYAngleBase += y - lastY;
+
+          camZAngleBase = (int)camZAngleBase % 360;
+          camYAngleBase = (int)camYAngleBase % 360;
+
+          lastX = x;
+          lastY = y;
+      }
   }
 }
 
@@ -1249,6 +1261,8 @@ void mouse(int button, int state, int x, int y) {
 			jogador.angulo_canhao_xz,
 			jogador.angulo_canhao_arena_xy,
 			jogador.angulo_canhao_arena_xz,
+			jogador.angulo_inclinacao,
+			jogador.curvando,
 			configuracao.jogador_velocidade_tiro*jogador.velocidade
 		);
 

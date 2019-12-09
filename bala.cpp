@@ -7,7 +7,7 @@ Bala::Bala()
 
 }
 
-Bala::Bala(float x, float y, float z, float r, float angulo_xy, float angulo_xz, float angulo_canhao_xy, float angulo_canhao_xz, float angulo_canhao_arena_xy, float angulo_canhao_arena_xz, float velocidade)
+Bala::Bala(float x, float y, float z, float r, float angulo_xy, float angulo_xz, float angulo_canhao_xy, float angulo_canhao_xz, float angulo_canhao_arena_xy, float angulo_canhao_arena_xz, float angulo_inclinacao, bool curvando, float velocidade)
 {
     this->x = x;
     this->y = y;
@@ -19,6 +19,8 @@ Bala::Bala(float x, float y, float z, float r, float angulo_xy, float angulo_xz,
     this->angulo_canhao_xz = angulo_canhao_xz;
     this->angulo_canhao_arena_xy = angulo_canhao_arena_xy;
     this->angulo_canhao_arena_xz = angulo_canhao_arena_xz;
+    this->angulo_inclinacao = angulo_inclinacao;
+    this->curvando = curvando;
     this->velocidade = velocidade;
 
 //Tentativa 1
@@ -64,17 +66,13 @@ void Bala::desenhar()
 		//Movimento do avião
 		glRotatef(angulo_xy, 0, 1, 0);
 		glRotatef(angulo_xz, -1, 0, 0);
-//		glRotatef(angulo_inclinacao, 0, 0, -1);
+		glRotatef(angulo_inclinacao, 0, 0, -1);
 
-//		if(!curvando)
-//		{
-//			glRotatef(angulo_inclinacao, 0, 0, 1);
-//		}
+		if(!curvando)
+		{
+    		glRotatef(angulo_inclinacao, 0, 0, 1);
+		}
 	
-		//Desenha o modelo do avião
-//		aviaoJogador.RenderOBJModel(&modeloAviaoJogador);
-
-
 		//Desenha o canhão
 		glPushMatrix();
 			

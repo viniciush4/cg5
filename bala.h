@@ -23,12 +23,14 @@ class Bala
         float angulo_canhao_xz;
         float angulo_canhao_arena_xy;
         float angulo_canhao_arena_xz; 
+        float angulo_inclinacao;
+        bool curvando;
         float velocidade;
 
 
 
         Bala();
-        Bala(float x, float y, float z, float r, float angulo_xy, float angulo_xz, float angulo_canhao_xy, float angulo_canhao_xz, float angulo_canhao_arena_xy, float angulo_canhao_arena_xz, float velocidade);
+        Bala(float x, float y, float z, float r, float angulo_xy, float angulo_xz, float angulo_canhao_xy, float angulo_canhao_xz, float angulo_canhao_arena_xy, float angulo_canhao_arena_xz, float angulo_inclinacao, bool curvando, float velocidade);
         void desenhar();
         void mover(float coeficiente_ajuste);
 
