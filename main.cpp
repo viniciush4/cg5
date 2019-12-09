@@ -255,9 +255,9 @@ void reiniciarJogo() {
 	jogador = jogador_copia;
 	inimigos = inimigos_copia;
 	bases = bases_copia;
-	// tiros_inimigos.clear();
 	bombas.clear();
 	balas.clear();
+	balasInimigas.clear();
 	placar.resetarPlacar();
 	estado = 0;
 }
@@ -471,27 +471,6 @@ void criarTirosInimigos()
 			);
 
 			balasInimigas.push_back(bala);
-
-			cout << "Inimigo: " << inimigo.x << ", " << inimigo.y << ", " << inimigo.z << ", " << inimigo.angulo_canhao_arena_xz << endl;
-			cout << "Bala   : " << bala.x << ", " << bala.y << ", " << bala.z << ", " << bala.angulo_canhao_arena_xz << endl;
-
-/*
-			//Verificar se as balas sairam da arena
-			if(verificarLimiteBalaArena(bala.x, bala.y, (bala.r/100)*4))
-			{
-				it = balas.erase(it);		
-			}		
-			//Verificar se acertou o inimigo
-			else if(derrubarInimigo(bala.x, bala.y, bala.z, bala.r/100))
-			{
-				it = balas.erase(it);			
-			}
-			else
-			{	
-				++it;
-			}	
-		}
-*/
 			++it;
 		}	
 
@@ -977,7 +956,6 @@ void desenharViewport2() {
 
 	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
 	glLoadIdentity();
-  	camera3pJogador->changeCamera(45,larguraJanela,alturaJanela);
 
 	// desenharMiniMapa();
 	
@@ -1022,15 +1000,19 @@ void desenharViewport2() {
 	// } 
 
 	if (cam5) {
+		camera3pBase->changeCamera(45,larguraJanela,alturaJanela);
 		camera3pBase->record();
 	}
 	if (cam3) {
+		camera3pJogador->changeCamera(45,larguraJanela,alturaJanela);
 		camera3pJogador->record();
 	}
 	if (cam2) {
+		cameraCanhao->changeCamera(45,larguraJanela,alturaJanela);
 		cameraCanhao->record();
 	}
 	if (cam1) {
+		camera1pJogador->changeCamera(45,larguraJanela,alturaJanela);
 		camera1pJogador->record();
 	}
 	if (desenhar_cameras) {

@@ -28,13 +28,17 @@ Camera1pJogador::Camera1pJogador(double x, double y, double z, double look_x, do
 
 void Camera1pJogador::update(double x, double y, double z, double z_angle, double y_angle){
 
-    this->xt = x + this->x*cos(z_angle*(M_PI/180.0));     
-    this->yt = y + this->x*sin(z_angle*(M_PI/180.0));
-    this->zt = z + this->z + this->x*sin(y_angle*(M_PI/180.0)); 
+    //this->xt = x + this->x*cos(z_angle*(M_PI/180.0));     
+    //this->yt = y + this->x*sin(z_angle*(M_PI/180.0));
+    //this->zt = z + this->z + this->x*sin(y_angle*(M_PI/180.0)); 
 
-    this->look_x = xt + 5*cos(z_angle*(M_PI/180.0));
-    this->look_y = yt + 5*sin(z_angle*(M_PI/180.0));
-    this->look_z = zt + 5*sin(y_angle*(M_PI/180.0));
+    this->xt = x + (this->x*cos(z_angle*(M_PI/180.0)))/1.8;     
+    this->yt = y + (this->x*sin(z_angle*(M_PI/180.0)))/1.8;
+    this->zt = z + this->z + 1.2 + (this->x*sin(y_angle*(M_PI/180.0)))/1.8; 
+
+    this->look_x = xt + 2*cos(z_angle*(M_PI/180.0));
+    this->look_y = yt + 2*sin(z_angle*(M_PI/180.0));
+    this->look_z = zt + 2*sin(y_angle*(M_PI/180.0));
 }
 
 void Camera1pJogador::record(){
@@ -44,6 +48,17 @@ void Camera1pJogador::record(){
              this->up_x,this->up_y,this->up_z);       //UpVector
 
 
+}
+
+void Camera1pJogador::changeCamera(int angle, int w, int h){
+    glMatrixMode (GL_PROJECTION);
+
+    glLoadIdentity();    
+
+    gluPerspective (angle,
+            (GLfloat)w / (GLfloat)h, 0.5, 5000.0);
+
+    glMatrixMode (GL_MODELVIEW);
 }
 
 void Camera1pJogador::draw(){

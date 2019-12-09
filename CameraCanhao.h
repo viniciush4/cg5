@@ -23,6 +23,7 @@ public:
     void update(double x, double y, double z,double heightCannon,double y_angle, double z_angle,double player_angle);
     void draw();
     void record();
+    void changeCamera(int angle, int w, int h);
     virtual ~CameraCanhao();
 private:
 
