@@ -30,6 +30,9 @@ Mover:
 Anoitecer:
     "n"
 
+Acende / Apaga farol:
+    "m"
+
 Atirar:
     "LEFT BUTTON"
 
