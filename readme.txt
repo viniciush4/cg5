@@ -1,15 +1,24 @@
 Readme
 
-Rotacionar Câmera 3:
+Câmera no cokpit do avião - (opção padrão):
+    "1"
+
+Câmera em cima do canhão:
+    "2"
+
+Câmera atrás do jogador:
+    "3"
+
+Câmera em cima da base inimiga:
+    "5"
+
+Rotacionar Câmera 3 (atrás do jogador) e câmera 5 (em cima da base inimiga):
     "e + RIGHT BUTTON"
 
-Zoom:
+Zoom na câmera 3 (atrás do jogador) e na câmera 5 (em cima da base inimiga):
     "SCROLL BUTTON"
 
-Aternar entre câmeras:
-    "1, 2, 3, 5"
-
-Habilitar desenho das câmeras 1 e 2:
+Habilitar desenho das câmeras 1 (cokpit do avião) e 2 (em cima do canhão):
     "9"
 
 Decolar:
@@ -26,3 +35,6 @@ Atirar:
 
 Bombardear:
     "RIGHT BUTTON"
+
+Reiniciar o jogo
+    "r"
