@@ -744,7 +744,7 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		);
 
 		cameraCanhao = new CameraCanhao(
-			jogador.r*0.9*cos(grausParaRadianos(jogador.angulo_xy)),jogador.r*0.9*sin(grausParaRadianos(jogador.angulo_xy)),7,
+			jogador.r*cos(grausParaRadianos(jogador.angulo_xy)),jogador.r*sin(grausParaRadianos(jogador.angulo_xy)),7,
 			0,0,0,
 			0,0,1
 		);
@@ -1083,7 +1083,15 @@ void idle(void) {
 		camera3pJogador->update(jogador.x,jogador.y,jogador.z,camYAngle,camZAngle);
 	// }
 	// if(cam2){
-		cameraCanhao->update(jogador.x,jogador.y,jogador.z,jogador.z+0.14*jogador.r, -jogador.angulo_canhao_xz,jogador.angulo_canhao_xy, jogador.angulo_xy);
+		cameraCanhao->update(
+			jogador.x, 
+			jogador.y, 
+			jogador.z,
+			0.14*jogador.r, 
+			-jogador.angulo_canhao_xz, 
+			jogador.angulo_canhao_xy, 
+			jogador.angulo_xy
+		);
 	// }
 	// if(cam1){
 		camera1pJogador->update(jogador.x,jogador.y,jogador.z,jogador.angulo_xy,jogador.angulo_xz);

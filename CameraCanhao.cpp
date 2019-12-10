@@ -32,9 +32,17 @@ void CameraCanhao::update(double x, double y, double z,double heightCannon,doubl
     this->yt = y + this->x*sin(player_angle*(M_PI/180.0)) + heightCannon*sin(y_angle*(M_PI/180.0)) * sin((z_angle + player_angle)*(M_PI/180.0));
     this->zt = z + this->z + heightCannon*cos(y_angle*(M_PI/180.0));    
 
-    this->look_x = xt + 15*cos((z_angle + player_angle)*(M_PI/180.0));
-    this->look_y = yt + 15*sin((z_angle + player_angle)*(M_PI/180.0));
-    this->look_z = zt - 15*sin(y_angle*(M_PI/180.0));
+    this->look_x = xt + 5*cos((z_angle + player_angle)*(M_PI/180.0));
+    this->look_y = yt + 5*sin((z_angle + player_angle)*(M_PI/180.0));
+    this->look_z = zt - 9*sin(y_angle*(M_PI/180.0));
+
+    // this->xt = x + (this->x*cos(player_angle*(M_PI/180.0)));     
+    // this->yt = y + (this->x*sin(player_angle*(M_PI/180.0)));
+    // this->zt = z + this->z + (7*cos(player_angle*(M_PI/180.0))); 
+
+    // this->look_x = xt + 5*cos(player_angle*(M_PI/180.0));
+    // this->look_y = yt + 5*sin(player_angle*(M_PI/180.0));
+    // this->look_z = zt - 5*sin(y_angle*(M_PI/180.0));
 
 }
 
@@ -52,7 +60,7 @@ void CameraCanhao::changeCamera(int angle, int w, int h){
     glLoadIdentity();    
 
     gluPerspective (angle,
-            (GLfloat)w / (GLfloat)h, 3, 5000.0);
+            (GLfloat)w / (GLfloat)h, 1, 5000.0);
 
     glMatrixMode (GL_MODELVIEW);
 }
