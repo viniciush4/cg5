@@ -39,9 +39,11 @@ void CameraCanhao::update(double x, double y, double z,double heightCannon,doubl
 
 void CameraCanhao::record(){
 
-   gluLookAt(this->xt,this->yt ,this->zt,                  //Position
-             this->look_x,this->look_y,this->look_z,  //look point
-             this->up_x,this->up_y,this->up_z);       //UpVector
+    gluLookAt(
+        this->xt,this->yt ,this->zt,
+        this->look_x,this->look_y,this->look_z,
+        this->up_x,this->up_y,this->up_z
+    );
 
 }
 
@@ -66,7 +68,6 @@ void CameraCanhao::draw(){
         glTranslatef(look_x,look_y,look_z);
         glutSolidCube(0.5);
     glPopMatrix();
-
 }
 
 CameraCanhao::~CameraCanhao() {

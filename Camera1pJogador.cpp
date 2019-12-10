@@ -56,11 +56,11 @@ void Camera1pJogador::update(double x, double y, double z, double z_angle, doubl
 
 void Camera1pJogador::record(){
 
-   gluLookAt(this->xt,this->yt ,this->zt,                  //Position
-             this->look_x,this->look_y,this->look_z,  //look point
-             this->up_x,this->up_y,this->up_z);       //UpVector
-
-
+   gluLookAt(
+        this->xt,this->yt ,this->zt,
+        this->look_x,this->look_y,this->look_z,
+        this->up_x,this->up_y,this->up_z
+    );
 }
 
 void Camera1pJogador::changeCamera(int angle, int w, int h){

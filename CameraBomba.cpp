@@ -47,9 +47,11 @@ void CameraBomba::update(double x, double y, double z, double look_x, double loo
 
 void CameraBomba::record(){
 
-   gluLookAt(this->xt,this->yt ,this->zt,                  //Position
-             this->look_x,this->look_y,this->look_z,  //look point
-             this->up_x,this->up_y,this->up_z);       //UpVector
+    gluLookAt(
+        this->xt,this->yt ,this->zt,
+        this->look_x,this->look_y,this->look_z,
+        this->up_x,this->up_y,this->up_z
+    );
 }
 
 CameraBomba::~CameraBomba() {

@@ -68,23 +68,16 @@ void Camera3pJogador::setZAngle(double z_angle){
 }
 
 void Camera3pJogador::record(){
-    
-    
-    gluLookAt(this->x,this->y,this->z,                  //Position
-              this->look_x,this->look_y,this->look_z,  //look point
-              this->up_x,this->up_y,this->up_z);       //UpVector
-    
-
+ 
+    gluLookAt(
+        this->x,this->y,this->z,
+        this->look_x,this->look_y,this->look_z,
+        this->up_x,this->up_y,this->up_z
+    );
+ 
     glRotatef(this->y_angle,0,-1,0); 
     glRotatef(this->z_angle,0,0,-1);          
     glTranslatef(-xt,-yt,-zt);        
-
-    
-    
-      
-    
-//    glutSolidCube(0.2);
-
 }
 
 void Camera3pJogador::changeCamera(int angle, int w, int h){
