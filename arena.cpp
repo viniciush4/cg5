@@ -16,7 +16,7 @@ Arena::Arena(float x, float y, float r, float altura){
 
 void Arena::desenhar(GLuint texturaCeu, GLuint texturaChao, GLuint texturaArvore)
 {
-	
+/*	
 	//Desenha o muro
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texturaArvore);
@@ -37,6 +37,7 @@ void Arena::desenhar(GLuint texturaCeu, GLuint texturaChao, GLuint texturaArvore
 			glPopAttrib();
 		glPopMatrix();
 	glDisable(GL_TEXTURE_2D);
+*/	
 
 	//Desenha o globo do céu
 	glEnable(GL_TEXTURE_2D);
@@ -91,7 +92,7 @@ void Arena::desenhar(GLuint texturaCeu, GLuint texturaChao, GLuint texturaArvore
 		glPushMatrix();
 			glPushAttrib(GL_TEXTURE_BIT);
 			
-				glColor3fv(mat_ambient_w);
+				glColor3fv(mat_ambient_w1);
 				glNormal3f(0.0, 0.0, 1.0);
 
 				glBegin(GL_QUADS);			
