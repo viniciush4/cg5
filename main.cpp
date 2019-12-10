@@ -17,7 +17,6 @@
 #include "bala.h"
 #include "jogador.h"
 #include "placar.h"
-#include "imageloader.h"
 #include "minimapa.h"
 #include "lerOBJ.h"
 #include "lerTextura.h"
@@ -89,9 +88,7 @@ LerTextura carregarTexturaBase = LerTextura();
 GLuint texturaPista = 0;
 LerTextura carregarTexturaPista = LerTextura();
 
-//Árvore
-GLuint texturaArvore = 0;
-LerTextura carregarTexturaArvore = LerTextura();
+
 
 /*
  * MAPEAMENTO DAS TECLAS
@@ -673,13 +670,6 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
    	 		exit (EXIT_FAILURE);
 		}
 
-		//Árvore
-		texturaArvore = carregarTexturaArvore.loadTGATexture("Texturas/arvore.tga", 0);
-  		if(!texturaArvore)
-		{
-			cout << "Erro ao carregar a textura da árvore!" << endl;
-   	 		exit (EXIT_FAILURE);
-		}
 
 		camera3pJogador = new Camera3pJogador(
 			-3*2*jogador.r,0,0,
@@ -767,7 +757,7 @@ void especificarIluminacao(void) {
 
 void desenharMundo() {
 
-	arena.desenhar(texturaCeu, texturaChao, texturaArvore);
+	arena.desenhar(texturaCeu, texturaChao);
 
 	pista.desenhar(texturaPista);
 

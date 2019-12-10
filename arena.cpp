@@ -14,30 +14,8 @@ Arena::Arena(float x, float y, float r, float altura){
 	this->altura = altura;
 }
 
-void Arena::desenhar(GLuint texturaCeu, GLuint texturaChao, GLuint texturaArvore)
+void Arena::desenhar(GLuint texturaCeu, GLuint texturaChao)
 {
-/*	
-	//Desenha o muro
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, texturaArvore);
-
-		glPushMatrix();			
-			glPushAttrib(GL_TEXTURE_BIT);
-				GLfloat mat_ambient_w[] = { 1.0, 1.0, 1.0, 1.0 };
-				glColor3fv(mat_ambient_w);
-				GLUquadric* m = gluNewQuadric();
-				gluQuadricOrientation(m, GLU_INSIDE);
-				gluQuadricDrawStyle(m, GLU_FILL); //GLU_FILL, GLU_LINE, GLU_SILHOUETTE, GLU_POINT
-				gluQuadricNormals(m, GLU_SMOOTH); //GLU_NONE, GLU_FLAT, GLU_SMOOTH
-				gluQuadricTexture(m, GL_TRUE);// if you want to map a texture to it.	
-				//			glBindTexture(GL_TEXTURE_2D, this->textura_ceu);
-		 		gluCylinder(m, 2*r-2, 2*r-2, 25, 30, 30);
-	//			gluSphere(c,2*r,1000,1000);
-
-			glPopAttrib();
-		glPopMatrix();
-	glDisable(GL_TEXTURE_2D);
-*/	
 
 	//Desenha o globo do céu
 	glEnable(GL_TEXTURE_2D);

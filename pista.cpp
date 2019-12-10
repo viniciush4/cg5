@@ -1,11 +1,5 @@
 #include "pista.h"
-#include <GL/glut.h>
-#include <math.h>
 
-using namespace std;
-
-#define grausParaRadianos(g) g*(M_PI/180)
-#define radianosParaGraus(r) r*(180/M_PI)
 
 Pista::Pista(){
 	this->x1 = 0;
@@ -15,7 +9,6 @@ Pista::Pista(){
 	this->largura = 0;
 	this->comprimento = 0;
 	this->angulo_xy = 0;
-	this->textura = LoadTextureRAW("Texturas/pista.bmp");
 }
 
 Pista::Pista(float x1, float y1, float x2, float y2){
@@ -26,7 +19,7 @@ Pista::Pista(float x1, float y1, float x2, float y2){
 	this->largura = 0;
 	this->comprimento = sqrt(pow(y2-y1,2) + pow(x2-x1,2));
 	this->angulo_xy = -radianosParaGraus(atan2((y2-y1), (x2-x1)));
-	// this->textura = LoadTextureRAW("Texturas/pista.bmp");
+
 }
 
 void Pista::desenhar(GLuint texturaPista){
