@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 #include "tinyxml2.h"
 #include "configuracao.h"
 #include "pista.h"
@@ -31,7 +30,6 @@
 
 #define grausParaRadianos(g) g*(M_PI/180)
 #define radianosParaGraus(r) r*(180/M_PI)
-
 
 using namespace tinyxml2;
 using namespace std;
@@ -119,8 +117,8 @@ Minimapa minimapa;
 int estado = 0;
 
 bool curvando = false;
-bool rButtonDown = false;
-int scrollUp = 0;
+bool botao_direito_status = false;
+int incremento_zoom = 0;
 
 /*
  * VARIÁVEIS PARA AJUSTE DO TEMPO
@@ -132,28 +130,17 @@ GLdouble timeDiference;
 /*
  * VARIÁVEIS DA CÂMERA
  */
-// int camera3pJogador = 1;
-// GLfloat anguloCamera=45, fAspect;
-// GLfloat obsX=0, obsY=-10, obsZ=1000;
-// GLfloat eyeX=0, eyeY=0, eyeZ=0;
-// GLfloat upX=0, upY=0, upZ=1;
-// float anguloCameraJogadorXY=0;
-// int ultimaPosicaoMouseCameraX=0, ultimaPosicaoMouseCameraY=0;
-// bool movimentarCamera3 = false;
 int mouse_ultima_posicao_x = 0;
 int mouse_ultima_posicao_y = 0;
+int mouse_ultima_posicao_x_motion = 0;
+int mouse_ultima_posicao_y_motion = 0;
 float momentoTiro = 0;
 
-//Camera controls
-int toggleCam = 0;
-int camAngle = 60;
-int lastX = 0;
-int lastY = 0;
-
-double camZAngle;
-double camYAngle;
-double camZAngleBase;
-double camYAngleBase;
+double cam3_angulo_xy;
+double cam3_angulo_xz;
+double cam5_angulo_xy;
+double cam5_angulo_xz;
+double distancia_camera = 0;
 
 bool cam1 = true;
 bool cam2 = false;
@@ -161,8 +148,6 @@ bool cam3 = false;
 bool cam4 = false;
 bool cam5 = false;
 bool desenhar_cameras = false;
-
-double camDist = 0;
 
 Camera3pJogador* camera3pJogador;
 Camera3pBase* camera3pBase;
@@ -175,12 +160,9 @@ bool verificarLimiteArena(Jogador jogador) {
 	float distancia = sqrt(pow(jogador.x - arena.x, 2.0) + pow(jogador.y - arena.y, 2.0));
 
 	//Verifica se o piloto está fora da arena
-	if(distancia >= arena.r)
-	{
+	if(distancia >= arena.r){
 		return true;
-	}
-	else
-	{
+	} else {
 		return false;
 	}
 }
@@ -218,14 +200,12 @@ void teletransportarJogador(){
 	if(fabs(jogador.x - x1) < fabs(jogador.x - x2)){
 		jogador.x = x2;
 		jogador.y = y2;
-	}else{
+	} else {
 		jogador.x = x1;
 		jogador.y = y1;
 	}
-
 }
 
-//Realiza o teletransporte para o lado oposto da arena
 void teletransportarInimigo(Inimigo& inimigo) {
 	double m = tanf(grausParaRadianos(inimigo.angulo_xy));
 	double E = inimigo.y - 0;
@@ -300,115 +280,88 @@ void atualizarEstadoInimigos() {
 			inimigo.z = inimigo.z + 0.5;
 		else
 			inimigo.z = inimigo.z - 0.5;
-
 	}
 }
 
-//Verifica se a bala ou a bomba está fora da arena
-bool verificarLimiteBalaArena(float x, float y, float r)
-{
+bool verificarLimiteBalaArena(float x, float y, float r) {
 	float distancia = sqrt(pow(x - arena.x, 2.0) + pow(y - arena.y, 2.0));
 
-	if(distancia >= arena.r - r)
-	{
+	if(distancia >= arena.r - r) {
 		return true;
-	}
-	else
-	{
+	} else {
 		return false;
 	}
 }
 
-bool derrubarInimigo(float x, float y, float z, float r)
-{
+bool derrubarInimigo(float x, float y, float z, float r) {
 	//Percorre todos os inimigos 
-	for(auto it = inimigos.begin(); it != inimigos.end();)
-	{
+	for(auto it = inimigos.begin(); it != inimigos.end();) {
 		Inimigo &inimigo = *it;
 
 		float distancia = sqrt(pow(x - inimigo.x, 2.0) + pow(y - inimigo.y, 2.0)  + pow(z - inimigo.z, 2.0));
 		
 		//Verificar se as balas sairam da arena
-		if(distancia < inimigo.r/2 + r)
-		{
+		if(distancia < inimigo.r/2 + r) {
 			it = inimigos.erase(it);
 			return true;		
-		}
-		else
-		{	
+		} else {	
 			++it;
 		}	
 	}
 	return false;
 }
 
-bool derrubarJogador(float x, float y, float z, float r)
-{
+bool derrubarJogador(float x, float y, float z, float r) {
 	float distancia = sqrt(pow(x - jogador.x, 2.0) + pow(y - jogador.y, 2.0) + pow(z - jogador.z, 2.0));
 	
-	if(distancia < jogador.r/2 + r)
-	{
+	if(distancia < jogador.r/2 + r)	{
 		return true;
-	}
-	else
-	{
+	} else {
 		return false;
 	}
 }
 
-void atualizarEstadoTirosJogador() 
-{
+void atualizarEstadoTirosJogador() {
 
-	for(auto it = balas.begin(); it != balas.end();)
-	{
+	for(auto it = balas.begin(); it != balas.end();) {
 		Bala &bala = *it;
 		
 		//Mover as balas em linha reta
 		bala.mover(timeDiference/1000);
 		
 		//Verificar se as balas sairam da arena
-		if(verificarLimiteBalaArena(bala.x, bala.y, (bala.r/100)*4))
-		{
+		if(verificarLimiteBalaArena(bala.x, bala.y, (bala.r/100)*4)) {
 			it = balas.erase(it);		
 		}		
 		//Verificar se acertou o inimigo
-		else if(derrubarInimigo(bala.x, bala.y, bala.z, bala.r/100))
-		{
+		else if(derrubarInimigo(bala.x, bala.y, bala.z, bala.r/100)) {
 			it = balas.erase(it);			
-		}
-		else
-		{	
+		} else {	
 			++it;
 		}	
 	}
 }
 
-void atualizarEstadoTirosInimigos() 
-{
-	for(auto it = balasInimigas.begin(); it != balasInimigas.end();)
-	{
+void atualizarEstadoTirosInimigos() {
+
+	for(auto it = balasInimigas.begin(); it != balasInimigas.end();) {
 		Bala &balaInimiga = *it;
 		
 		//Mover as balas em linha reta
 		balaInimiga.moverBalaInimiga(timeDiference/1000);
 	
 		//Verificar se as balas sairam da arena
-		if(verificarLimiteBalaArena(balaInimiga.x, balaInimiga.y, (balaInimiga.r/100)*4))
-		{
+		if(verificarLimiteBalaArena(balaInimiga.x, balaInimiga.y, (balaInimiga.r/100)*4)) {
 			it = balasInimigas.erase(it);		
 		}			
 		//Verificar se acertou o jogador
-		else if(derrubarJogador(balaInimiga.x, balaInimiga.y, balaInimiga.z, balaInimiga.r/100))
-		{
+		else if(derrubarJogador(balaInimiga.x, balaInimiga.y, balaInimiga.z, balaInimiga.r/100)) {
 			it = balasInimigas.erase(it);
 			estado = 3;			
-		}
-		else
-		{	
+		} else {	
 			++it;
 		}	
 	}
-
 }
 
 void atualizarEstadoBombas() {
@@ -441,16 +394,12 @@ void atualizarEstadoBombas() {
 	}
 }
 
-void criarTirosInimigos() 
-{
+void criarTirosInimigos() {
 	//Frequência do tiro do inimigo
-
 	momentoTiro += timeDiference * configuracao.inimigo_frequencia_tiro;
-	if(momentoTiro >= 1000)
-	{
+	if(momentoTiro >= 1000)	{
 
-		for(auto it = inimigos.begin(); it != inimigos.end();)
-		{
+		for(auto it = inimigos.begin(); it != inimigos.end();) {
 			Inimigo &inimigo = *it;
 			
 			//Criar bala inimiga
@@ -469,15 +418,12 @@ void criarTirosInimigos()
 				false,
 				configuracao.inimigo_velocidade_tiro*inimigo.velocidade
 			);
-
 			balasInimigas.push_back(bala);
 			++it;
 		}	
-
 		momentoTiro = 0.0;
 	}
 }
-	
 
 /*
  * CONFIGURAÇÕES
@@ -494,17 +440,10 @@ void inicializarOpengl() {
 	glEnable(GL_LIGHT0);
 	// Habilita o depth-buffering
 	glEnable(GL_DEPTH_TEST);
-	
 	//Habilitar texturas
 	glEnable(GL_TEXTURE_2D);
-	
 	// Habilita o modelo de colorizacao de Gouraud
-	glShadeModel(GL_SMOOTH);
-
-	// glDepthFunc(GL_LEQUAL);
-
-	//	carregouAviaoJogador = aviaoJogador.LoadFile("Modelos/piper_pa18.obj");
-	
+	glShadeModel(GL_SMOOTH);	
 }
 
 bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
@@ -744,7 +683,7 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		);
 
 		cameraCanhao = new CameraCanhao(
-			jogador.r*cos(grausParaRadianos(jogador.angulo_xy)),jogador.r*sin(grausParaRadianos(jogador.angulo_xy)),7,
+			jogador.r*0.9*cos(grausParaRadianos(jogador.angulo_xy)),jogador.r*0.9*sin(grausParaRadianos(jogador.angulo_xy)),7.3,
 			0,0,0,
 			0,0,1
 		);
@@ -768,10 +707,10 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 		);
 
 		camera3pJogador->setZAngle(jogador.angulo_xy);
-		camZAngle = camera3pJogador->getZAngle();
-    	camYAngle = camera3pJogador->getYAngle();
-		camZAngleBase = 0;
-		camYAngleBase = 30;
+		cam3_angulo_xy = camera3pJogador->getZAngle();
+    	cam3_angulo_xz = camera3pJogador->getYAngle();
+		cam5_angulo_xy = 0;
+		cam5_angulo_xz = 30;
 
 	return true;
 }
@@ -780,25 +719,6 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
 /*
  * CÂMERAS, LUZES E DESENHO
  */
-
-// void posicionarObservador(GLfloat obsX, GLfloat obsY, GLfloat obsZ, GLfloat eyeX, GLfloat eyeY, GLfloat eyeZ, GLfloat upX, GLfloat upY, GLfloat upZ) {
-// 	// Especifica sistema de coordenadas do modelo
-// 	glMatrixMode(GL_MODELVIEW);
-// 	// Inicializa sistema de coordenadas do modelo
-// 	glLoadIdentity();
-// 	// Especifica posição do observador e do alvo
-//     gluLookAt(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
-// }
-
-// void especificarParametrosVisualizacao(GLfloat angle, GLfloat fAspectW, GLfloat fAspectH, GLfloat zMin, GLfloat zMax) {
-// 	// Especifica sistema de coordenadas de projeção
-// 	glMatrixMode(GL_PROJECTION);
-// 	// Inicializa sistema de coordenadas de projeção
-// 	glLoadIdentity();
-// 	// Especifica a projeção perspectiva(angulo,aspecto,zMin,zMax)
-// 	gluPerspective(angle, (GLfloat)fAspectW / (GLfloat)fAspectH, zMin, zMax);
-// }
-
 void especificarIluminacao(void) {
 
 	GLfloat luzAmbiente[4]={0.2,0.2,0.2,1.0}; 
@@ -815,13 +735,10 @@ void especificarIluminacao(void) {
 
 	// Define a reflet�ncia do material 
 	glMaterialfv(GL_FRONT,GL_SPECULAR, especularidade);
-	// Define a concentra��o do brilho
+	// Define a concentração do brilho
 	glMateriali(GL_FRONT,GL_SHININESS,especMaterial);
 
-	// Ativa o uso da luz ambiente 
-	// glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
-
-	// Define os par�metros da luz de n�mero 0
+	// Define os parametros da luz de numero 0
 	glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente); 
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa );
 	glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular );
@@ -835,59 +752,7 @@ void especificarIluminacao(void) {
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, direcaoLuzSpot ); 
 }
 
-// Vamos retirar depois
-// void DrawAxes() {
-//     GLfloat mat_ambient_r[] = { 1.0, 0.0, 0.0, 1.0 };
-//     GLfloat mat_ambient_g[] = { 0.0, 1.0, 0.0, 1.0 };
-//     GLfloat mat_ambient_b[] = { 0.0, 0.0, 1.0, 1.0 };
-
-//     glPushAttrib(GL_ENABLE_BIT);
-//         glDisable(GL_LIGHTING);
-//         glDisable(GL_TEXTURE_2D);
- 
-//         //x axis
-//         glPushMatrix();
-//             glColor3fv(mat_ambient_r);
-//             glScalef(5, 0.1, 0.1);
-//             glTranslatef(0, 0, 0); // put in one end
-//             glutSolidCube(20.0);
-//         glPopMatrix();
-
-//         //y axis
-//         glPushMatrix();
-//             glColor3fv(mat_ambient_g);
-//             glScalef(0.1, 5, 0.1);
-//             glTranslatef(0, 0, 0); // put in one end
-//             glutSolidCube(20.0);
-//         glPopMatrix();
-
-//         //z axis
-//         glPushMatrix();
-//             glColor3fv(mat_ambient_b);
-//             glScalef(0.1, 0.1, 5);
-//             glTranslatef(0, 0, 0); // put in one end
-//             glutSolidCube(20.0);
-//         glPopMatrix();
-//     glPopAttrib();
-    
-// }
-
-
 void desenharMundo() {
-	
-	
-
-	// Desenha uma esfera na posição da luz
-	// Vamos retirar isso depois
-	// glPushMatrix();
-	// 	glTranslatef(0, 0, 50);
-	// 	glColor3f(1.0f, 1.0f, 0.0f);
-	// 	glutSolidSphere (10.0, 50, 50);
-	// 	glColor3f(0.0f, 0.0f, 1.0f);
-	// glPopMatrix();
-
-	
-	// DrawAxes();
 
 	arena.desenhar(texturaCeu, texturaChao, texturaArvore);
 
@@ -910,29 +775,11 @@ void desenharMundo() {
 		balaInimiga.desenharBalaInimiga();		
 	}
 
-
-
-	//	jogador.desenhar();
-
 	jogador.desenharModeloAviao(aviaoJogador, modeloAviaoJogador, helice, modeloHelice, texturaJogador);
 
-	//Desenha os inimigos aereos
 	for(Inimigo inimigo: inimigos) {
 		inimigo.desenharModeloAviao(aviaoJogador, modeloAviaoJogador, helice, modeloHelice, texturaInimigo);			
 	}
-
-	//	 glPushMatrix();
-		// 	glColor3f(0.0f, 0.0f, 1.0f);
-	//	 	glTranslatef(jogador.x, jogador.y, jogador.z);
-			
-	//		glRotatef(-90, 0, 0, 1);
-		
-	//		glRotatef(jogador.angulo_xy, 0, 0, 1);
-
-	//	 	desenharAeromodelo();
-	//	 glPopMatrix();
-	
-	
 }
 
 void desenharViewport1() {
@@ -941,12 +788,6 @@ void desenharViewport1() {
 		glViewport(0, (GLsizei)alturaJanela, (GLsizei)larguraJanela ,200);
 		glLoadIdentity();
 		camera3pJogador->changeCamera(45,larguraJanela,200);	
-		// especificarParametrosVisualizacao(anguloCamera, larguraJanela, 200, 40, 5000.0);
-		// posicionarObservador(
-		// 	bombas.at(0).x, bombas.at(0).y, bombas.at(0).z,
-		//  	bombas.at(0).x, bombas.at(0).y, bombas.at(0).z-10, 
-		//  	cos(grausParaRadianos(bombas.at(0).angulo_xy)), sin(grausParaRadianos(bombas.at(0).angulo_xy)), 0.0
-		// );
 		cameraBomba->record();
 		desenharMundo();
 	}
@@ -956,48 +797,6 @@ void desenharViewport2() {
 
 	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
 	glLoadIdentity();
-
-	// desenharMiniMapa();
-	
-
-	// if(camera3pJogador == 0){
-	// 	// Padrão
-	// 	especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
-	// 	posicionarObservador(obsX, obsY, obsZ, eyeX, eyeY, eyeZ, upX, upY, upZ);
-	// }
-	// if(camera3pJogador == 1){
-	// 	// Cokpit
-	// 	especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 5, 5000.0);
-	// 	posicionarObservador(
-	// 		jogador.x + (jogador.r/2 - 2) * cos(grausParaRadianos(jogador.angulo_xy)), 
-	// 		jogador.y + (jogador.r/2 - 2) * sin(grausParaRadianos(jogador.angulo_xy)), 
-	// 		jogador.z + jogador.r/2,
-	// 		jogador.x + (jogador.r + 1) * cos(grausParaRadianos(jogador.angulo_xy)), 
-	// 		jogador.y + (jogador.r + 1) * sin(grausParaRadianos(jogador.angulo_xy)), 
-	// 		jogador.z + jogador.r/2, 
-	// 		0, 0, 1);
-	// }
-	// if(camera3pJogador == 2){
-	// 	// Canhão
-	// 	especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
-	// 	posicionarObservador(
-	// 		jogador.x + jogador.r * cos(grausParaRadianos(jogador.angulo_xy)), 
-	// 		jogador.y + jogador.r * sin(grausParaRadianos(jogador.angulo_xy)), 
-	// 		jogador.z+2,
-	// 		jogador.x + jogador.r * cos(grausParaRadianos(jogador.angulo_xy)) + (0.5*jogador.r) * cos(grausParaRadianos(jogador.angulo_canhao_arena_xy)), 
-	// 		jogador.y + jogador.r * sin(grausParaRadianos(jogador.angulo_xy)) + (0.5*jogador.r) * sin(grausParaRadianos(jogador.angulo_canhao_arena_xy)), 
-	// 		jogador.z + (0.5*jogador.r) * sin(grausParaRadianos(jogador.angulo_canhao_arena_xz)), 
-	// 		0, 0, 1);
-	// }
-	// if(camera3pJogador == 3){
-	// 	// 3a pessoa
-	// 	especificarParametrosVisualizacao(anguloCamera, larguraJanela, alturaJanela, 0.1, 5000.0);
-	// 	posicionarObservador(
-	// 		jogador.x - 50*cos(grausParaRadianos(anguloCameraJogadorXY)), 
-	// 		jogador.y - 50*sin(grausParaRadianos(anguloCameraJogadorXY)), 
-	// 		jogador.z + 40,
-	// 		jogador.x, jogador.y, jogador.z+jogador.r, 0, 0, 1);
-	// } 
 
 	if (cam5) {
 		camera3pBase->changeCamera(45,larguraJanela,alturaJanela);
@@ -1019,8 +818,6 @@ void desenharViewport2() {
 		cameraCanhao->draw();
 		camera1pJogador->draw();
 	}
-	
-
 
 	desenharMundo();
 
@@ -1030,7 +827,6 @@ void desenharViewport2() {
 
 	if(estado == 3)
 		placar.desenharMensagemFinal(alturaJanela, larguraJanela);
-
 }
 
 /*
@@ -1049,9 +845,6 @@ void display(void) {
 
 	desenharViewport2();
 
-
-
-	
 	glutSwapBuffers();
 }
 
@@ -1062,13 +855,13 @@ void idle(void) {
 	timeDiference = currentTime - previousTime;
 	previousTime = currentTime;
 
-	camDist = scrollUp*timeDiference*0.1;
-  	scrollUp = 0;
+	distancia_camera = incremento_zoom*timeDiference*0.1;
+  	incremento_zoom = 0;
 
 	// cam5
 	if(bases.size() != 0){ 
-		camera3pBase->setDist(camDist);
-		camera3pBase->update(bases.at(0).x,bases.at(0).y,0,camYAngleBase,camZAngleBase);
+		camera3pBase->setDist(distancia_camera);
+		camera3pBase->update(bases.at(0).x,bases.at(0).y,0,cam5_angulo_xz,cam5_angulo_xy);
 	}
 	// cam4
 	if(bombas.size() != 0){ 
@@ -1078,24 +871,21 @@ void idle(void) {
 	 		cos(grausParaRadianos(bombas.at(0).angulo_xy)), sin(grausParaRadianos(bombas.at(0).angulo_xy)), 0.0
 		);
 	}
-	// if(cam3){
-		camera3pJogador->setDist(camDist);
-		camera3pJogador->update(jogador.x,jogador.y,jogador.z,camYAngle,camZAngle);
-	// }
-	// if(cam2){
-		cameraCanhao->update(
-			jogador.x, 
-			jogador.y, 
-			jogador.z,
-			0.14*jogador.r, 
-			-jogador.angulo_canhao_xz, 
-			jogador.angulo_canhao_xy, 
-			jogador.angulo_xy
-		);
-	// }
-	// if(cam1){
-		camera1pJogador->update(jogador.x,jogador.y,jogador.z,jogador.angulo_xy,jogador.angulo_xz);
-	// }
+	// cam3
+	camera3pJogador->setDist(distancia_camera);
+	camera3pJogador->update(jogador.x,jogador.y,jogador.z,cam3_angulo_xz,cam3_angulo_xy);
+	// cam2
+	cameraCanhao->update(
+		jogador.x, 
+		jogador.y, 
+		jogador.z,
+		0.14*jogador.r, 
+		-jogador.angulo_canhao_xz, 
+		jogador.angulo_canhao_xy, 
+		jogador.angulo_xy
+	);
+	// cam1
+	camera1pJogador->update(jogador.x,jogador.y,jogador.z,jogador.angulo_xy,jogador.angulo_xz);
 
 	// Decolando
 	if(estado == 1){
@@ -1151,16 +941,13 @@ void idle(void) {
 		}
 
 		//Verificar se o piloto chegou ao final da arena
-		if(verificarLimiteArena(jogador))
-		{
+		if(verificarLimiteArena(jogador)) {
 			teletransportarJogador();
 		}
 
-		if(verificarColisaoInimigo())
-		{
+		if(verificarColisaoInimigo()) {
 			estado = 3;
 		}
-
 	}
 
 	// Início, decolando ou jogando
@@ -1186,35 +973,12 @@ void keyPress(unsigned char key, int x, int y) {
 		case '-':
 			jogador.velocidade -= (estado == 2) ? ((jogador.velocidade > 1) ? 1 : 0) : 0;
 			break;
-		// case 'I':
-		// case 'i':
-		// {
-		// 	int inc = anguloCamera <= 5 ? 0 : 1;
-		// 	anguloCamera -= inc;
-		// 	break;
-		// }
-		// case 'O':
-		// case 'o':
-		// {
-		// 	int inc = anguloCamera >= 180 ? 0 : 1;
-		// 	anguloCamera += inc;
-		// 	break;
-		// }
 		case 'R':
 		case 'r':
 		{
 			reiniciarJogo();
 			break;
 		}
-		// case '0':
-		// 	camera3pJogador = 0;
-		// 	break;
-		// case '1':
-		// 	camera3pJogador = 1;
-		// 	break;
-		// case '2':
-		// 	camera3pJogador = 2;
-		// 	break;
 		case '9':
 			desenhar_cameras = !desenhar_cameras;
 			break;
@@ -1267,30 +1031,6 @@ void keyUp(unsigned char key, int x, int y) {
 	teclas[key] = 0;
 }
 
-void specialKeys(int key, int x, int y) {
-	// switch (key) {
-	// 	case GLUT_KEY_LEFT:
-	// 		obsX -=10;
-	// 		break;
-	// 	case GLUT_KEY_RIGHT: 
-	// 		obsX +=10;
-	// 		break;
-	// 	case GLUT_KEY_UP: 
-	// 		obsY +=10;
-	// 		break;
-	// 	case GLUT_KEY_DOWN: 
-	// 		obsY -=10;
-	// 		break;
-	// 	case GLUT_KEY_HOME : 
-	// 		obsZ +=10;
-	// 		break;
-	// 	case GLUT_KEY_END : 
-	// 		obsZ -=10;
-	// 		break;
-	// }
-}
-
-//Controla o canhão
 void passiveMotion(int x, int y) {	
 	if (estado != 3){
 		if(x > mouse_ultima_posicao_x)
@@ -1310,44 +1050,37 @@ void passiveMotion(int x, int y) {
 }
 
 void motion(int x, int y) {
-	// if (movimentarCamera3) {
-	// 	if(x > ultimaPosicaoMouseCameraX)
-	// 		anguloCameraJogadorXY -= 3;
-	// 	if(x < ultimaPosicaoMouseCameraX)
-	// 		anguloCameraJogadorXY += 3;
+	
+	if(botao_direito_status){
 
-	// 	ultimaPosicaoMouseCameraX = x;
-	// }
-
-	if(rButtonDown){
       if(cam3 && (teclas['E'] == 1 || teclas['e'] == 1)){
-          camZAngle -= x - lastX;
-          camYAngle += y - lastY;
+          cam3_angulo_xy -= x - mouse_ultima_posicao_x_motion;
+          cam3_angulo_xz += y - mouse_ultima_posicao_y_motion;
 
-          camZAngle = (int)camZAngle % 360;
-          camYAngle = (int)camYAngle % 360;
+          cam3_angulo_xy = (int)cam3_angulo_xy % 360;
+          cam3_angulo_xz = (int)cam3_angulo_xz % 360;
 
-          lastX = x;
-          lastY = y;
+          mouse_ultima_posicao_x_motion = x;
+          mouse_ultima_posicao_y_motion = y;
       }
 
 	  if(cam5 && (teclas['E'] == 1 || teclas['e'] == 1)){
-          camZAngleBase -= x - lastX;
-          camYAngleBase += y - lastY;
+          cam5_angulo_xy -= x - mouse_ultima_posicao_x_motion;
+          cam5_angulo_xz += y - mouse_ultima_posicao_y_motion;
 
-          camZAngleBase = (int)camZAngleBase % 360;
-          camYAngleBase = (int)camYAngleBase % 360;
+          cam5_angulo_xy = (int)cam5_angulo_xy % 360;
+          cam5_angulo_xz = (int)cam5_angulo_xz % 360;
 
-          lastX = x;
-          lastY = y;
+          mouse_ultima_posicao_x_motion = x;
+          mouse_ultima_posicao_y_motion = y;
       }
   }
 }
 
 void mouse(int button, int state, int x, int y) {
+
 	//Verifica se o botão esquerdo está pressionado
-	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && estado == 2)
-	{
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && estado == 2)	{
 		//Atirar
 		Bala bala = Bala(
 			jogador.x, 
@@ -1383,32 +1116,23 @@ void mouse(int button, int state, int x, int y) {
 		}
 	}
 
-	// Seta flag que permite movimento da câmera 3
-	// if(button == 0 && state == 0 && (teclas['b'] == 1 || teclas['B'] == 1)) {
-	// 	movimentarCamera3 = true;
-	// }
-	// if(button == 0 && state == 1) {
-	// 	movimentarCamera3 = false;
-	// }
-
 	if (button == GLUT_RIGHT_BUTTON) {
         if(state == GLUT_DOWN){
-            lastX = x;
-            lastY = y;
-			rButtonDown = true;
-        }else{
-            rButtonDown = false;
+            mouse_ultima_posicao_x_motion = x;
+            mouse_ultima_posicao_y_motion = y;
+			botao_direito_status = true;
+        } else {
+            botao_direito_status = false;
         }
-
     }
 
-	scrollUp = 0;
+	incremento_zoom = 0;
 
 	if(button == 4){
-		scrollUp = -1;
+		incremento_zoom = -1;
 	}
 	if(button == 3){
-		scrollUp = 1;
+		incremento_zoom = 1;
 	}
 }
 
@@ -1416,15 +1140,10 @@ void reshape(GLsizei w, GLsizei h) {
 	// Para previnir uma divis�o por zero
 	if ( h == 0 ) h = 1;
 
-	// Calcula a correcao de aspecto
-	//	fAspect = (GLfloat)w/(GLfloat)h;
-
-	camera3pJogador->changeCamera(camAngle, w, h);
+	camera3pJogador->changeCamera(60, w, h);
 
 	// Especifica o tamanho da viewport
 	glViewport (0, 0, (GLsizei)w, (GLsizei)h);
-
-	// especificarParametrosVisualizacao(anguloCamera, w, h, 0.1, 500.0);
 
 	larguraJanela = w;
 	alturaJanela = h - 200;	
@@ -1439,11 +1158,9 @@ int main(int argc, char** argv) {
 	glutInit (&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(larguraJanela, alturaJanela + 200);
-//	glutInitWindowPosition(0, 0); // Deixar assim por enquanto... para a janela não abrir em cma do código
 	glutInitWindowPosition((glutGet(GLUT_SCREEN_WIDTH)-larguraJanela)/2,(glutGet(GLUT_SCREEN_HEIGHT)-alturaJanela)/2);
 	glutCreateWindow("TRABALHO FINAL");
 	glutReshapeFunc(reshape);
-	glutSpecialFunc(specialKeys);
 	glutDisplayFunc(display);
 	glutIdleFunc(idle);
 	glutKeyboardFunc(keyPress);
