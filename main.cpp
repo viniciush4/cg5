@@ -23,6 +23,7 @@
 #include "lerTextura.h"
 
 #include "Camera3pJogador.h"
+#include "Camera3pInimigo.h"
 #include "Camera3pBase.h"
 #include "CameraCanhao.h"
 #include "Camera1pJogador.h"
@@ -140,6 +141,8 @@ double cam3_angulo_xy;
 double cam3_angulo_xz;
 double cam5_angulo_xy;
 double cam5_angulo_xz;
+double cam6_angulo_xy;
+double cam6_angulo_xz;
 double distancia_camera = 0;
 
 bool cam1 = true;
@@ -147,9 +150,11 @@ bool cam2 = false;
 bool cam3 = false;
 bool cam4 = false;
 bool cam5 = false;
+bool cam6 = false;
 bool desenhar_cameras = false;
 
 Camera3pJogador* camera3pJogador;
+Camera3pInimigo* camera3pInimigo;
 Camera3pBase* camera3pBase;
 CameraCanhao* cameraCanhao;
 Camera1pJogador* camera1pJogador;
@@ -682,6 +687,12 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
             0,0,1
 		);
 
+		camera3pInimigo = new Camera3pInimigo(
+			-3*2*inimigos[0].r,0,0,
+            0,0,0,
+            0,0,1
+		);
+
 		cameraCanhao = new CameraCanhao(
 			jogador.r*0.9*cos(grausParaRadianos(jogador.angulo_xy)),jogador.r*0.9*sin(grausParaRadianos(jogador.angulo_xy)),7.3,
 			0,0,0,
@@ -711,6 +722,8 @@ bool inicializarObjetosJogo(char* caminho_arquivo_configuracoes) {
     	cam3_angulo_xz = camera3pJogador->getYAngle();
 		cam5_angulo_xy = 0;
 		cam5_angulo_xz = 30;
+		cam6_angulo_xy = 0;
+		cam6_angulo_xz = 30;
 
 	return true;
 }
@@ -787,7 +800,7 @@ void desenharViewport1() {
 	if(bombas.size() != 0) {
 		glViewport(0, (GLsizei)alturaJanela, (GLsizei)larguraJanela ,200);
 		glLoadIdentity();
-		camera3pJogador->changeCamera(45,larguraJanela,200);	
+		cameraBomba->changeCamera(45,larguraJanela,200);	
 		cameraBomba->record();
 		desenharMundo();
 	}
@@ -798,6 +811,10 @@ void desenharViewport2() {
 	glViewport(0, 0, (GLsizei)larguraJanela, (GLsizei)alturaJanela);
 	glLoadIdentity();
 
+	if (cam6) {
+		camera3pInimigo->changeCamera(45,larguraJanela,alturaJanela);
+		camera3pInimigo->record();
+	}
 	if (cam5) {
 		camera3pBase->changeCamera(45,larguraJanela,alturaJanela);
 		camera3pBase->record();
@@ -858,6 +875,11 @@ void idle(void) {
 	distancia_camera = incremento_zoom*timeDiference*0.1;
   	incremento_zoom = 0;
 
+	// cam6
+	if(inimigos.size() != 0){ 
+		camera3pInimigo->setDist(distancia_camera);
+		camera3pInimigo->update(inimigos.at(0).x,inimigos.at(0).y,inimigos.at(0).z,cam6_angulo_xz,cam6_angulo_xy);
+	}
 	// cam5
 	if(bases.size() != 0){ 
 		camera3pBase->setDist(distancia_camera);
@@ -999,18 +1021,21 @@ void keyPress(unsigned char key, int x, int y) {
         cam2 = false;
         cam3 = false;
 		cam5 = false;
+		cam6 = false;
     }
     if(key == '2'){
         cam1 = false;
 		cam2 = true;
         cam3 = false;
 		cam5 = false;
+		cam6 = false;
     }
     if(key == '3'){
         cam1 = false;
         cam2 = false;
 		cam3 = true;
 		cam5 = false;
+		cam6 = false;
     }
 	if(key == '5'){
 		if(bases.size() != 0) {
@@ -1018,11 +1043,28 @@ void keyPress(unsigned char key, int x, int y) {
 			cam2 = false;
 			cam3 = false;
 			cam5 = true;
+			cam6 = false;
 		} else {
 			cam1 = true;
 			cam2 = false;
 			cam3 = false;
 			cam5 = false;
+			cam6 = false;
+		}
+    }
+	if(key == '6'){
+		if(inimigos.size() != 0) {
+			cam1 = false;
+			cam2 = false;
+			cam3 = false;
+			cam5 = false;
+			cam6 = true;
+		} else {
+			cam1 = true;
+			cam2 = false;
+			cam3 = false;
+			cam5 = false;
+			cam6 = false;
 		}
     }
 }
@@ -1070,6 +1112,17 @@ void motion(int x, int y) {
 
           cam5_angulo_xy = (int)cam5_angulo_xy % 360;
           cam5_angulo_xz = (int)cam5_angulo_xz % 360;
+
+          mouse_ultima_posicao_x_motion = x;
+          mouse_ultima_posicao_y_motion = y;
+      }
+
+	  if(cam6 && (teclas['E'] == 1 || teclas['e'] == 1)){
+          cam6_angulo_xy -= x - mouse_ultima_posicao_x_motion;
+          cam6_angulo_xz += y - mouse_ultima_posicao_y_motion;
+
+          cam6_angulo_xy = (int)cam6_angulo_xy % 360;
+          cam6_angulo_xz = (int)cam6_angulo_xz % 360;
 
           mouse_ultima_posicao_x_motion = x;
           mouse_ultima_posicao_y_motion = y;

@@ -54,5 +54,16 @@ void CameraBomba::record(){
     );
 }
 
+void CameraBomba::changeCamera(int angle, int w, int h){
+    glMatrixMode (GL_PROJECTION);
+
+    glLoadIdentity();    
+
+    gluPerspective (angle,
+            (GLfloat)w / (GLfloat)h, 5, 5000.0);
+
+    glMatrixMode (GL_MODELVIEW);
+}
+
 CameraBomba::~CameraBomba() {
 }
