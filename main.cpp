@@ -1150,7 +1150,6 @@ void idle(void) {
 
 		if(verificarColisaoInimigo())
 		{
-			cout << "Colidiu com inimigo" << endl;
 			estado = 3;
 		}
 
