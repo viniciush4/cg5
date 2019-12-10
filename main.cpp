@@ -114,6 +114,7 @@ Placar placar;
 Minimapa minimapa;
 int estado = 0;
 
+bool conferir_minimapa = false;
 bool curvando = false;
 bool botao_direito_status = false;
 int incremento_zoom = 0;
@@ -757,7 +758,7 @@ void especificarIluminacao(void) {
 
 void desenharMundo() {
 
-	arena.desenhar(texturaCeu, texturaChao);
+	arena.desenhar(texturaCeu, texturaChao, conferir_minimapa);
 
 	pista.desenhar(texturaPista);
 
@@ -872,7 +873,7 @@ void idle(void) {
 	}
 	// cam5
 	if(bases.size() != 0){ 
-		camera3pBase->setDist(distancia_camera);
+		if(!conferir_minimapa){ camera3pBase->setDist(distancia_camera); }
 		camera3pBase->update(bases.at(0).x,bases.at(0).y,0,cam5_angulo_xz,cam5_angulo_xy);
 	}
 	// cam4
@@ -1002,6 +1003,38 @@ void keyPress(unsigned char key, int x, int y) {
 		case 'm':
 			if(glIsEnabled(GL_LIGHT1)){ glDisable(GL_LIGHT1); }else{ glEnable(GL_LIGHT1); }
 			break;
+		case 'Y':
+		case 'y':
+			{
+				if(bases.size() != 0 && !conferir_minimapa) {
+					conferir_minimapa = true;
+					cam1 = false;
+					cam2 = false;
+					cam3 = false;
+					cam5 = true;
+					cam6 = false;
+					cam5_angulo_xz = 90;
+					cam5_angulo_xy = 90;
+					camera3pBase->setDist(-1050);
+				}
+				break;
+			}
+		case 'T':
+		case 't':
+			{
+				if(bases.size() != 0 && conferir_minimapa) {
+					conferir_minimapa = false;
+					cam1 = true;
+					cam2 = false;
+					cam3 = false;
+					cam5 = false;
+					cam6 = false;
+					cam5_angulo_xz = 0;
+					cam5_angulo_xy = 30;
+					camera3pBase->setDist(+1050);
+				}
+				break;
+			}
 		default:
 			break;  	
 	}

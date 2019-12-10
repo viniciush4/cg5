@@ -15,6 +15,12 @@ Câmera em cima da base inimiga:
 Câmera atrás de um inimigo:
     "6"
 
+Ativar modo conferência do minimapa:
+    "y"
+
+Desativar modo conferência do minimapa:
+    "t"
+
 Rotacionar Câmera 3 (atrás do jogador), câmera 5 (em cima da base inimiga) e câmera 6 (atrás de um inimigo):
     "e + RIGHT BUTTON"
 

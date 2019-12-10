@@ -17,7 +17,7 @@ public:
 
 	Arena();
 	Arena(float x, float y, float r, float altura);
-	void desenhar(GLuint texturaCeu, GLuint texturaChao);
+	void desenhar(GLuint texturaCeu, GLuint texturaChao, bool conferir_minimapa);
 	
 	virtual ~Arena();
 };

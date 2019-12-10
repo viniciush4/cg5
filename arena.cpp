@@ -14,9 +14,10 @@ Arena::Arena(float x, float y, float r, float altura){
 	this->altura = altura;
 }
 
-void Arena::desenhar(GLuint texturaCeu, GLuint texturaChao)
+void Arena::desenhar(GLuint texturaCeu, GLuint texturaChao, bool conferir_minimapa)
 {
 
+	if(!conferir_minimapa){
 	//Desenha o globo do céu
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texturaCeu);
@@ -84,28 +85,30 @@ void Arena::desenhar(GLuint texturaCeu, GLuint texturaChao)
 
 	glDisable(GL_TEXTURE_2D);
 	
+	} else { // se não for pra conferir o minimapa
 	
 // 	//Desenha o chão redondo
-// 	glPushMatrix();	
-// 		float angulo = 0.0;
-// 		int numVertices = 1000;
+	glPushMatrix();	
+		float angulo = 0.0;
+		int numVertices = 1000;
 
-// //		glColor3f(1.0f, 0.0f, 0.5f);
+//		glColor3f(1.0f, 0.0f, 0.5f);
 
-// 		glColor3fv(mat_ambient_w);
-// 		glNormal3f(0.0, 0.0, 1.0);
+		GLfloat mat_ambient_w1[] = { 1.0, 1.0, 1.0, 1.0 };
+		glColor3fv(mat_ambient_w1);
+		glNormal3f(0.0, 0.0, 1.0);
 
-// 		//Desenha o círculo		
-// 		glBegin(GL_POLYGON);
-// 			for(int i=0; i < numVertices; i++)
-// 			{
-// 				glTexCoord2f(r * cos(angulo), r * sin(angulo));
-// 				glVertex3f(r * cos(angulo), r * sin(angulo), 0.0);
-// 				angulo += 2 * M_PI / numVertices;
-// 			}
-// 		glEnd();
-// 	glPopMatrix();
-
+		//Desenha o círculo		
+		glBegin(GL_POLYGON);
+			for(int i=0; i < numVertices; i++)
+			{
+				glTexCoord2f((r+80) * cos(angulo), (r+80) * sin(angulo));
+				glVertex3f((r+80) * cos(angulo), (r+80) * sin(angulo), 0.0);
+				angulo += 2 * M_PI / numVertices;
+			}
+		glEnd();
+	glPopMatrix();
+	}
 	
 }
 

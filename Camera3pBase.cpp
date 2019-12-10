@@ -45,11 +45,11 @@ void Camera3pBase::update(double x, double y, double z,double y_angle, double z_
     this->y_angle = y_angle;
     this->z_angle = z_angle;           
     
-    if(abs(this->y_angle) > 60){
+    if(abs(this->y_angle) > 90){
         if(this->y_angle > 0)
-          this->y_angle = 60;
+          this->y_angle = 90;
         else{
-          this->y_angle = -60;
+          this->y_angle = -90;
         }
     }    
 }
