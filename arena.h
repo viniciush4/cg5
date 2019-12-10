@@ -3,7 +3,6 @@
 
 #include <GL/glut.h>
 #include <math.h>
-#include "imageloader.h"
 
 using namespace std;
 
@@ -18,7 +17,7 @@ public:
 
 	Arena();
 	Arena(float x, float y, float r, float altura);
-	void desenhar(GLuint texturaCeu, GLuint texturaChao, GLuint texturaArvore);
+	void desenhar(GLuint texturaCeu, GLuint texturaChao);
 	
 	virtual ~Arena();
 };
