@@ -2,6 +2,22 @@
 
 Trata-se de um jogo desenvolvido como trabalho final da disciplina de Computação Gráfica da Universidade Federal do Espírito Santo.
 
+<img src="https://github.com/viniciush4/cg5/blob/master/videos/3pessoa.gif" />
+
+<img src="https://github.com/viniciush4/cg5/blob/master/videos/base.gif" />
+
+<img src="https://github.com/viniciush4/cg5/blob/master/videos/bombas.gif" />
+
+<img src="https://github.com/viniciush4/cg5/blob/master/videos/cam_superior.gif" />
+
+<img src="https://github.com/viniciush4/cg5/blob/master/videos/canhão.gif" />
+
+<img src="https://github.com/viniciush4/cg5/blob/master/videos/decolagem.gif" />
+
+<img src="https://github.com/viniciush4/cg5/blob/master/videos/derrota.gif" />
+
+<img src="https://github.com/viniciush4/cg5/blob/master/videos/inimigo.gif" />
+
 ## Iniciando
 
 
