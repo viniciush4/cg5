@@ -10,7 +10,7 @@ Trata-se de um jogo desenvolvido como trabalho final da disciplina de Computaç�
 
 <img src="https://github.com/viniciush4/cg5/blob/master/videos/cam_superior.gif" />
 
-<img src="https://github.com/viniciush4/cg5/blob/master/videos/canhão.gif" />
+<img src="https://github.com/viniciush4/cg5/blob/master/videos/canhao.gif" />
 
 <img src="https://github.com/viniciush4/cg5/blob/master/videos/decolagem.gif" />
 
